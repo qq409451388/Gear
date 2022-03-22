@@ -54,14 +54,8 @@ class EzIdClient
     }
 
     private function nextDbId(string $objName){
-        $remoter = new HdfClient("idgenerator", Env::get(), $this->version);
-        $params = [
-            "objName" => $objName,
-            "count" => 1,
-            "structure" => true
-        ];
-        $response = $remoter->onPhp()->post("IdgeneratorService/createId", [], $params);
-        return empty($response) || empty($response['data']) ? null : $response['data'];
+        //todo
+        return 0;
     }
 
     private function genCacheKey(string $system) {

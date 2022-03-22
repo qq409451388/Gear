@@ -277,13 +277,10 @@ array(2) {
   "default": {
     "server": [
       "10.1.30.94:6379",
-      "10.1.30.95:6379",
-      "10.1.30.92:6379",
-      "10.1.30.93:6379",
       "10.1.30.90:6379",
       "10.1.30.91:6379"
     ],
-    "auth": "ae3d2adcdf201c980e8d55a4f5530257"
+    "auth": "2adcdf24f5530257"
   }
 }
 ```
@@ -340,24 +337,6 @@ array(2) {
     }finally {
         $locker->unlock("lock_key");
     }
-```
-#### 3.π.2 HDF服务调用工具HdfClient(依赖EzCurl)
-```php
-    $client = new HdfClient("user", Env::DEV, "gh"); //参数2 或使用全局环境常量 Env::get();
-    //1. 调用java
-    $client->onJava()->get("auth/get", ["id"=>123]);
-    //支持传body
-    $client->onJava()->post("auth/post", ["id"=>123], [1,2,3], EzCurl::POSTTYPE_X_WWW_FORM);
-
-    //2. 调用php，
-    //与java不太一样，不区分get还是post，参数都放在body里
-    $client->onPhp()->get("UserService/find", [], ["id" => 123]);
-```
-#### 3.π.3 id生成器(依赖HdfClient、EzRedis、EzLocker)
-```php
-    //环境常量需要使用全局定义 const ENV。底层通过Env::get()获取
-    $jira = "gh";
-    $nextId = EzIdClient::getInstance($jira)->nextId();
 ```
 ## TODO List
 ### HTTP类非阻塞优化
