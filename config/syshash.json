@@ -1,0 +1,11 @@
+{
+  "LOCAL": {
+  },
+  "DEV": {
+    "mydevmanual": "centos"
+  },
+  "TEST": {
+  },
+  "PROD": {
+  }
+}

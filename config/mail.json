@@ -1,0 +1,9 @@
+{
+    "hdfguohan":{
+        "host":"smtp.exmail.qq.com",
+        "port":"465",
+        "userName":"guohan@example.com",
+        "passWord":"",
+        "from":"guohan@example.com"
+    }
+}
