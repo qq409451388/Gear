@@ -24,7 +24,7 @@
 >> 2、配置数据库与数据源关系：/gear/config/syshash.json <br/>
 >> 键为环境值，要求大写，默认的PROD、TEST、DEV三种，可以额外拓展，如：LOCAL<br/>
 >> 值为database => 连接名，连接名即dbconf.json中自定义的键 <br/>
->> ```{"LOCAL": {"preask_avatar": "local5.7"},"DEV": {},"TEST": {"db_Hdf":"3488",},"PROD": {"db_Hdf":"yonghu3mops"}}```
+>> ```{"LOCAL": {"database": "local5.7"},"DEV": {"database": "local5.7"},"TEST": {},"PROD": {"database": "local5.7"}}```
 
 **基本查询方法**
 ```php
@@ -37,184 +37,143 @@
 ```
 #### 3.1.1 query 执行一端sql语句，查询数据库返回原始数据
 ```php
-    $sql = "select * from tab_Space where fld_SpaceUserId = :spaceId";
-    $binds[':spaceId'] = '34974';
-    DB::get('db_Hdf')->query($sql, $binds);
+    $sql = "select * from users where userid = :userId";
+    $binds[':userId'] = '111';
+    DB::get('database')->query($sql, $binds);
 
     //或者干脆直接拼接sql，方便随你~
-    $sql = "select * from tab_Space where fld_SpaceUserId = 34974";
-    DB::get('db_Hdf')->query($sql);
+    $sql = "select * from users where userid = 111";
+    DB::get('database')->query($sql);
 ````
 打印结果：
 ```php
     array(1) {
     [0]=>
         array(85) {
-            ["fld_SpaceUserId"]=>
-            string(5) "34974"
-            ["fld_SpaceUserName"]=>
-            string(10) "yanglifeng"
-            ["fld_SpaceHostType"]=>
-            string(6) "Doctor"
-            string(1) "1"
-            ["motto"]=>
-            string(6) "杨利锋"
-            ["isopenclinic"]=>
-            string(1) "0"
-            ["fld_SpaceAuditTime"]=>
-            string(19) "2019-09-11 20:27:31"
+            ["userId"]=>
+            string(5) "111"
             ["ver"]=>
             string(7) "2206723"
-            ["islowerdoctor"]=>
-            string(1) "0"
-            ["firstflowtime"]=>
-            string(19) "2014-10-01 00:00:00"
+            ["name"]=>
+            string(1) "哈"
         }
     }
 ```
 #### 3.1.2 queryColumn 获取结果集一列并返回
 ```php
-    $sql = "select * from tab_Space where fld_SpaceUserId in (34974,67967975)";
-    DB::get('db_Hdf')->queryColumn($sql, [], 'fld_SpaceUserName');
+    $sql = "select * from users where userid in (1,2)";
+    DB::get('database')->queryColumn($sql, [], 'name');
 ```
 打印结果：
 ```php
     array(2) {
       [0]=>
-      string(10) "yanglifeng"
+      string(3) "aaa"
       [1]=>
-      string(10) "huiwang227"
+      string(3) "bbb"
     }
 ```
 #### 3.1.3 queryHash 获取结果集中指定key和value的对应关系或key与整个子数组的对应
 ```php
-    $sql = "select * from tab_Space where fld_SpaceUserId in (34974,67967975)";
-    DB::get('db_Hdf')->queryHash($sql, [], 'fld_SpaceUserName', 'fld_SpaceUserId');
+    $sql = "select * from users where userid in (1,2)";
+    DB::get('database')->queryHash($sql, [], 'userid', 'name');
 ```
 打印结果：
 ```php
     array(2) {
-      ["yanglifeng"]=>
-      string(5) "34974"
-      ["huiwang227"]=>
-      string(8) "67967975"
+      ["1"]=>
+      string(5) "aaa"
+      ["2"]=>
+      string(8) "bbb"
     }
 ```
 **或者不传第四个参数**
 ```php
-    $sql = "select * from tab_Space where fld_SpaceUserId in (34974,67967975)";
-    DB::get('db_Hdf')->queryHash($sql, [], 'fld_SpaceUserName');
+    $sql = "select * from users where userid in (1,2)";
+    DB::get('database')->queryHash($sql, [], 'name');
 ```
 打印结果：
 ```php
     array(2) {
-      ["yanglifeng"]=>
+      ["aaa"]=>
       array(85) {
-        ["fld_SpaceUserId"]=>
-        string(5) "34974"
-        ["fld_SpaceUserName"]=>
-        string(10) "yanglifeng"
-        ["fld_SpaceHostType"]=>
-        string(6) "Doctor"
-        ["fld_SpaceHostName"]=>
-        string(10) "yanglifeng"
-        ["fld_SpaceHostId"]=>
-        string(10) "1115519594"
-        ["motto"]=>
-        string(6) "杨利锋"
+        ["userId"]=>
+        string(5) "1"
+        ["name"]=>
+        string(10) "aaa"
       }
-      ["huiwang227"]=>
+      ["bbb"]=>
       array(85) {
-        ["fld_SpaceUserId"]=>
-        string(8) "67967975"
-        ["fld_SpaceUserName"]=>
-        string(10) "huiwang227"
-        ["fld_SpaceHostType"]=>
-        string(6) "Doctor"
-        ["fld_SpaceHostName"]=>
-        string(10) "huiwang227"
-        ["fld_SpaceHostId"]=>
-        string(9) "120926805"
-        ["motto"]=>
-        string(18) "王辉大夫的个人网站"
+        ["userId"]=>
+        string(8) "2"
+        ["name"]=>
+        string(10) "bbb"
       }
     }
 ```
 #### 3.1.4 queryGroup 根据指定key分组结果集，返回二维数组
 ```php
-    $sql = "select * from tab_Patient where fld_UserId in (34974,67967975)";
-    DB::get('db_Hdf')->queryGroup($sql, [], 'fld_UserId');
+    $sql = "select * from userlogs where userid in (111,222)";
+    DB::get('database')->queryGroup($sql, [], 'userid');
 ```
 打印结果：
 ```php
 array(2) {
-  [34974]=>
+  [111]=>
   array(12) {
     [0]=>
     array(4) {
-      ["fld_UserId"]=>
-      string(5) "34974"
-      ["id"]=>
-      string(5) "34974"
-      ["fld_UserName"]=>
-      string(10) "yanglifeng"
-      ["fld_PatientName"]=>
-      string(7) "于34974"
+      ["log"]=>
+      string(5) "xxx"
+      ["date"]=>
+      string(5) "2022-01-01 00:00:00"
     }
   }
-  [67967975]=>
+  [222]=>
   array(91) {
     [0]=>
     array(4) {
-      ["fld_UserId"]=>
-      string(8) "67967975"
-      ["id"]=>
-      string(9) "506667389"
-      ["fld_UserName"]=>
-      string(10) "huiwang227"
-      ["fld_PatientName"]=>
-      string(11) "测506667389"
+      ["log"]=>
+      string(5) "xxx"
+      ["date"]=>
+      string(5) "2022-01-01 00:00:00"
     }
     [1]=>
     array(4) {
-      ["fld_UserId"]=>
-      string(8) "67967975"
-      ["id"]=>
-      string(9) "836293069"
-      ["fld_UserName"]=>
-      string(10) "huiwang227"
-      ["fld_PatientName"]=>
-      string(11) "测836293069"
+      ["log"]=>
+      string(5) "xxx"
+      ["date"]=>
+      string(5) "2022-01-01 00:00:00"
     }
   }
 }
 ```
 **支持传入第四个参数，指定结果为所选字段**
 ```php
-    $sql = "select * from tab_Patient where fld_UserId in (34974,67967975)";
-    DB::get('db_Hdf')->queryGroup($sql, [], 'fld_UserId', 'fld_PatientName');
+    $sql = "select * from users where userid in (111,222)";
+    DB::get('database')->queryGroup($sql, [], 'userid', 'name');
 ```
 打印结果：
 ```php
 array(2) {
-  [34974]=>
+  [111]=>
   array(12) {
     [0]=>
-    string(7) "于34974"
+    string(7) "张xx"
   }
-  [67967975]=>
+  [222]=>
   array(91) {
     [0]=>
-    string(11) "测506667389"
+    string(11) "王xx"
     [1]=>
-    string(11) "测836293069"
+    string(11) "王xx2"
   }
 }
 ```
 #### 3.1.5 queryValue 返回指定数值，一般用于统计类的sql
 ```php
-    $sql = "select count('id') cnt from tab_Patient where fld_UserId = 34974";
-    DB::get('db_Hdf')->queryValue($sql, [], 'cnt');
+    $sql = "select count('id') cnt from users where name = 'aaa'";
+    DB::get('database')->queryValue($sql, [], 'cnt');
 ```
 打印结果：
 ```php
