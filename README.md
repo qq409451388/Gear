@@ -1,4 +1,5 @@
-# 使用说明文档（ver 2.1.8）
+# 使用说明文档（ver 2.1.9）
+
 ## 1.使用须知
 > 开发环境 PHP 7.3.24,
 > 暂不保证老版本完美运行
@@ -13,6 +14,7 @@
 + 【可选】redis工具需要配置/gear/config目录下rediscluster.json
 + 【可选】mail工具需要配置/gear/config目录下mail.json
 + 【可选】微信工具人需要配置/gear/config目录下wechatrobot.json
+
 
 ## 3.功能介绍
 ### 3.1 数据库查询功能 DB
