@@ -60,7 +60,7 @@ abstract class BaseDBSimple extends AbstractDB
     }
 
     protected function buildSql($sqlTemplate, &$binds, SqlOptions $sqlOptions){
-        $this->preCheck4Query($sqlTemplate, $binds);
+        $this->preCheck4Query($sqlTemplate, $binds, $sqlOptions);
         if(empty($binds)){
             $this->sql = $sqlTemplate;
             return;
@@ -79,7 +79,7 @@ abstract class BaseDBSimple extends AbstractDB
             }
             elseif ($val instanceof SqlPatternChunk)
             {
-                $sqlOptions->setChunk(true);
+                $sqlOptions->setIsChunk(true);
                 $sqlTemplate = $val->outPutTemplate($key, $sqlTemplate);
                 unset($binds[$key]);
             }
@@ -107,7 +107,8 @@ abstract class BaseDBSimple extends AbstractDB
         return null;
     }
 
-    private function preCheck4Query($sqlTemplate, $binds){
+    private function preCheck4Query($sqlTemplate, $binds, SqlOptions $sqlOptions){
+        $sqlTemplate = strtolower($sqlTemplate);
         //check1
         $dataTypes = array_filter(array_map(function($v){
             if(is_object($v) && SqlPatternChunk::class == get_class($v)) {
@@ -115,5 +116,11 @@ abstract class BaseDBSimple extends AbstractDB
             }return false;
         }, $binds));
         DBC::assertTrue(2 > count($dataTypes), "[DB] PreCheck Exception Put In Too Many SqlPatternChunks");
+
+        //check sqlTemplate
+        if($sqlOptions->isUnion()){
+            DBC::assertTrue(false === strpos($sqlTemplate, "limit"), "[DB] PreCheck Exception Please Remove 'limit'");
+            str_replace(";", "", $sqlTemplate);
+        }
     }
 }

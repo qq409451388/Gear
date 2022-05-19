@@ -34,4 +34,9 @@ class Env
     private static function getEnv(){
         return @defined("ENV") ? strtoupper(ENV) : null;
     }
+
+    public static function staticPath(){
+        DBC::assertTrue(@defined("STATIC_PATH"), "静态文件路径未设置");
+        return STATIC_PATH;
+    }
 }

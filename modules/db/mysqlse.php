@@ -7,14 +7,14 @@ class MySqlSE extends BaseDB implements IDbSe
         return time()+3600;
     }
 
-    public function init(string $host, string $user, string $pwd, string $database)
+    public function init(string $host, string $user, string $pwd, string $database, int $port = 3306)
     {
         if(empty($database))
         {
             DBC::throwEx('[Mysql Exception] unselect db.', -1);
         }
         $this->mysqli = mysqli_init();
-        $this->conn = $this->mysqli->real_connect($host, $user, $pwd, $database);
+        $this->conn = $this->mysqli->real_connect($host, $user, $pwd, $database, $port);
         if(0 != $this->mysqli->connect_errno)
         {
             DBC::throwEx('[Mysql Exception]'.$this->mysqli->connect_error, $this->mysqli->connect_errno);

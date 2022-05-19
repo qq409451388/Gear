@@ -120,7 +120,7 @@ abstract class BaseHTTP
                 $contentType = explode(";", $value);
                 $value = new HttpContentType();
                 $value->contentType = $contentType[0];
-                $value->boundary = $contentType[1];
+                $value->boundary = $contentType[1]??"";
             }
             $requestSource->$key = $value;
         }
@@ -203,7 +203,7 @@ abstract class BaseHTTP
             if(empty($this->_root)){
                 return $this->getHeaders(HttpStatus::NOT_FOUND());
             }
-            $fullPath = STATIC_PATH."/".$path;
+            $fullPath = ENV::staticPath()."/".$path;
             if(empty($path) || !is_file($fullPath)){
                 return $this->getHeaders(HttpStatus::NOT_FOUND());
             }

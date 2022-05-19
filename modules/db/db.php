@@ -5,10 +5,6 @@ class DB{
 	private $dbCon = [];
 	private $sysHash = [];
 
-    /**
-     * 数据库类型
-     */
-	private const DB_OPS = "ops";
 	private const DB_MYSQL = "mysql";
 	private const DB_MONGOPS = "mongops";
 
@@ -49,7 +45,6 @@ class DB{
             if($se instanceof IDbSe && $se->isExpired()){
                 Logger::console("[DB] database $database.$env is expired, rebuilding...");
             }
-            //创建新实例
             $se = self::$ins->getDB($database, $env);
             self::$ins->map[$database.$env] = $se;
         }
@@ -62,12 +57,8 @@ class DB{
         $dbType = $dbConfig['dbType'] ?? '';
         $se = null;
         switch($dbType){
-            case self::DB_OPS:
-                $se = new Opsql();
-                break;
             case self::DB_MONGOPS:
                 $se = new MongoSql();
-                //如果重名，使用_mongo后缀
                 $database = str_replace("_mongo", "", $database);
                 break;
             case self::DB_MYSQL:
@@ -77,6 +68,6 @@ class DB{
                 DBC::throwEx("[DB]Unknow Db-Type:$dbType");
                 break;
         }
-        return $se->init($dbConfig['host'], $dbConfig['user'], $dbConfig['pwd'], $database);
+        return $se->init($dbConfig['host'], $dbConfig['user'], $dbConfig['pwd'], $database, $dbConfig['port']??3306);
     }
 }
