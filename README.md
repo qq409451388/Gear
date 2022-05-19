@@ -16,7 +16,7 @@
 
 ## 3.功能介绍
 ### 3.1 数据库查询功能 DB
-> 下面代码以db_Hdf的查询为例，这里介绍配置文件配置:
+> 下面代码以查询为例，这里介绍配置文件配置:
 >> 1、配置数据源：/gear/config/dbcon.json 键（local）为自定义的数据源名字，值为连接配置详情 <br/>
 >> dbType可选值为mysql、ops、mongops；详情可查看class DB内部常量<br/>
 >> ```{"local": {"host": "127.0.0.1", "user":"root", "pwd":"12345678", "dbType": "mysql"}}```
