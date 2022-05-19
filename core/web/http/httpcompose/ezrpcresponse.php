@@ -18,6 +18,10 @@ class EzRpcResponse
         return (new self($data,self::OK, $msg));
     }
 
+    public static function error($code, $msg = ""){
+        return (new self(null, $code, $msg));
+    }
+
     public function toJson():String{
         return EzString::encodeJson($this)??self::EMPTY_RESPONSE;
     }
