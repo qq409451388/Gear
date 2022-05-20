@@ -100,7 +100,6 @@ class EzWebSocketServer
                             $funcAfterHandShake($readSocket, $key);
                         } else {
                             $clientMsg = $this->decode($buffer);
-                            var_dump($clientMsg);
                             $funcClientSend($readSocket, $clientMsg);
                         }
                     }
