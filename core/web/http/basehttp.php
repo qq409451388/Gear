@@ -203,7 +203,7 @@ abstract class BaseHTTP
             if(empty($this->_root)){
                 return $this->getHeaders(HttpStatus::NOT_FOUND());
             }
-            $fullPath = ENV::staticPath()."/".$path;
+            $fullPath = Env::staticPath()."/".$path;
             if(empty($path) || !is_file($fullPath)){
                 return $this->getHeaders(HttpStatus::NOT_FOUND());
             }

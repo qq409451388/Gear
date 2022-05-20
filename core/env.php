@@ -23,6 +23,10 @@ class Env
         return 'http://'.$host.':'.$port.'/';
     }
 
+    public static function getIp(){
+        return Config::get("host");
+    }
+
     public static function get(){
         return self::getEnv();
     }
