@@ -379,7 +379,7 @@ class EzWebSocketServer
         if(!is_resource($socket)){
             return null;
         }
-        return $this->socketKeys[(int)$socket]??null;
+        return $this->socketKeys[(string)$socket]??null;
     }
 
     public function getIp(){
