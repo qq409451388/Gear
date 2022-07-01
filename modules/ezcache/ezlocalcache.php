@@ -1,5 +1,5 @@
 <?php
-class EzCache implements IEzCache
+class EzLocalCache implements IEzCache
 {
     private $_totalHash = [];
 

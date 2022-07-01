@@ -1,5 +1,5 @@
 <?php
-class EzRedis
+class EzRedis implements IEzCache
 {
     protected $tcp = null;
 
@@ -204,4 +204,18 @@ class EzRedis
         return $this->exec("KEYS", $pattern);
     }
 
+    public function setOrReplace(string $k, string $v, int $expire = 7200): bool
+    {
+        // TODO: Implement setOrReplace() method.
+    }
+
+    public function lpop(string $k): bool
+    {
+        // TODO: Implement lpop() method.
+    }
+
+    public function lpush(string $k, $v, int $expire = 7200): bool
+    {
+        // TODO: Implement lpush() method.
+    }
 }

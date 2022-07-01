@@ -15,7 +15,7 @@ Abstract class AbstractDB
     }
 
     protected function esistsCache($key){
-        return EzFileCache::get()->exists($key);
+        return EzFileCache::getInstance()->exists($key);
     }
 
     protected function initExpireTime(){

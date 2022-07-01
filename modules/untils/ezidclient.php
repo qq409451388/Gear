@@ -2,30 +2,29 @@
 class EzIdClient
 {
     private $version;
-    private $redisClient;
+    private $cacheClient;
 
     private static $ins = [];
 
-    public function __construct(string $jira){
-        $this->version = $jira;
+    private function __construct(string $version){
+        $this->version = $version;
     }
 
-    public static function getInstance($jira){
+    public static function getInstance($version){
         if(!Env::isDev() && !Env::isTest()){
             DBC::throwEx("[EzIdClient Exception] Current Environment is Prod!");
         }
         if(null == self::$ins){
-            return new self($jira);
+            return new self($version);
         }
-        return self::$ins[$jira];
+        return self::$ins[$version];
     }
 
-    private function getRedisClient():EzRedis{
-        if(null == $this->redisClient){
-            $this->redisClient = new EzRedis();
-            $this->redisClient->connectCluster("default");
+    private function getCacheClient():IEzCache{
+        if(null == $this->cacheClient){
+            $this->cacheClient = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
         }
-        return $this->redisClient;
+        return $this->cacheClient;
     }
 
     public function nextId($count = 1, $objName = "default"){
@@ -35,7 +34,7 @@ class EzIdClient
             $lockKey = "locker_".$redisKey;
             $ezLocker->lock($lockKey);
 
-            $idValue = EzCollection::decodeJson($this->getRedisClient()->get($redisKey));
+            $idValue = EzCollection::decodeJson($this->getCacheClient()->get($redisKey));
             if(empty($idValue)){
                 $idValue = $this->nextDbId($objName);
             }
@@ -43,7 +42,7 @@ class EzIdClient
                 $idValue = $this->nextDbId($objName);
             }
             $idValue["curID"] += $count;
-            $setRes = $this->getRedisClient()->set($redisKey, EzString::encodeJson($idValue));
+            $setRes = $this->getCacheClient()->set($redisKey, EzString::encodeJson($idValue));
             DBC::assertTrue($setRes, "[EzIdClient] set redis fail!");
             return $idValue["curID"];
         }catch (Exception $e){
@@ -59,6 +58,6 @@ class EzIdClient
     }
 
     private function genCacheKey(string $system) {
-        return strtolower("id_generator_gear" . $system . "_server");
+        return strtolower("id_generator_gear" . $system . $this->version . "_server");
     }
 }
