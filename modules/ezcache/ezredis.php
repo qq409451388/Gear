@@ -177,30 +177,30 @@ class EzRedis implements IEzCache
         return $this;
     }
 
-    public function set($key, $value, int $expire = self::EXPIRE_WEEK){
+    public function set(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool {
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "EX", $expire);
     }
 
-    public function setNx($key, $value, int $expire = self::EXPIRE_WEEK){
+    public function setNX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool {
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "NX", "EX", $expire);
     }
 
-    public function setXx($key, $value, int $expire = self::EXPIRE_WEEK){
+    public function setXx(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool{
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "XX", "EX", $expire);
     }
 
-    public function get($key){
+    public function get(string $key){
         return $this->exec("GET", $key);
     }
 
-    public function del($key){
+    public function del(string $key):bool{
         return $this->exec("DEL", $key);
     }
 
-    public function keys($pattern){
+    public function keys(string $pattern):array{
         return $this->exec("KEYS", $pattern);
     }
 

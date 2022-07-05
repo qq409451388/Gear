@@ -22,6 +22,21 @@ class EzFileCache implements IEzCache
         return $path.$key;
     }
 
+    private function lock($key){
+        $lkf = $this->file(md5($key).'lock');
+        while(is_file($lkf)){
+            if(!is_file($lkf)){
+                break;
+            }
+        }
+        file_put_contents($lkf, '');
+    }
+
+    private function unlock($key){
+        $lkf = $this->file(md5($key).'lock');
+        unlink($lkf);
+    }
+
     /**
      * 存在key有两个要求，key文件存在，且未过期
      * @param string $key
@@ -33,10 +48,12 @@ class EzFileCache implements IEzCache
     }
 
     public function save($key, $value) {
+        $this->lock($key);
         $file = $this->file($key);
         $value = EzString::encodeJson($value);
         $this->check();
         file_put_contents($file, $value);
+        $this->unlock($key);
     }
 
     public function fetch($key) {
@@ -89,5 +106,29 @@ class EzFileCache implements IEzCache
 
     public function lpush(string $k, $v, int $expire = 7200): bool {
         // TODO: Implement lpush() method.
+    }
+
+    public function setNX(string $k, string $v, int $expire = 7200): bool
+    {
+        $file = $this->file($k);
+        if(is_file($file)){
+            return false;
+        }
+        return $this->set($k, $v, $expire);
+    }
+
+    public function del(string $k): bool
+    {
+        // TODO: Implement del() method.
+    }
+
+    public function keys(string $k): array
+    {
+        // TODO: Implement keys() method.
+    }
+
+    public function setXX(string $k, string $v, int $expire = 7200): bool
+    {
+        // TODO: Implement setXX() method.
     }
 }
