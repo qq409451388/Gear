@@ -13,6 +13,7 @@ class BaseController
     }
 
     protected function show($response, $path){
+        DBC::assertTrue(defined("TEMPLATE_DIR"), "[Controller] Must Define const TEMPLATE_DIR At Enter File!");
         extract($response);
         $template = strtolower(TEMPLATE_DIR.'/'.$path.'.php');
         ob_start();
