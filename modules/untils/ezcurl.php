@@ -251,9 +251,8 @@ class EzCurl
         return $this->setUserAgent("Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/36.0.1985.143 Safari/537.36");
     }
 
-    private function exec($httpMethod)
+    public function prepare()
     {
-        $this->trace->start();
         curl_setopt($this->ch, CURLOPT_URL, $this->url.'?'.$this->query);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER , 1 );
@@ -264,6 +263,12 @@ class EzCurl
         curl_setopt($this->ch, CURLOPT_HEADER, $this->showHeader);
         curl_setopt($this->ch, CURLOPT_NOBODY, 0);
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->header);
+    }
+
+    private function exec($httpMethod)
+    {
+        $this->trace->start();
+        $this->prepare();
         $res = curl_exec($this->ch);
         $this->haveRun = true;
         if (curl_errno($this->ch))
@@ -320,6 +325,11 @@ class EzCurl
         } else  {
             DBC::throwEx("[EzCurl Exception] Need run get/post!");
         }
+    }
+
+    public function getClient()
+    {
+        return $this->ch;
     }
 
     private function close()
