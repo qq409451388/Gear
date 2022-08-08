@@ -12,6 +12,7 @@
 * 首次使用：将此文件改名为autoload.php 并移到与gear框架目录同级
 */
 const CORE_PATH = __DIR__ . "/gear";
+const VENDOR_PATH = CORE_PATH . "/Vendor";
 /**
 * 需要使用http服务器时可选,USER_PATH为mvc项目路径，STATIC_PATH为静态文件路径
 * const USER_PATH = __DIR__ . "/avatar";
@@ -63,8 +64,10 @@ $hash += $userHash;
 spl_autoload_register(function ($className) use($hash){
     $className = strtolower($className);
     $filePath = empty($hash[$className]) ? '' : $hash[strtolower($className)];
-
+    $filePath2 = VENDOR_PATH."/".$className.".php";
     if(file_exists($filePath)){
         include($filePath);
+    } else if(file_exists($filePath2)) {
+        include($filePath2);
     }
 });

@@ -72,4 +72,19 @@ class EzEncoder{
         }
         return '';
     }
+
+    /**
+     * @main 签名
+     * @param $content * @return string * User: sync * Date: 2020/6/12
+     * Time: 3:20 下午
+     */
+    public static function getRsaSign($content, $privateKey)
+    {
+        $privateKey = chunk_split($privateKey, 64, "\n");
+        $rsaKey = "-----BEGIN RSA PRIVATE KEY-----\n" . $privateKey . "-----END RSA PRIVATE KEY-----";
+        $key = openssl_pkey_get_private($rsaKey);
+        openssl_sign($content, $signature, $key, "SHA256");
+        openssl_free_key($key);
+        return base64_encode($signature);
+    }
 }
