@@ -51,7 +51,7 @@ abstract class BaseDBSimple extends AbstractDB
             $sqlOptions = SqlOptions::new();
         }
         $res = $this->query($sql, $binds, $sqlOptions);
-        //In General,This method is be used for Statistic When Use SqlChunk
+        //In General,This method is being used for Statistic When Use SqlChunk
         if($sqlOptions->isChunk()){
             return array_sum(array_column($res, $val));
         }

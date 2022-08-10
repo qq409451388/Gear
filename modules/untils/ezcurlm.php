@@ -17,17 +17,6 @@ class EzCurlM
         curl_multi_add_handle($this->chs, $client);
     }
 
-    public function addHandlerA($alias, $url){
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 1);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_NOSIGNAL, true);
-        curl_multi_add_handle($this->chs, $ch);
-        $this->urlMap[strval($ch)] = $url;
-    }
-
     public function exec(){
         do{
             if (($status = curl_multi_exec($this->chs, $active)) != CURLM_CALL_MULTI_PERFORM) {

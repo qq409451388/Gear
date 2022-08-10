@@ -3,13 +3,7 @@ class EzDataUtils
 {
     public static function argsCheck(...$args){
         foreach($args as $arg){
-            if(is_null($arg)){
-                return false;
-            }
-            if(is_numeric($arg) && 0 > $arg){
-                return false;
-            }
-            if(empty($arg)){
+            if(empty($arg) || (is_numeric($arg) && 0 > $arg)){
                 return false;
             }
         }

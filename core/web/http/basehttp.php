@@ -10,13 +10,15 @@ abstract class BaseHTTP
 
     protected const SOCKET_READ_LENGTH = 8192;
 
+    private const MIME_TEXT = "text/html";
+
     private const MIME_TYPE_LIST = array(
         'avi' => 'video/x-msvideo',
         'bmp' => 'image/bmp',
         'css' => 'text/css',
         'doc' => 'application/msword',
         'gif' => 'image/gif',
-        'html' => 'text/html',
+        'html' => self::MIME_TEXT,
         'ico' => 'image/x-icon',
         'jpeg' => 'image/jpeg',
         'jpg' => 'image/jpeg',
@@ -185,7 +187,7 @@ abstract class BaseHTTP
      * @param string $contentType 发送的内容类型
      * @return string
      **/
-    public function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = "text/html"):String{
+    public function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = self::MIME_TEXT):String{
         return (new EzHeader($httpStatus, $content, $contentType))->get();
     }
 
@@ -231,7 +233,7 @@ abstract class BaseHTTP
     }
 
     public function getStaticResponse(string $path):string{
-
+        return "";
     }
 
     /**
@@ -241,7 +243,7 @@ abstract class BaseHTTP
      */
     public function getMime($path){
         $type = explode(".",$path);
-        return self::MIME_TYPE_LIST[end($type)] ?? 'text/html';
+        return self::MIME_TYPE_LIST[end($type)] ?? self::MIME_TEXT;
     }
 
     /**

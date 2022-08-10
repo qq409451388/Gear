@@ -8,7 +8,7 @@ class BaseController
         return BeanFinder::get()->pull($obj);
     }
 
-    public function __call($func, $args){
+    public function __call(){
         return '404 Not Found!';
     }
 

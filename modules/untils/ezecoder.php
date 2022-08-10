@@ -43,12 +43,7 @@ class EzEncoder{
             return '';
         }
 
-        //解码图片内容(方法一)
-        /*$base64_image = preg_split("/(,|;)/",$base64_image_content);
-        $file_content = base64_decode($base64_image[2]);
-        $file_type = substr(strrchr($base64_image[0],'/'),1);*/
-
-        //解码图片内容(方法二)
+        //解码图片内容
         $base64_image = str_replace($result[1], '', $base64_image_content);
         $file_content = base64_decode($base64_image);
         $file_type = $result[2];

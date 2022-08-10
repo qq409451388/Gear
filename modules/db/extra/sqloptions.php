@@ -11,7 +11,7 @@ class SqlOptions
     private $isDumpTrace = false;
 
     /**
-     * @var bool sql may be write a large result, loop fetch and merge chunks
+     * @var bool may be sql is a large result, loop fetch and merge chunks
      */
     private $isUnion = false;
 

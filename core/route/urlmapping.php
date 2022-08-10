@@ -2,19 +2,19 @@
 class UrlMapping
 {
     private $class;
-    private $func;
+    private $function;
 
     public function __construct($class, $func){
         $this->class = $class;
-        $this->func = $func;
+        $this->function = $func;
     }
 
     private function getCallArray(){
-        return [BeanFinder::get()->pull($this->class), $this->func];
+        return [BeanFinder::get()->pull($this->class), $this->function];
     }
 
     public function disPatch($request){
-        $func = $this->func;
+        $func = $this->function;
         return BeanFinder::get()->pull($this->class)->$func($request);
     }
 }

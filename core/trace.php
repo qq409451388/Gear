@@ -13,7 +13,6 @@ class Trace
         $this->s2 = microtime(true);
     }
 
-    //计算时间消耗，并转为毫秒
     public function finish()
     {
         $this->end();
@@ -21,7 +20,7 @@ class Trace
         return round($time * 1000, 2);
     }
 
-    public function log($msg = '', $classNameAsFileName)
+    public function log($msg, $classNameAsFileName)
     {
         $time = $this->finish();
         if(!empty($msg))
