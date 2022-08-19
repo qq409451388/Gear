@@ -20,3 +20,4 @@
 | 2.1.7 | DB类支持env，新增EzDataTransfer、EzIdClient功能    | 2021-11-11 |
 | 2.1.8 | 修复Http工具接受body数据失败的问题                     | 2022-03-22 |
 | 2.1.9 | 增加WebSocket组件                             | 2022-05-20 |
+| 2.2.0 | 增加EzCurl并发请求组件EzCurlM                     | 2022-08-19 |

@@ -10,13 +10,16 @@ class EzCurl
     private $query;
     private $body;
 
+    //temp
+    private $alias;
+
     //options
     private $userAgent = "";
     private $haveRun;
     private $setTimeOut = 10;
     private $cookieFile = "";
     private $cookieMode = 0;
-    private $showHeader = 0;
+    private $showHeader = false;
     private $debug = 0;
 
     //dependent
@@ -58,6 +61,10 @@ class EzCurl
 
     public function setQuery(array $query){
         $this->query = http_build_query($query);
+        $parseUrl = parse_url($this->url);
+        $fixParams = empty($parseUrl['query']) ? "?" : "&";
+        $newUrl = $this->url.$fixParams.$this->query;
+        $this->setUrl($newUrl);
         return $this;
     }
 
@@ -140,6 +147,7 @@ class EzCurl
     public function setDebug(bool $debug){
         $this->debug = $debug;
         $this->setShowHeader($debug);
+        return $this;
     }
 
     public function setReferer($referer = "")
@@ -222,9 +230,9 @@ class EzCurl
         return $this;
     }
 
-    public function setShowHeader(bool $show=false)
+    private function setShowHeader(bool $show=false)
     {
-        $this->showHeader = (int)$show;
+        $this->showHeader = $show;
         return $this;
     }
 
@@ -253,7 +261,7 @@ class EzCurl
 
     public function prepare()
     {
-        curl_setopt($this->ch, CURLOPT_URL, $this->url.'?'.$this->query);
+        curl_setopt($this->ch, CURLOPT_URL, $this->url);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER , 1 );
         curl_setopt($this->ch, CURLOPT_USERAGENT, $this->userAgent);
@@ -262,6 +270,7 @@ class EzCurl
         curl_setopt($this->ch, CURLOPT_TIMEOUT, $this->setTimeOut);
         curl_setopt($this->ch, CURLOPT_HEADER, $this->showHeader);
         curl_setopt($this->ch, CURLOPT_NOBODY, 0);
+        curl_setopt($this->ch, CURLINFO_HEADER_OUT, $this->showHeader);
         curl_setopt($this->ch, CURLOPT_HTTPHEADER, $this->header);
     }
 
@@ -275,34 +284,41 @@ class EzCurl
         {
             DBC::throwEx('[EzCurl Exception] Proxy Errno:'.curl_error($this->ch));
         }
+        $msg = $this->geneRequestMsg($httpMethod, $res);
+        $this->trace->log($msg, __CLASS__);
+        $this->result = $res;
+        return $res;
+    }
+
+    private function geneRequestMsg($httpMethod, &$res){
+        $requestHeader = "";
         $responseHeader = "";
-        if($this->showHeader == 1)
+        $msg = 'EzCurl ['.strtoupper($httpMethod).'] '.$this->url."?".$this->query.PHP_EOL;
+        if($this->showHeader)
         {
+            $requestHeader = $this->getInfo()['request_header']??"";
+            $requestHeader = "==================================================" .PHP_EOL.$requestHeader.PHP_EOL;
+
             $resArr = explode("\r\n\r\n", $res);
             $responseHeader = current($resArr);
             if($responseHeader == "HTTP/1.1 100 Continue"){
                 $responseHeader = next($resArr);
             }
             $responseBody = end($resArr);
-            $responseHeader = PHP_EOL."=================================================="
-            .PHP_EOL.$responseHeader.PHP_EOL."==================================================".PHP_EOL;
-            print_r($responseHeader);
+
+            $responseHeader = "==================================================" .PHP_EOL.$responseHeader.PHP_EOL;
             $this->judgeAndSaveCookie($responseHeader);
             $res = $responseBody;
-        }
-        $msg = 'EzCurl ['.$httpMethod.'] '.$this->url."?".$this->query;
-        if($this->showHeader){
-            $msg .= PHP_EOL.PHP_EOL.'[RequestHeader] '.EzString::encodeJson($this->header);
+
+            $msg .= '[RequestHeader] '.PHP_EOL.print_r($requestHeader, true);
         }
         if(!empty($this->body)){
-            $msg .= PHP_EOL.PHP_EOL.'[RequestBody] '.print_r($this->body, true);
+            $msg .= '[RequestBody] '.PHP_EOL.print_r($this->body, true).PHP_EOL;
         }
         if($this->debug){
-            $msg .= PHP_EOL.PHP_EOL.'[Response] '.$responseHeader.$res;
-            Logger::save($msg.PHP_EOL, __CLASS__."_DEBUG");
+            $msg .= '[Response] '.PHP_EOL.$responseHeader.PHP_EOL.$res;
         }
-        $this->trace->log($msg, __CLASS__);
-        return $res;
+        return $msg;
     }
 
     private function judgeAndSaveCookie($header){
@@ -332,6 +348,41 @@ class EzCurl
         return $this->ch;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param mixed $haveRun
+     * @return EzCurl
+     */
+    public function setHaveRun(bool $haveRun)
+    {
+        $this->haveRun = $haveRun;
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAlias()
+    {
+        return $this->alias;
+    }
+
+    /**
+     * @param mixed $alias
+     */
+    public function setAlias($alias): EzCurl
+    {
+        $this->alias = $alias;
+        return $this;
+    }
+
     private function close()
     {
         if(!is_null($this->ch))
@@ -342,7 +393,7 @@ class EzCurl
 
     public function __destruct()
     {
-        $this->close();
+        //$this->close();
     }
 
 }
