@@ -10,8 +10,13 @@ class DB{
 
     private function getSysName($database)
     {
-        DBC::assertNotEmpty($this->sysHash[$database],'[Mysql Exception]null database:'.$database);
-        return $this->sysHash[$database];
+        if(isset($this->sysHash[$database])){
+            return $this->sysHash[$database];
+        }
+        if(isset($this->sysHash["@all"])){
+            return $this->sysHash["@all"];
+        }
+        DBC::assertTrue(false, '[Mysql Exception]null database:'.$database);
     }
 
     private function getDbConfig($database, $env = null)

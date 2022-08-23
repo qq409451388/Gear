@@ -5,6 +5,7 @@
     "mydevmanual": "centos"
   },
   "TEST": {
+    "@all": "gh"
   },
   "PROD": {
   }

@@ -3,11 +3,13 @@ class EzCurlM
 {
     private $chs;
     private $urlMap;
+    private $index;
 
     public function __construct(){
         $this->chs = curl_multi_init();
         $this->instances = [];
         $this->urlMap = [];
+        $this->index = 0;
     }
 
     public function __call($function, $args){
@@ -19,6 +21,8 @@ class EzCurlM
         $client = $curl->getClient();
         if(!is_null($alias)){
             $curl->setAlias($alias);
+        }else{
+            $curl->setAlias($this->index++);
         }
         $this->instances[intval($client)] = $curl;
         curl_multi_add_handle($this->chs, $client);

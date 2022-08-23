@@ -97,15 +97,24 @@ class EzFileCache implements IEzCache
 
     public function get(string $k) {
         $obj = $this->fetch($k);
-        return $obj['data'];
+        return $obj['data']??null;
     }
 
     public function lpop(string $k): bool {
-        // TODO: Implement lpop() method.
+        $data = $this->fetch($k);
+        if(empty($data)){
+            return false;
+        }
+        array_pop($data['data']);
+        $this->save($k, $data);
+        return true;
     }
 
     public function lpush(string $k, $v, int $expire = 7200): bool {
-        // TODO: Implement lpush() method.
+        $data = $this->fetch($k)??["expire"=>$expire, "data"=> []];
+        $data['data'][] = $v;
+        $this->save($k, $data);
+        return true;
     }
 
     public function setNX(string $k, string $v, int $expire = 7200): bool
@@ -119,7 +128,11 @@ class EzFileCache implements IEzCache
 
     public function del(string $k): bool
     {
-        // TODO: Implement del() method.
+        $file = $this->file($k);
+        if(!is_file($file)){
+            return false;
+        }
+        return unlink($file);
     }
 
     public function keys(string $k): array
