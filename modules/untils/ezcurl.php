@@ -107,7 +107,7 @@ class EzCurl
                 break;
             case self::POSTTYPE_FILE:
                 DBC::assertTrue(current($data) instanceof CURLFile,
-                    "[EzCurl Exception] Upload File Fail! Data Myst Be Instance of CurlFile");
+                    "[EzCurl Exception] Upload File Fail! Data Must Be Instance of CurlFile");
                 return $data;
             case self::POSTTYPE_NONE:
             default:
@@ -279,11 +279,11 @@ class EzCurl
         $this->trace->start();
         $this->prepare();
         $res = curl_exec($this->ch);
-        $this->haveRun = true;
         if (curl_errno($this->ch))
         {
             DBC::throwEx('[EzCurl Exception] Proxy Errno:'.curl_error($this->ch));
         }
+        $this->haveRun = true;
         $msg = $this->geneRequestMsg($httpMethod, $res);
         $this->trace->log($msg, __CLASS__);
         $this->result = $res;
