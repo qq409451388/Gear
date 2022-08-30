@@ -68,7 +68,7 @@ class HashMap extends AbstractMap
         $blackRedTree = new EzBlackRedTree($linkedList->size());
         while($linkedList->hasNext()){
             $node = $linkedList->next();
-            $blackRedTree->add($node);
+            $blackRedTree->append($node->getData());
         }
         $this->dataSpace[$hashCode] = $blackRedTree;
     }
