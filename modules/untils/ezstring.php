@@ -417,4 +417,5 @@ class EzString
         }
         return $type == 1 ? lcfirst($newStr) : $newStr;
     }
+
 }
