@@ -51,7 +51,7 @@ abstract class BaseHTTP
         return $this;
     }
 
-    protected function buildRequest($buf){
+    protected function buildRequest($buf):Request{
         $httpRequestInfos = $this->buildHttpRequestSource($buf, $requestBody);
         //检查请求类型
         $this->check($httpRequestInfos->accept);
@@ -228,8 +228,21 @@ abstract class BaseHTTP
         return $this->dispatcher->judgePath($path);
     }
 
-    public function getDynamicResponse(Request $request):Response{
-        return $this->dispatcher->disPatch($request);
+    public function getDynamicResponse(IRequest $request):IResponse{
+        try {
+            $router = $this->dispatcher->matchedRouteMapping($request->getPath());
+            if ($router instanceof NullMapping) {
+                return $request->getNotFoundResourceResponse();
+            } else {
+                return $request->getDynamicResponse($router);
+            }
+        }catch (GearRunTimeException $e) {
+            Logger::error($e->getMessage().$e->getFile().":".$e->getLine());
+            return $request->getNetErrorResponse($e->getMessage());
+        }catch (Exception $e){
+            Logger::error($e->getMessage());
+            return $request->getNetErrorResponse($e->getMessage());
+        }
     }
 
     public function getStaticResponse(string $path):string{

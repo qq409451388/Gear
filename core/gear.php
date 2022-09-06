@@ -45,21 +45,8 @@ class Gear implements IDispatcher
         return EzRouter::get()->judgePath($path);
     }
 
-    public function disPatch(Request $request):Response {
-        try{
-            $mapper = EzRouter::get()->getMapping($request->getPath());
-            if($mapper instanceof NullMapping){
-                return new Response(HttpStatus::NOT_FOUND(), "");
-            }else{
-                return new Response(HttpStatus::OK(), $mapper->disPatch($request));
-            }
-        }catch (Exception $e){
-            Logger::error($e->getMessage());
-            $msg = $e->getMessage().PHP_EOL;
-            echo $msg;
-            return new Response(HttpStatus::INTERNAL_SERVER_ERROR(), $msg);
-        }
-
+    public function matchedRouteMapping(string $path):IRouteMapping {
+        return EzRouter::get()->getMapping($path);
     }
 
     /**

@@ -65,4 +65,16 @@ class EzLinkedList
         $this->curNode = $prev;
         $this->size--;
     }
+
+    public function toString(){
+        $str = [];
+        while($this->hasNext()){
+            /**
+             * @var $next EzNode|EzNullNode
+             */
+            $next = $this->next();
+            $str[] = EzDataUtils::toString($next->getData());
+        }
+        return empty($str) ? null : "[ROOT]->".PHP_EOL.implode("->".PHP_EOL, $str);
+    }
 }

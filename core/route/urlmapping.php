@@ -1,5 +1,5 @@
 <?php
-class UrlMapping
+class UrlMapping implements IRouteMapping
 {
     private $class;
     private $function;
@@ -13,7 +13,7 @@ class UrlMapping
         return [BeanFinder::get()->pull($this->class), $this->function];
     }
 
-    public function disPatch($request){
+    public function disPatch(IRequest $request):string {
         $func = $this->function;
         return BeanFinder::get()->pull($this->class)->$func($request);
     }

@@ -1,5 +1,5 @@
 <?php
-class Response
+class Response implements IResponse
 {
     private $httpStatus;
     private $content;
@@ -43,5 +43,9 @@ class Response
 
     public function getHeader(){
         return $this->httpStatus;
+    }
+
+    public function toString(): string{
+        return EzDataUtils::toString($this);
     }
 }

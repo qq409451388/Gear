@@ -15,7 +15,7 @@ class EzRouter
         $this->urlMap[$path] = new UrlMapping($class, $func);
     }
 
-    public function getMapping($path):UrlMapping{
+    public function getMapping($path):IRouteMapping{
         $path = strtolower($path);
         return $this->urlMap[$path]??new NullMapping();
     }

@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * @deprecated soo long no upgrade
+ */
 class HTTPs extends BaseHTTP implements IHttp
 {
     /**

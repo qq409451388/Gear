@@ -27,4 +27,16 @@ class EzDataUtils
         }
         return true;
     }
+
+    public static function toString($obj){
+        if(is_string($obj) || is_numeric($obj)){
+            return (string) $obj;
+        }else if(is_array($obj) || is_object($obj)){
+            return json_encode($obj);
+        }else if(is_resource($obj)){
+            return "[Resource]#".((int)$obj);
+        }else{
+            return "null";
+        }
+    }
 }

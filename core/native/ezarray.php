@@ -9,12 +9,16 @@ class EzArray implements ArrayAccess
         $this->size = $size;
     }
 
-    public function macllo($newSize){
+    public function copyOf($newSize){
         $this->size = $newSize;
     }
 
     public function free(){
         unset($this->list);
+    }
+
+    public function memLen(){
+        return $this->size;
     }
 
     public function offsetExists($index)
@@ -29,6 +33,7 @@ class EzArray implements ArrayAccess
 
     public function offsetSet($index, $value)
     {
+        var_dump(func_get_args());
         DBC::assertTrue($index < $this->size, "[EzArray Exception] Out bound For Index $index!");
         $this->container[$index] = $value;
     }

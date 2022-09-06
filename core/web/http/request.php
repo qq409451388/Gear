@@ -1,5 +1,5 @@
 <?php
-class Request
+class Request implements IRequest
 {
     //content-type
     private $contentType;
@@ -35,10 +35,10 @@ class Request
     }
 
     public function filter(){
-
+        //todo
     }
 
-    public function isEmpty(){
+    public function isEmpty():bool{
         return empty($this->request);
     }
 
@@ -46,7 +46,7 @@ class Request
         $this->requestMethod = $requestMethod;
     }
 
-    public function getPath(){
+    public function getPath():string{
         return $this->path;
     }
 
@@ -66,12 +66,24 @@ class Request
         $this->contentLenActual = $contentLen;
     }
 
-    public function check(){
+    public function check() {
         if(!is_null($this->contentLen) && !is_null($this->contentLenActual)
             && $this->contentLen != $this->contentLenActual){
             return Http::TYPE_MULTIPART_FORMDATA == $this->contentType->contentType ?
                 HttpStatus::CONTINUE() : HttpStatus::EXPECTATION_FAIL();
         }
         return true;
+    }
+
+    public function getNotFoundResourceResponse():IResponse {
+        return new Response(HttpStatus::NOT_FOUND(), "");
+    }
+
+    public function getNetErrorResponse(string $msg):IResponse {
+        return new Response(HttpStatus::INTERNAL_SERVER_ERROR(), $msg);
+    }
+
+    public function getDynamicResponse(IRouteMapping $router): IResponse{
+        return new Response(HttpStatus::OK(), $router->disPatch($this));
     }
 }
