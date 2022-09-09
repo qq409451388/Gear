@@ -36,12 +36,14 @@ class Gear implements IDispatcher
         if(!$reflectionMethod->isPublic() || BaseController::class === $reflectionMethod->getDeclaringClass()->getName()){
             return;
         }
+        $defaultPath = $objName.'/'.$reflectionMethod->getName();
+        EzRouter::get()->setMapping($defaultPath, $objName, $reflectionMethod->getName());
+
         $path = RouterAnno::get()->buildPath($reflection->getDocComment(), $reflectionMethod->getDocComment());
+        DBC::assertEquals($defaultPath, $path, "[Gear Exception] Anno Mapping Path $path Cant Equals to Class::Function");
         if(!empty($path)){
             EzRouter::get()->setMapping($path, $objName, $reflectionMethod->getName());
         }
-        $path = $objName.'/'.$reflectionMethod->getName();
-        EzRouter::get()->setMapping($path, $objName, $reflectionMethod->getName());
     }
 
     private function initCustomize(String $objName, ReflectionClass  $reflection, ReflectionMethod $reflectionMethod){

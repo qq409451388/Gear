@@ -12,6 +12,9 @@ class EzRouter
 
     public function setMapping($path, $class, $func){
         $path = strtolower($path);
+        if(array_key_exists($path, $this->urlMap)){
+           Logger::warn("EzRouter Has Setted Path:".$path.", From Obj:".$class."::".$func);
+        }
         $this->urlMap[$path] = new UrlMapping($class, $func);
     }
 
