@@ -8,10 +8,6 @@ class BaseController
         return BeanFinder::get()->pull($obj);
     }
 
-    public function __call(){
-        return '404 Not Found!';
-    }
-
     protected function show($response, $path){
         DBC::assertTrue(defined("TEMPLATE_DIR"), "[Controller] Must Define const TEMPLATE_DIR At Enter File!");
         extract($response);

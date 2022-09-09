@@ -78,4 +78,29 @@ class EzLocalCache implements IEzCache
         }
         return time() > $this->_totalHash[$k][1];
     }
+
+    public function exists(string $K): bool
+    {
+        // TODO: Implement exists() method.
+    }
+
+    public function del(string $k): bool
+    {
+        // TODO: Implement del() method.
+    }
+
+    public function keys(string $k): array
+    {
+        // TODO: Implement keys() method.
+    }
+
+    public function setNX(string $k, string $v, int $expire = 7200): bool
+    {
+        // TODO: Implement setNX() method.
+    }
+
+    public function setXX(string $k, string $v, int $expire = 7200): bool
+    {
+        // TODO: Implement setXX() method.
+    }
 }

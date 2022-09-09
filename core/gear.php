@@ -1,11 +1,12 @@
 <?php
 class Gear implements IDispatcher
 {
-    public function init(Array $classess){
+    public function __construct(){
+        $classess = CacheFactory::getInstance(CacheFactory::TYPE_MEM)->get("GLOBAL_USER_CLASS");
+        $classess = EzCollection::decodeJson($classess);
         //初始化对象
         $this->initObjects($classess);
         $this->initAnno();
-        return $this;
     }
 
     private function initObjects($classess){
@@ -29,6 +30,12 @@ class Gear implements IDispatcher
     }
 
     private function initRouter(String $objName, ReflectionClass  $reflection, ReflectionMethod $reflectionMethod){
+        if(!$reflection->isSubclassOf(BaseController::class)){
+            return;
+        }
+        if(!$reflectionMethod->isPublic() || BaseController::class === $reflectionMethod->getDeclaringClass()->getName()){
+            return;
+        }
         $path = RouterAnno::get()->buildPath($reflection->getDocComment(), $reflectionMethod->getDocComment());
         if(!empty($path)){
             EzRouter::get()->setMapping($path, $objName, $reflectionMethod->getName());
