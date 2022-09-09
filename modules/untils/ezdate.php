@@ -2,13 +2,14 @@
 class EzDate{
     private $timeStamp;
 
-    private const DAY_SEC = 86400;
-    private const HOUR_SEC = 3600;
-    private const MINUTE_SEC = 60;
+    public const DAY_SEC = 86400;
+    public const HOUR_SEC = 3600;
+    public const MINUTE_SEC = 60;
 
     const FORMAT_DATETIME = 'Y-m-d H:i:s';
     const FORMAT_DATE = 'Y-m-d';
     const FORMAT_TIME = 'H:i:s';
+
     private static $formatList = [
         self::FORMAT_DATETIME,
         self::FORMAT_DATE,

@@ -7,12 +7,11 @@
  */
 class GearMessageProtocol
 {
-    private $host;
-    private $port;
-    private $socket;
-
+    /**
+     * @var EzWebSocketServer
+     */
+    private $server;
     private $dispatcher;
-    private $clients;
 
     public function __construct(IDispatcher $dispatcher){
         $this->dispatcher = $dispatcher;
@@ -22,8 +21,7 @@ class GearMessageProtocol
     public function init(string $host = '127.0.0.1', $port = null):GearMessageProtocol {
         DBC::assertNotEmpty($host, "[GMP Exception] Args host is empty!");
         DBC::assertNotEmpty($port, "[GMP Exception] Args port is empty!");
-        $this->host = $host;
-        $this->port = $port;
+        $this->server = (new EzWebSocketServer())->init($host, $port);
         Config::set(["host"=>$host, "port"=>$port]);
         return $this;
     }
@@ -33,9 +31,11 @@ class GearMessageProtocol
      * @return void
      */
     public function start(){
-        EzWebSocketServer::get()->start();
         Logger::console("[GMP]Start GMP Server...");
-        $this->startSocket();
+        $this->server->start(function($readSocket, $clientMsg){
+            var_dump($clientMsg);
+        });
+        /*$this->startSocket();
         while(true)
         {
             try{
@@ -58,7 +58,7 @@ class GearMessageProtocol
                 Logger::error("[GMP Exception] msg:".$t->getMessage());
                 $this->restart();
             }
-        }
+        }*/
     }
 
     private function fetchClient($alias){

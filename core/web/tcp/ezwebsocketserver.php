@@ -45,9 +45,6 @@ class EzWebSocketServer
      */
     private $timeOut = 3;
 
-    //socket资源管理器
-    protected static $instance;
-
     private $ip;
     private $port;
 
@@ -61,17 +58,10 @@ class EzWebSocketServer
      */
     private const THRESOLD_THROW = 5;
 
-    public static function get($ip, $port){
-        $key = $ip.$port;
-        if(!isset(self::$instance[$key])){
-            self::$instance[$key] = new static();
-            self::$instance[$key]->ip = $ip;
-            self::$instance[$key]->port = $port;
-        }
-        return self::$instance[$key] ?? null;
-    }
+    public function init($ip, $port){
+        $this->ip = $ip;
+        $this->port = $port;
 
-    public function init() {
         $this->master = socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_bind($this->master,$this->ip,$this->port);
@@ -89,29 +79,28 @@ class EzWebSocketServer
      * @param $funcClientSend @var回调函数，接收客户端msg并处理
      * @param $funcAfterHandShake @var回调函数，处理握手后的动作
      */
-    public function start($funcClientSend, $funcAfterHandShake = null, $funcListingRuning = null){
+    public function start($funcClientSend, $funcAfterHandShake = null){
+        Logger::console("Start Server Success! ws://".$this->ip.":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;
             $writeSockets = NULL;
             $except = NULL;
             $ready = @socket_select($readSockets, $writeSockets, $except, $this->timeOut);
             $startSucc = false !== $ready;
-            if(!is_null($funcListingRuning)){
-                $funcListingRuning($startSucc, $except);
-            }
             //$this->periodicityCheck();
             DBC::assertTrue($startSucc, "[EzTcpServer] Srart Fail!".socket_strerror(socket_last_error()));
             foreach ($readSockets as $readSocket) {
                 if($this->master == $readSocket) {
                     $this->newConnect();
                 } else {
-                    $recv = socket_recv($readSocket, $buffer, 8192, 0);
+                    $recv = @socket_recv($readSocket, $buffer, 8192, 0);
+                    var_dump($recv, $buffer);
                     if ($recv == 0) {
                         $this->disConnect($readSocket);
                         continue;
                     }
                     //接收并处理消息体
-                    $this->receiveConnect($buffer, $readSocket, $funcAfterHandShake, $funcClientSend);
+                    //$this->receiveConnect($buffer, $readSocket, $funcAfterHandShake, $funcClientSend);
                 }
             }
         }
@@ -216,6 +205,7 @@ class EzWebSocketServer
         DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         $this->connectPool[$alias] = $clientSocket;
         if(self::MASTER != $alias){
+            socket_set_nonblock($clientSocket);
             Logger::console($clientSocket." CONNECTED!");
         }
     }
