@@ -24,4 +24,10 @@ class DBC
             self::throwEx($msg);
         }
     }
+
+    public static function assertNotEquals($expect, $actual, $msg){
+        if($expect == $actual){
+            self::throwEx($msg);
+        }
+    }
 }

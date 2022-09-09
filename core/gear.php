@@ -40,7 +40,7 @@ class Gear implements IDispatcher
         EzRouter::get()->setMapping($defaultPath, $objName, $reflectionMethod->getName());
 
         $path = RouterAnno::get()->buildPath($reflection->getDocComment(), $reflectionMethod->getDocComment());
-        DBC::assertEquals($defaultPath, $path, "[Gear Exception] Anno Mapping Path $path Cant Equals to Class::Function");
+        DBC::assertNotEquals($defaultPath, $path, "[Gear Exception] Anno Mapping Path $path Cant Equals to Class::Function");
         if(!empty($path)){
             EzRouter::get()->setMapping($path, $objName, $reflectionMethod->getName());
         }
