@@ -37,6 +37,7 @@ abstract class BaseHTTP
 
     //contentType
     public const TYPE_X_WWW_FORM_URLENCODE = "application/x-www-form-urlencoded";
+    public const TYPE_JSON = "application/json";
     public const TYPE_MULTIPART_FORMDATA = "multipart/form-data";
 
     public function __construct(IDispatcher $dispatcher){
@@ -52,7 +53,9 @@ abstract class BaseHTTP
     }
 
     protected function buildRequest($buf):Request{
+        print_r($buf);
         $httpRequestInfos = $this->buildHttpRequestSource($buf, $requestBody);
+        var_dump($requestBody);
         //检查请求类型
         $this->check($httpRequestInfos->accept);
         //获取web路径
@@ -78,16 +81,21 @@ abstract class BaseHTTP
         }
     }
 
-    private function buildHttpRequestBody($contentType, $requestBody){
+    private function buildHttpRequestBody($contentType, RequestSource $requestSource, $requestBody){
         $requestBodyArr = null;
-        if(is_null($contentType)){
-            $requestBodyArr = [];
-        }
-        if(self::TYPE_X_WWW_FORM_URLENCODE == $contentType){
-            $requestBodyArr = EzCollection::decodeJson($requestBody);
-        }
-        if(self::TYPE_MULTIPART_FORMDATA == $contentType){
-            parse_str($requestBody, $requestBodyArr);
+        switch ($contentType){
+            case self::TYPE_X_WWW_FORM_URLENCODE:
+                parse_str($requestBody, $requestBodyArr);
+                break;
+            case self::TYPE_JSON:
+                $requestBodyArr = EzCollection::decodeJson($requestBody);
+                break;
+            case self::TYPE_MULTIPART_FORMDATA:
+                $requestBodyArr = explode($requestSource->contentType->boundary, $requestBody);
+                break;
+            default:
+                $requestBodyArr = [];
+                break;
         }
         DBC::assertTrue(!is_null($requestBodyArr), "[Http] BuildRequestBody Fail! Params:".EzString::encodeJson(func_get_args()));
         return $requestBodyArr;
@@ -102,32 +110,35 @@ abstract class BaseHTTP
         $requestSource->httpVer = $firstLine[2]??"";
         $whenBody = false;
         $requestSource->contentLengthActual = 0;
+        $body = "";
         while(true){
             $httpOption = array_shift($httpOptions);
-            if(false === $httpOption){
+            if(false === $httpOption || is_null($httpOption)){
                 break;
             }
             if($whenBody){
-                $body = $httpOption;
-                break;
+                $body .= $httpOption.PHP_EOL;
+            }else{
+                if(empty($httpOption)){
+                    $whenBody = true;
+                    continue;
+                }
+                $pos = strpos($httpOption, ":");
+                $key = EzString::camelCase(substr($httpOption, 0, $pos), "-");
+                $value = trim(substr($httpOption, $pos+1));
+                if($key == "contentType"){
+                    $contentType = explode(";", $value);
+                    $value = new HttpContentType();
+                    $value->contentType = $contentType[0];
+                    $value->boundary = str_replace("boundary=", "", $contentType[1]??"");
+                }
+                $requestSource->$key = $value;
             }
-            if(empty($httpOption)){
-                $whenBody = true;
-                continue;
-            }
-            $pos = strpos($httpOption, ":");
-            $key = EzString::camelCase(substr($httpOption, 0, $pos), "-");
-            $value = trim(substr($httpOption, $pos+1));
-            if($key == "contentType"){
-                $contentType = explode(";", $value);
-                $value = new HttpContentType();
-                $value->contentType = $contentType[0];
-                $value->boundary = $contentType[1]??"";
-            }
-            $requestSource->$key = $value;
+
         }
         $requestSource->contentLengthActual = strlen($body);
-        $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $body);
+        var_dump($body, $requestSource->contentType->boundary);
+        $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $requestSource, $body);
         return $requestSource;
     }
 
