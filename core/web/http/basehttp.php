@@ -53,9 +53,7 @@ abstract class BaseHTTP
     }
 
     protected function buildRequest($buf):Request{
-        print_r($buf);
         $httpRequestInfos = $this->buildHttpRequestSource($buf, $requestBody);
-        var_dump($requestBody);
         //检查请求类型
         $this->check($httpRequestInfos->accept);
         //获取web路径
@@ -68,6 +66,7 @@ abstract class BaseHTTP
         $request->setContentType($httpRequestInfos->contentType);
         $this->buildRequestArgs($requestBody, $args, $request);
         $request->setRequestMethod($httpRequestInfos->requestMethod);
+        var_dump($request);
         return $request;
     }
 
@@ -81,7 +80,16 @@ abstract class BaseHTTP
         }
     }
 
-    private function buildHttpRequestBody($contentType, RequestSource $requestSource, $requestBody){
+    private function buildHttpRequest($contentType, $string){
+        switch ($contentType){
+            case 'form-data':
+                return $string;
+            default:
+                return "";
+        }
+    }
+
+    private function buildHttpRequestBody($contentType, $requestBody, RequestSource $requestSource = null){
         $requestBodyArr = null;
         switch ($contentType){
             case self::TYPE_X_WWW_FORM_URLENCODE:
@@ -91,7 +99,27 @@ abstract class BaseHTTP
                 $requestBodyArr = EzCollection::decodeJson($requestBody);
                 break;
             case self::TYPE_MULTIPART_FORMDATA:
-                $requestBodyArr = explode($requestSource->contentType->boundary, $requestBody);
+                $requestBodyArrInit = explode(PHP_EOL, $requestBody);
+                $requestBodyArr = [];
+                $flag = null;
+                $requestName = null;
+                $isEmptyLine = false;
+                foreach($requestBodyArrInit as $requestBodyLine){
+                    /*if(EzString::containString($requestBodyLine, $requestSource->contentType->boundary) || empty($requestBodyLine)){
+                        continue;
+                    }*/
+                    if(EzString::containString($requestBodyLine, "Content-Disposition")){
+                        preg_match('/Content-Disposition: (?<contentType>\S+); name="(?<requestName>[a-zA-Z])"/', $requestBodyLine, $matches);
+                        $flag = $matches['contentType'];
+                        $requestName = $matches['requestName'];
+                    }else if(!empty($flag) && !empty($requestName) && $isEmptyLine){
+                        $requestBodyArr[$requestName] = $this->buildHttpRequest($flag, $requestBodyLine);
+                        $flag = null;
+                        $requestName = null;
+                    }
+                    //为下一行数据使用
+                    $isEmptyLine = empty($requestBodyLine);
+                }
                 break;
             default:
                 $requestBodyArr = [];
@@ -137,8 +165,7 @@ abstract class BaseHTTP
 
         }
         $requestSource->contentLengthActual = strlen($body);
-        var_dump($body, $requestSource->contentType->boundary);
-        $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $requestSource, $body);
+        $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $body, $requestSource);
         return $requestSource;
     }
 

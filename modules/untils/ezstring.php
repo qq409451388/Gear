@@ -418,4 +418,7 @@ class EzString
         return $type == 1 ? lcfirst($newStr) : $newStr;
     }
 
+    public static function containString($source, $nass){
+        return false !== strstr($source, $nass);
+    }
 }
