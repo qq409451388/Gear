@@ -66,7 +66,6 @@ abstract class BaseHTTP
         $request->setContentType($httpRequestInfos->contentType);
         $this->buildRequestArgs($requestBody, $args, $request);
         $request->setRequestMethod($httpRequestInfos->requestMethod);
-        var_dump($request);
         return $request;
     }
 
