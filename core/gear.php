@@ -97,8 +97,7 @@ class Gear implements IDispatcher
             $k = $annoItem->annoName;
             $v = $annoItem->value;
             $annoReflection = new ReflectionClass($k);
-            $target = $annoReflection->getConstant("TARGET");
-            DBC::assertTrue($target, "[Gear] Anno $k Must Defined Const TARGET!");
+            $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
             DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
             $dependConf = $annoReflection->getConstant("DEPEND");
             DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
@@ -136,8 +135,9 @@ class Gear implements IDispatcher
                     $aspectSon->setValue($dependItem->value);
                     $aspectSon->setAtClass($reflectionClass);
                     $aspectSon->setAtMethod($reflectionMethod);
-                    $target = $annoReflectionSon->getConstant("TARGET");
-                    DBC::assertTrue($target, "[Gear] Anno $dependItemName Must Defined Const TARGET!");
+                    $target = $annoReflectionSon->getConstant("TARGET")?:AnnoElementType::TYPE;
+                    DBC::assertEquals($target, $dependItem->at, "[Gear] Anno $dependItem->annoName Must Used At "
+                        .AnnoElementType::getDesc($dependItem->at)."!");
                     $aspectSon->setTarget($target);
                     $aspectSon->setDependConf($dependConf);
                     $aspectSon->setDependList($dependList);
@@ -167,8 +167,7 @@ class Gear implements IDispatcher
             $k = $annoItem->annoName;
             $v = $annoItem->value;
             $annoReflection = new ReflectionClass($k);
-            $target = $annoReflection->getConstant("TARGET");
-            DBC::assertTrue($target, "[Gear] Anno $k Must Defined Const TARGET!");
+            $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
             DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
             $dependConf = $annoReflection->getConstant("DEPEND");
             DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
