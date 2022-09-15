@@ -10,7 +10,7 @@ abstract class BaseHTTP
 
     protected const SOCKET_READ_LENGTH = 8192;
 
-    private const MIME_TEXT = HttpMimeType::MIME_TEXT;
+    private const MIME_TEXT = HttpMimeType::MIME_HTML;
 
     private const MIME_TYPE_LIST = HttpMimeType::MIME_TYPE_LIST;
 
@@ -145,6 +145,7 @@ abstract class BaseHTTP
             }
 
         }
+        $body = trim($body, PHP_EOL);
         $requestSource->contentLengthActual = strlen($body);
         $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $body, $requestSource);
         return $requestSource;
