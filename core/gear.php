@@ -38,14 +38,14 @@ class Gear implements IDispatcher
      */
     private function initAnno(){
         $annoList = [];
-        foreach(BeanFinder::get()->getAll() as $objName => $obj){
+        foreach(BeanFinder::get()->getAll() as $obj){
             $reflection = new ReflectionClass($obj);
             $reflectionMethods = $reflection->getMethods();
             $classDocComment = $reflection->getDocComment();
-            $classAnnoList = $this->analyzeDocComment($classDocComment);
+            $classAnnoList = $this->analyzeDocComment($classDocComment, AnnoElementType::TYPE_CLASS);
             foreach($reflectionMethods as $reflectionMethod) {
                 $methodDocComment = $reflectionMethod->getDocComment();
-                $methodAnnoList = $this->analyzeDocComment($methodDocComment);
+                $methodAnnoList = $this->analyzeDocComment($methodDocComment, AnnoElementType::TYPE_METHOD);
                 $this->relationshipAnno($classAnnoList, $methodAnnoList, $reflection, $reflectionMethod, $annoList);
             }
         }
@@ -60,7 +60,10 @@ class Gear implements IDispatcher
         }
     }
 
-    private function analyzeDocComment($comment){
+    /**
+     * @return array<AnnoItem>
+     */
+    private function analyzeDocComment($comment, $at){
         $result = [];
         if(empty($comment)){
             return $result;
@@ -77,17 +80,26 @@ class Gear implements IDispatcher
                 Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName, $content);
                 continue;
             }
-            $result[$annoName] = $content;
+            $result[] = AnnoItem::create($annoName, $content, $at);
         }
         return $result;
     }
 
     /**
+     * @param $methodAnnoList array<AnnoItem> 某一个方法上的注解列表
      * @throws ReflectionException
      */
     private function relationshipAnno($classAnnoList, $methodAnnoList, $reflectionClass, $reflectionMethod, &$annoList){
-        foreach($classAnnoList as $k => $v){
+        foreach($classAnnoList as $annoItem){
+            /**
+             * @var $annoItem AnnoItem
+             */
+            $k = $annoItem->annoName;
+            $v = $annoItem->value;
             $annoReflection = new ReflectionClass($k);
+            $target = $annoReflection->getConstant("TARGET");
+            DBC::assertTrue($target, "[Gear] Anno $k Must Defined Const TARGET!");
+            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
             $dependConf = $annoReflection->getConstant("DEPEND");
             DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
             $dependList = null;
@@ -98,34 +110,38 @@ class Gear implements IDispatcher
                     Logger::warn("[Gear] Anno {} Set DEPEND But Empty", $k);
                     continue;
                 }
-                $dependListIntersect = array_intersect($dependConf, array_keys($methodAnnoList));
+                $dependListIntersect = [];
+                foreach($methodAnnoList as $methodAnnoKey => $methodAnno){
+                    if(in_array($methodAnno->annoName, $dependConf)){
+                        $dependListIntersect[] = $methodAnno;
+                        unset($methodAnnoList[$methodAnnoKey]);
+                    }
+                }
                 if(empty($dependListIntersect)){
-                    //Logger::warn("[Gear] Anno {} Must Cooperate With {}", $k, implode(",", $dependConf));
                     continue;
                 }
                 $dependList = [];
-                foreach($dependListIntersect as $dependItemTmp){
-                    $annoReflectionSon = new ReflectionClass($dependItemTmp);
+                foreach($dependListIntersect as $dependItem){
+                    $dependItemName = $dependItem->annoName;
+                    $annoReflectionSon = new ReflectionClass($dependItemName);
                     $dependConf = $annoReflectionSon->getConstant("DEPEND");
-                    //DBC::assertTrue($dependConf, "[Gear] Anno $dependItemTmp Must Defined Const DEPEND!");
                     $dependList = null;
                     $aspectClass = $annoReflectionSon->getConstant("ASPECT");
-                    DBC::assertTrue($aspectClass, "[Gear] Anno $dependItemTmp Must Defined Const ASPECT!");
+                    DBC::assertTrue($aspectClass, "[Gear] Anno $dependItemName Must Defined Const ASPECT!");
                     $aspectSon = new $aspectClass;
                     $policy = $annoReflectionSon->getConstant("POLICY");
-                    DBC::assertTrue($policy, "[Gear] Anno $dependItemTmp Must Defined Const POLICY!");
+                    DBC::assertTrue($policy, "[Gear] Anno $dependItemName Must Defined Const POLICY!");
                     $aspectSon->setPolicy($policy);
-                    $aspectSon->setAnnoName($dependItemTmp);
-                    $aspectSon->setValue($methodAnnoList[$dependItemTmp]);
+                    $aspectSon->setAnnoName($dependItemName);
+                    $aspectSon->setValue($dependItem->value);
                     $aspectSon->setAtClass($reflectionClass);
                     $aspectSon->setAtMethod($reflectionMethod);
                     $target = $annoReflectionSon->getConstant("TARGET");
-                    DBC::assertTrue($target, "[Gear] Anno $dependItemTmp Must Defined Const TARGET!");
+                    DBC::assertTrue($target, "[Gear] Anno $dependItemName Must Defined Const TARGET!");
                     $aspectSon->setTarget($target);
                     $aspectSon->setDependConf($dependConf);
                     $aspectSon->setDependList($dependList);
                     $dependList[] = $aspectSon;
-                    unset($methodAnnoList[$dependItemTmp]);
                 }
             }
             /**
@@ -139,8 +155,37 @@ class Gear implements IDispatcher
             $aspect->setValue($v);
             $aspect->setAtClass($reflectionClass);
             $aspect->setAtMethod($reflectionMethod);
+            $aspect->setTarget($target);
+            $aspect->setDependConf($dependConf);
+            $aspect->setDependList($dependList);
+            $annoList[] = $aspect;
+        }
+        foreach($methodAnnoList as $annoItem){
+            /**
+             * @var $annoItem AnnoItem
+             */
+            $k = $annoItem->annoName;
+            $v = $annoItem->value;
+            $annoReflection = new ReflectionClass($k);
             $target = $annoReflection->getConstant("TARGET");
             DBC::assertTrue($target, "[Gear] Anno $k Must Defined Const TARGET!");
+            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
+            $dependConf = $annoReflection->getConstant("DEPEND");
+            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
+            $dependList = null;
+            $aspectClass = $annoReflection->getConstant("ASPECT");
+            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const ASPECT!");
+            /**
+             * @var $aspect Aspect
+             */
+            $aspect = new $aspectClass;
+            $policy = $annoReflection->getConstant("POLICY");
+            DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
+            $aspect->setPolicy($policy);
+            $aspect->setAnnoName($k);
+            $aspect->setValue($v);
+            $aspect->setAtClass($reflectionClass);
+            $aspect->setAtMethod($reflectionMethod);
             $aspect->setTarget($target);
             $aspect->setDependConf($dependConf);
             $aspect->setDependList($dependList);
