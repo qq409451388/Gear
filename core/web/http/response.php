@@ -5,9 +5,10 @@ class Response implements IResponse
     private $content;
     private $contentType;
 
-    public function __construct(HttpStatus $header, $content){
+    public function __construct(HttpStatus $header, $content, $contentType = null){
         $this->httpStatus = $header;
         $this->setContent($content);
+        $this->setContentType($contentType);
         $this->setContentType($this->guessContent());
     }
 
@@ -28,17 +29,17 @@ class Response implements IResponse
     }
 
     private function guessContent(){
-        /*if($this->content instanceof EzRpcResponse) {
+        if(isset($this->contentType)){
+            return $this->contentType;
+        }
+        if($this->content instanceof EzRpcResponse) {
             $this->content = $this->content->toJson();
-            return EzHeader::H_JSON;
-        }elseif(null !== json_decode($this->content, true)){
-            return EzHeader::H_JSON;
-        }elseif(null !== ($jcontent = json_encode($this->content))){
-            $this->content = $jcontent;
-            return EzHeader::H_JSON;
+            return HttpContentType::H_JSON;
+        }else if(null !== json_decode($this->content, true)){
+            return HttpContentType::H_JSON;
         }else{
-        }*/
-        return EzHeader::H_TEXT_HTML;
+            return HttpContentType::H_HTML;
+        }
     }
 
     public function getHeader(){

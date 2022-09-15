@@ -13,7 +13,7 @@ class UrlMapping implements IRouteMapping
         return [BeanFinder::get()->pull($this->class), $this->function];
     }
 
-    public function disPatch(IRequest $request):string {
+    public function disPatch(IRequest $request) {
         $func = $this->function;
         return BeanFinder::get()->pull($this->class)->$func($request);
     }

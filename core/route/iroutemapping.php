@@ -1,5 +1,5 @@
 <?php
 interface IRouteMapping
 {
-    public function disPatch(IRequest $request):string;
+    public function disPatch(IRequest $request);
 }

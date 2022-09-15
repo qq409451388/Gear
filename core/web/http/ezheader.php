@@ -6,9 +6,6 @@ class EzHeader
     private $contentType;
     private $charset;
 
-    public const H_JSON = "applicaition/json";
-    public const H_TEXT_HTML = "text/html";
-
     public function __construct(HttpStatus $httpStatus, $content, $contentType = "text/html;", $charset = "charset=utf-8;"){
         $this->httpStatus = $httpStatus;
         $this->content = $content;

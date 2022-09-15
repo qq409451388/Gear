@@ -10,30 +10,9 @@ abstract class BaseHTTP
 
     protected const SOCKET_READ_LENGTH = 8192;
 
-    private const MIME_TEXT = "text/html";
+    private const MIME_TEXT = HttpMimeType::MIME_TEXT;
 
-    private const MIME_TYPE_LIST = array(
-        'avi' => 'video/x-msvideo',
-        'bmp' => 'image/bmp',
-        'css' => 'text/css',
-        'doc' => 'application/msword',
-        'gif' => 'image/gif',
-        'html' => self::MIME_TEXT,
-        'ico' => 'image/x-icon',
-        'jpeg' => 'image/jpeg',
-        'jpg' => 'image/jpeg',
-        'js' => 'application/x-javascript',
-        'mpeg' => 'video/mpeg',
-        'ogg' => 'application/ogg',
-        'png' => 'image/png',
-        'avif' => 'image/avif',
-        'rtf' => 'text/rtf',
-        'rtx' => 'text/richtext',
-        'swf' => 'application/x-shockwave-flash',
-        'wav' => 'audio/x-wav',
-        'wbmp' => 'image/vnd.wap.wbmp',
-        'zip' => 'application/zip',
-    );
+    private const MIME_TYPE_LIST = HttpMimeType::MIME_TYPE_LIST;
 
     //contentType
     public const TYPE_X_WWW_FORM_URLENCODE = "application/x-www-form-urlencoded";
@@ -108,9 +87,12 @@ abstract class BaseHTTP
                         continue;
                     }*/
                     if(EzString::containString($requestBodyLine, "Content-Disposition")){
-                        preg_match('/Content-Disposition: (?<contentType>\S+); name="(?<requestName>[a-zA-Z])"/', $requestBodyLine, $matches);
+                        var_dump($requestBodyLine);
+                        preg_match('/Content-Disposition: (?<contentType>\S+);.*/', $requestBodyLine, $matches);
                         $flag = $matches['contentType'];
+                        preg_match('/(.*)name="(?<requestName>(.*)])";(.*)/', $requestBodyLine, $matches);
                         $requestName = $matches['requestName'];
+                        var_dump($flag, $requestName);die;
                     }else if(!empty($flag) && !empty($requestName) && $isEmptyLine){
                         $requestBodyArr[$requestName] = $this->buildHttpRequest($flag, $requestBodyLine);
                         $flag = null;
@@ -224,7 +206,7 @@ abstract class BaseHTTP
      * @param string $contentType 发送的内容类型
      * @return string
      **/
-    public function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = self::MIME_TEXT):String{
+    private function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = self::MIME_TEXT):String{
         return (new EzHeader($httpStatus, $content, $contentType))->get();
     }
 

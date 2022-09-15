@@ -84,6 +84,12 @@ class Request implements IRequest
     }
 
     public function getDynamicResponse(IRouteMapping $router): IResponse{
-        return new Response(HttpStatus::OK(), $router->disPatch($this));
+        $response = $router->disPatch($this);
+        if($response instanceof IResponse){
+            return $response;
+        }else if (is_array($response) || is_object($response)){
+            $response = EzString::encodeJson($response);
+        }
+        return new Response(HttpStatus::OK(), $response);
     }
 }

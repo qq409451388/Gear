@@ -5,7 +5,7 @@ class NullMapping extends UrlMapping
         parent::__construct(null, null);
     }
 
-    public function disPatch(IRequest $request):string{
+    public function disPatch(IRequest $request){
         return '';
     }
 }
