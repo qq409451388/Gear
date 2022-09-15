@@ -61,7 +61,7 @@ class Gear implements IDispatcher
     /**
      * create a obj if none in objects[]
      * @param $class
-     * @return Object
+     * @return void
      */
     private function createObject($class){
         try {

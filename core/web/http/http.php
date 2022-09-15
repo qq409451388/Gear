@@ -6,6 +6,18 @@ class HTTP extends BaseHTTP implements IHttp
      */
     public function start(){
         Logger::console("[HTTP]Start HTTP Server...");
+        try{
+            $this->s();
+        } catch (Exception $e){
+            Logger::error("[HTTP] Cause By %s, At %s:%s", $e->getMessage(), $e->getLine(). $e->getFile());
+            $this->s();
+        } catch (Throwable $t){
+            Logger::error("[HTTP] Cause By %s, At %s:%s", $t->getMessage(), $t->getLine(). $t->getFile());
+            $this->s();
+        }
+    }
+
+    private function s(){
         //创建socket套接字
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         // set the option to reuse the port
@@ -22,7 +34,7 @@ class HTTP extends BaseHTTP implements IHttp
         }else{
             $err = socket_strerror($isSucc);
             Logger::console("[HTTP]Start Fail! ".$err);
-            return;
+            exit();
         }
         while(true)
         {
