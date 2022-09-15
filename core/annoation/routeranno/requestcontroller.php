@@ -1,5 +1,5 @@
 <?php
-class RequestController extends Anno
+class RequestController implements Anno
 {
     public const DEPEND = [
         GetMapping::class
