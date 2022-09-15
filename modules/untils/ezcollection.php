@@ -35,11 +35,17 @@ class EzCollection
         return $target;
     }
 
-    public static function matchKeys($keys, $hash){
+    public static function matchKeys($keys, $hash, $withKey = false){
         $res = [];
         foreach($keys as $key){
-            DBC::assertTrue(isset($hash[$key]), "[EzCollection Exception] matchKeys Fail!");
-            $res[] = $hash[$key];
+            if(!isset($hash[$key])) {
+                continue;
+            }
+            if($withKey){
+                $res[$key] = $hash[$key];
+            }else{
+                $res[] = $hash[$key];
+            }
         }
         return $res;
     }

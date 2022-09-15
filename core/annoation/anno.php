@@ -1,5 +1,5 @@
 <?php
-Abstract class Anno
+abstract class Anno
 {
     protected $classDoc;
     protected $methodDoc;
@@ -11,19 +11,6 @@ Abstract class Anno
         }
         return static::$ins;
     }
-
-    protected function parseClassDocComment(string $docComment){
-        return '';
-    }
-
-    protected function parseMethodDocComment(string $docComment){
-        return '';
-    }
-
-    protected function parsePropertyDocComment(string $docComment){
-        return '';
-    }
-
 
     public function parse($docComment1, $docComment2, $docComment3 = ''){
         $this->parseClassDocComment($docComment1);

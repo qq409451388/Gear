@@ -1,6 +1,9 @@
 <?php
-class RouterAnno extends Anno
+
+class RouterAnno
 {
+    public const POLICY = AnnoPolicyEnum::POLICY_RUNTIME;
+
     protected static $ins;
 
     protected function parseClassDocComment(string $docComment){
@@ -17,7 +20,7 @@ class RouterAnno extends Anno
         $this->parse($docComment1, $docComment2, $docComment3);
         $path = '';
         if(!empty($this->getClassDoc()) && !empty($this->getMethodDoc())){
-            $path = $this->getClassDoc().'/'.$this->getMethodDoc();
+            $path = $this->getClassDoc() . 'routeranno.php/' .$this->getMethodDoc();
         }
         return $path;
     }

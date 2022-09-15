@@ -23,6 +23,7 @@ class Logger
         $template = '[Warn]'.$template;
         $res = self::matchTemplate($template, $args);
         self::write($res, self::TYPE_RECORD);
+        self::console($res);
     }
 
     public static function error($template, ...$args)
