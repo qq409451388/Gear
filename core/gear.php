@@ -59,9 +59,14 @@ class Gear implements IDispatcher
          * @var $annoItem Aspect
          */
         foreach($annoList as $annoItem){
-            //先处理一种情况
-            if($annoItem->check()){
-                $annoItem->adhere();
+            if(AnnoPolicyEnum::POLICY_BUILD == $annoItem->getPolicy()){
+                //先处理一种情况
+                if($annoItem->check()){
+                    $annoItem->adhere();
+                }
+            }
+            if(AnnoPolicyEnum::POLICY_RUNTIME == $annoItem->getPolicy()){
+
             }
         }
     }
@@ -315,7 +320,7 @@ class Gear implements IDispatcher
         try {
             Logger::console("[Gear]Create Object {$class}");
             BeanFinder::get()->save($class, new $class);
-        } catch (ReflectionException $e) {
+        } catch (Exception $e) {
             DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}");
         }
     }

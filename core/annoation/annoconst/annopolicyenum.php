@@ -1,6 +1,13 @@
 <?php
 class AnnoPolicyEnum
 {
-    public const POLICY_RUNTIME = 1;
-    public const POLICY_SOURCE = 2;
+    /**
+     * 在运行时生效
+     */
+    public const POLICY_RUNTIME = "RUNTIME";
+
+    /**
+     * 在构建初始化时生效
+     */
+    public const POLICY_BUILD = "BUILD";
 }

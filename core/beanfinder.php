@@ -11,10 +11,11 @@ class BeanFinder
     }
 
     public function has($key){
-        return !is_null($this->pull($key));
+        return array_key_exists(strtolower($key), $this->objects);
     }
 
     public function save($key, $obj){
+        $key = strtolower($key);
         if($this->has($key)){
             DBC::throwEx("[BeanFinder] $key is exists!");
         }
