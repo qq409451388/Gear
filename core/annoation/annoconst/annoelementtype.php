@@ -10,6 +10,7 @@ class AnnoElementType
     private static $descMap = [
         self::TYPE_METHOD => "Method",
         self::TYPE_CLASS => "Class",
+        self::TYPE_FIELD => "Property",
         self::TYPE => "Any Where"
     ];
 

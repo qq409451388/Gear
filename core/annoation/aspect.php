@@ -7,6 +7,12 @@ abstract class Aspect
     private $value;
 
     /**
+     * @var
+     * @link AnnoElementType::$descMap
+     */
+    private $pos;
+
+    /**
      * 注解被设置在哪个类上面
      * @var ReflectionClass
      */
@@ -14,9 +20,15 @@ abstract class Aspect
 
     /**
      * 注解被设置在哪个方法上面
-     * @var ReflectionClass
+     * @var ReflectionMethod
      */
     private $atMethod;
+
+    /**
+     * 注解被设置在哪个属性上面
+     * @var ReflectionProperty
+     */
+    private $atProperty;
 
     //注解支持被放在什么位置
     private $target;
@@ -100,15 +112,15 @@ abstract class Aspect
     }
 
     /**
-     * @return mixed
+     * @return ReflectionMethod
      */
-    public function getAtMethod()
+    public function getAtMethod():ReflectionMethod
     {
         return $this->atMethod;
     }
 
     /**
-     * @param mixed $atMethod
+     * @param ReflectionMethod $atMethod
      */
     public function setAtMethod($atMethod): void
     {
@@ -161,5 +173,21 @@ abstract class Aspect
     public function setDependList($dependList): void
     {
         $this->dependList = $dependList;
+    }
+
+    /**
+     * @return ReflectionProperty
+     */
+    public function getAtProperty(): ReflectionProperty
+    {
+        return $this->atProperty;
+    }
+
+    /**
+     * @param ReflectionProperty $atProperty
+     */
+    public function setAtProperty($atProperty): void
+    {
+        $this->atProperty = $atProperty;
     }
 }
