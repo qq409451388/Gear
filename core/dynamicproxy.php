@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * 动态代理类
+ */
 class DynamicProxy
 {
     private $obj;

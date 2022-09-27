@@ -208,6 +208,9 @@ abstract class Aspect
     }
 
     /**
+     * 在项目启动时执行，以构建代理类
+     * @link RunTimeAspect
+     * @uses RunTimeAspect
      * @return void
      */
     public function around(): void
