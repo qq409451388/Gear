@@ -9,4 +9,11 @@ class RequestController implements Anno
 
     public const ASPECT = RouterAspect::class;
     public const TARGET = AnnoElementType::TYPE_CLASS;
+
+    public $path;
+
+    public function combine($values)
+    {
+        $this->path = $values;
+    }
 }

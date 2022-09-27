@@ -1,14 +1,11 @@
 <?php
-class Resource implements Anno
+class Autowire implements Anno
 {
     public const ASPECT = DiAspect::class;
     public const POLICY = AnnoPolicyEnum::POLICY_BUILD;
     public const TARGET = AnnoElementType::TYPE_FIELD;
 
-    public $className;
-
-    public function combine($values)
+    public function combine($hashMap)
     {
-        $this->className = $values;
     }
 }

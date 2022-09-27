@@ -4,6 +4,9 @@ abstract class Aspect
     //标识注解可以保留到什么时候{启动时、运行时}
     private $policy;
     private $annoName;
+    /**
+     * @var Anno
+     */
     private $value;
 
     /**
@@ -80,7 +83,7 @@ abstract class Aspect
     }
 
     /**
-     * @return mixed
+     * @return Anno
      */
     public function getValue()
     {
@@ -189,5 +192,21 @@ abstract class Aspect
     public function setAtProperty($atProperty): void
     {
         $this->atProperty = $atProperty;
+    }
+
+    /**
+     * @return Anno
+     */
+    public function getAnnoObject()
+    {
+        return $this->annoObject;
+    }
+
+    /**
+     * @param mixed $annoObject
+     */
+    public function setAnnoObject($annoObject): void
+    {
+        $this->annoObject = $annoObject;
     }
 }

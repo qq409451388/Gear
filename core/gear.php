@@ -79,19 +79,49 @@ class Gear implements IDispatcher
         if(empty($comment)){
             return $result;
         }
+        /**
+         * 注解第一种类型，参数为普通字符串
+         * @example: @XXX("qqq") 或 @YYY('qqq')
+         */
         $s= "/(.*)@(?<annoName>\S+)\(\'?\"?(?<content>[\/a-zA-Z0-9]+)\'?\"?\)/";
         preg_match_all($s, $comment, $matches, 2);
         foreach($matches as $matched){
             $annoName = $matched['annoName']??null;
             $content = $matched['content']??null;
-            if(empty($annoName)
-                || !is_subclass_of($annoName, Anno::class)
-                || ( !is_numeric($content) && empty($content) )
-            ) {
+            if(empty($annoName)){
+                Logger::warn("[Gear] Not Found AnnoClass AnnoInfo:{} ({})", $annoName, $content);
+                continue;
+            } else if (!is_subclass_of($annoName, Anno::class)){
                 Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName, $content);
+                continue;
+            }else if(!is_numeric($content) && empty($content)){
+                Logger::warn("[Gear] Empty Content AnnoInfo:{} ({})", $annoName, $content);
                 continue;
             }
             $result[] = AnnoItem::create($annoName, $content, $at);
+        }
+        /**
+         * 注解第二种类型，参数为JSON字符串
+         * @example: @XXX({"a":"a", "b":"b"})
+         */
+        $s = "/(.*)@(?<annoName>\S+)\(\{(?<content>(.*)+)\}\)/";
+        preg_match_all($s, $comment, $matches, 2);
+        foreach($matches as $matched){
+            $annoName = $matched['annoName']??null;
+            $content = $matched['content']??null;
+            if(empty($annoName)){
+                Logger::warn("[Gear] Not Found AnnoClass AnnoInfo:{} ({})", $annoName, $content);
+                continue;
+            } else if (!is_subclass_of($annoName, Anno::class)){
+                Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName, $content);
+                continue;
+            }else if(!is_numeric($content) && empty($content)){
+                Logger::warn("[Gear] Empty Content AnnoInfo:{} ({})", $annoName, $content);
+                continue;
+            }
+
+            $content = "{".$content."}";
+            $result[] = AnnoItem::createComplex($annoName, $content, $at);
         }
         return $result;
     }
@@ -106,10 +136,10 @@ class Gear implements IDispatcher
              * @var $annoItem AnnoItem
              */
             $k = $annoItem->annoName;
-            $v = $annoItem->value;
+            $v = $annoItem->getValue();
             $annoReflection = new ReflectionClass($k);
             $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
+            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
             $dependConf = $annoReflection->getConstant("DEPEND");
             DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
             $dependList = null;
@@ -143,12 +173,12 @@ class Gear implements IDispatcher
                     DBC::assertTrue($policy, "[Gear] Anno $dependItemName Must Defined Const POLICY!");
                     $aspectSon->setPolicy($policy);
                     $aspectSon->setAnnoName($dependItemName);
-                    $aspectSon->setValue($dependItem->value);
+                    $aspectSon->setValue($dependItem->getValue());
                     $aspectSon->setAtClass($reflectionClass);
                     $aspectSon->setAtMethod($reflectionMethod);
                     $target = $annoReflectionSon->getConstant("TARGET")?:AnnoElementType::TYPE;
                     DBC::assertEquals($target, $dependItem->at, "[Gear] Anno $dependItem->annoName Must Used At "
-                        .AnnoElementType::getDesc($dependItem->at)."!");
+                        .AnnoElementType::getDesc($target)."!");
                     $aspectSon->setTarget($target);
                     $aspectSon->setDependConf($dependConf);
                     $aspectSon->setDependList($dependList);
@@ -277,10 +307,10 @@ class Gear implements IDispatcher
              * @var $annoItem AnnoItem
              */
             $k = $annoItem->annoName;
-            $v = $annoItem->value;
+            $v = $annoItem->getValue();
             $annoReflection = new ReflectionClass($k);
             $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
+            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
             $dependConf = null;
             $dependList = null;
             $aspectClass = $annoReflection->getConstant("ASPECT");
