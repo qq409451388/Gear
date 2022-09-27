@@ -47,9 +47,6 @@ abstract class Aspect
      */
     private $dependList;
 
-    abstract public function check():bool;
-    abstract public function adhere():void;
-
     /**
      * @return mixed
      */

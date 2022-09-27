@@ -12,6 +12,8 @@ class Required implements Anno
     public $defaultValue = null;
 
     public const POLICY = AnnoPolicyEnum::POLICY_RUNTIME;
+    public const ASPECT = LombokDataAspect::class;
+    public const TARGET = AnnoElementType::TYPE_FIELD;
 
     public function combine($values)
     {

@@ -3,7 +3,7 @@
 /**
  * 依赖注入切面
  */
-class DiAspect extends Aspect
+class DiAspect extends Aspect implements BuildAspect
 {
 
     public function check(): bool

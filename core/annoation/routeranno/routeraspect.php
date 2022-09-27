@@ -1,5 +1,5 @@
 <?php
-class RouterAspect extends Aspect
+class RouterAspect extends Aspect implements BuildAspect
 {
     public function getHttpMethodLimit(){
         return HttpMethod::get(str_replace("Mapping", "", $this->getAnnoName()));
