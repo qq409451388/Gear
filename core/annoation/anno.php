@@ -1,4 +1,12 @@
 <?php
+
+/**
+ * 注解接口
+ * 子类需要定义如下常量
+ * ASPECT：切面逻辑类名，触发此注解时，执行的逻辑 @example {@see DiAspect}
+ * TARGET：指定注解可以放置的位置（默认: 所有）@see AnnoElementType
+ * POLICY：指定注解的执行模式 @see AnnoPolicyEnum
+ */
 interface Anno
 {
     /**
