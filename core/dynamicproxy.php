@@ -25,12 +25,13 @@ class DynamicProxy
             return call_user_func_array([$this, $funcName], $args);
         }
         $rpp = new RunTimeProcessPoint(get_class($this->obj), $funcName, $args, null);
-        if($this->hasBefore($funcName)){
+        $rpp->setClassInstance($this->ref);
+        if($this->hasBefore($rpp->getFunctionName())){
             $this->callBefore($rpp);
         }
-        $return = $this->obj->$funcName($args);
-        $rpp->setReturnValue($rpp);
-        if($this->hasAfter($funcName)){
+        $return = call_user_func_array([$this->obj, $rpp->getFunctionName()], $rpp->getArgs());
+        $rpp->setReturnValue($return);
+        if($this->hasAfter($rpp->getFunctionName())){
             $this->callAfter($rpp);
         }
         return $rpp->hasTampered() ? $rpp->getNewValueTampered() : $return;

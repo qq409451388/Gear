@@ -18,6 +18,9 @@ class EzCacheAnno implements Anno
 
     public function combine($values)
     {
+        if(empty($values)){
+            return;
+        }
         $this->dataType = $values['dataType'];
         $this->defaultValue = $values['defaultValue']??null;
     }

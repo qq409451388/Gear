@@ -1,6 +1,15 @@
 <?php
+
+/**
+ * 动态代理类运行时，上下文信息
+ */
 class RunTimeProcessPoint
 {
+    /**
+     * @var ReflectionClass
+     */
+    private $classInstance;
+
     /**
      * @var string 类名
      */
@@ -111,5 +120,31 @@ class RunTimeProcessPoint
 
     public function getNewValueTampered(){
         return $this->newReturn;
+    }
+
+    public function __toString(){
+        $methodRef = $this->classInstance->getMethod($this->functionName);
+        $argRefs = $methodRef->getParameters();
+        $arguments = [];
+        foreach ($argRefs as $k => $argRef){
+            $arguments[$argRef->getName()] = is_object($this->args[$k]) ? get_class($this->args[$k])."@Instance" : $this->args[$k];
+        }
+        return "Called ".$this->functionName."@".$this->className." with args:".EzString::toString($arguments);
+    }
+
+    /**
+     * @return ReflectionClass
+     */
+    public function getClassInstance(): ReflectionClass
+    {
+        return $this->classInstance;
+    }
+
+    /**
+     * @param ReflectionClass $classInstance
+     */
+    public function setClassInstance(ReflectionClass $classInstance): void
+    {
+        $this->classInstance = $classInstance;
     }
 }

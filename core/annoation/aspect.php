@@ -207,6 +207,10 @@ abstract class Aspect
         $this->annoObject = $annoObject;
     }
 
+    public function check(): bool {
+        return true;
+    }
+
     /**
      * 在项目启动时执行，以构建代理类
      * @link RunTimeAspect
@@ -216,7 +220,11 @@ abstract class Aspect
     public function around(): void
     {
         $object = BeanFinder::get()->pull($this->getAtClass()->getName());
-        $dynamic = DynamicProxy::get($object);
+        if(!$object instanceof DynamicProxy){
+            $dynamic = DynamicProxy::get($object);
+        }else{
+            $dynamic = $object;
+        }
 
         $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
             /**

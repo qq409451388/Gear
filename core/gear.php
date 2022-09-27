@@ -55,6 +55,7 @@ class Gear implements IDispatcher
                 $this->relationshipAnno2($classAnnoList, $propertyAnnoList, $reflection, $reflectionProperty, $annoList);
             }
         }
+
         /**
          * @var $annoItem Aspect
          */
@@ -88,7 +89,7 @@ class Gear implements IDispatcher
          * 注解第一种类型，参数为普通字符串
          * @example: @XXX("qqq") 或 @YYY('qqq')
          */
-        $s= "/(.*)@(?<annoName>\S+)\(\'?\"?(?<content>[\/a-zA-Z0-9]+)\'?\"?\)/";
+        $s= "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\'?\"?(?<content>[\/a-zA-Z0-9]+)\'?\"?\)/";
         preg_match_all($s, $comment, $matches, 2);
         foreach($matches as $matched){
             $annoName = $matched['annoName']??null;
@@ -109,7 +110,7 @@ class Gear implements IDispatcher
          * 注解第二种类型，参数为JSON字符串
          * @example: @XXX({"a":"a", "b":"b"})
          */
-        $s = "/(.*)@(?<annoName>\S+)\(\{(?<content>(.*)+)\}\)/";
+        $s = "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\{(?<content>(.*)+)\}\)/";
         preg_match_all($s, $comment, $matches, 2);
         foreach($matches as $matched){
             $annoName = $matched['annoName']??null;
@@ -127,6 +128,24 @@ class Gear implements IDispatcher
 
             $content = "{".$content."}";
             $result[] = AnnoItem::createComplex($annoName, $content, $at);
+        }
+        /**
+         * 注解第三种类型，无任何参数
+         * @example: @XXX
+         */
+        $s = "/(.*)@(?<annoName>[a-zA-Z0-9]+)[\f\n\r\t\v]+/";
+        preg_match_all($s, $comment, $matches, 2);
+        foreach($matches as $matched){
+            $annoName = $matched['annoName']??null;
+            if(empty($annoName)){
+                Logger::warn("[Gear] Not Found AnnoClass AnnoInfo:{} ", $annoName);
+                continue;
+            } else if (!is_subclass_of($annoName, Anno::class)){
+                Logger::warn("[Gear] UnExpected AnnoInfo:{}", $annoName);
+                continue;
+            }
+
+            $result[] = AnnoItem::createComplex($annoName, null, $at);
         }
         return $result;
     }
@@ -353,8 +372,9 @@ class Gear implements IDispatcher
      */
     private function createObject($class){
         try {
-            Logger::console("[Gear]Create Object {$class}");
             BeanFinder::get()->save($class, new $class);
+            $className = get_class(BeanFinder::get()->pull($class));
+            Logger::console("[Gear]Create Bean {$className}");
         } catch (Exception $e) {
             DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}");
         }

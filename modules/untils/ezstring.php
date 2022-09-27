@@ -389,6 +389,10 @@ class EzString
         return json_encode($obj, JSON_UNESCAPED_SLASHES) ?? self::EMPTY_JSON_OBJ;
     }
 
+    public static function toString($obj){
+        return is_object($obj) ? $obj : self::encodeJson($obj);
+    }
+
     public static function _dump(array $arr, $pos = 'default', $critical = []){
         $str = '';
         $eolHash = [

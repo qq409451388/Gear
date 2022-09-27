@@ -3,8 +3,8 @@ class EzCollection
 {
     const EMPTY_LIST = [];
 
-    public static function decodeJson(string $json){
-        return json_decode($json, true);
+    public static function decodeJson($json){
+        return empty($json) ? null : json_decode($json, true);
     }
 
     /**
