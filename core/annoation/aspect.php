@@ -206,4 +206,27 @@ abstract class Aspect
     {
         $this->annoObject = $annoObject;
     }
+
+    /**
+     * @return void
+     */
+    public function around(): void
+    {
+        $object = BeanFinder::get()->pull($this->getAtClass()->getName());
+        $dynamic = DynamicProxy::get($object);
+
+        $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
+            /**
+             * @var $this RunTimeAspect
+             */
+            $this->before($rpp);
+        });
+        $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp){
+            /**
+             * @var $this RunTimeAspect
+             */
+            $this->after($rpp);
+        });
+        BeanFinder::get()->replace(strtolower($this->getAtClass()->getName()), $dynamic);
+    }
 }

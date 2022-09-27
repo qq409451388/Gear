@@ -14,6 +14,11 @@ class BeanFinder
         return array_key_exists(strtolower($key), $this->objects);
     }
 
+    public function replace($key, $obj){
+        DBC::assertTrue($this->has($key), "[BeanFinder] $key is not exists");
+        $this->objects[$key] = $obj;
+    }
+
     public function save($key, $obj){
         $key = strtolower($key);
         if($this->has($key)){

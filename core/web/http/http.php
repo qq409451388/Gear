@@ -9,10 +9,10 @@ class HTTP extends BaseHTTP implements IHttp
         try{
             $this->s();
         } catch (Exception $e){
-            Logger::error("[HTTP] Cause By %s, At %s:%s", $e->getMessage(), $e->getLine(). $e->getFile());
+            Logger::error("[HTTP] Cause By {}, At {}:{}", $e->getMessage(), $e->getLine(). $e->getFile());
             $this->s();
         } catch (Throwable $t){
-            Logger::error("[HTTP] Cause By %s, At %s:%s", $t->getMessage(), $t->getLine(). $t->getFile());
+            Logger::error("[HTTP] Cause By {}, At {}:{}", $t->getMessage(), $t->getLine(). $t->getFile());
             $this->s();
         }
     }

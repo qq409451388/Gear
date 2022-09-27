@@ -33,7 +33,6 @@ class EzArray implements ArrayAccess
 
     public function offsetSet($index, $value)
     {
-        var_dump(func_get_args());
         DBC::assertTrue($index < $this->size, "[EzArray Exception] Out bound For Index $index!");
         $this->container[$index] = $value;
     }

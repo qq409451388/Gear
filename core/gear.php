@@ -59,14 +59,19 @@ class Gear implements IDispatcher
          * @var $annoItem Aspect
          */
         foreach($annoList as $annoItem){
+            DBC::assertTrue($annoItem->check(), "[Gear] Init Anno Check Fail! AnnoInfo:".$annoItem->getAnnoName());
             if(AnnoPolicyEnum::POLICY_BUILD == $annoItem->getPolicy()){
-                //先处理一种情况
-                if($annoItem->check()){
-                    $annoItem->adhere();
-                }
+                /**
+                 * @var $annoItem Aspect|BuildAspect
+                 */
+
+                $annoItem->adhere();
             }
             if(AnnoPolicyEnum::POLICY_RUNTIME == $annoItem->getPolicy()){
-
+                /**
+                 * @var $annoItem Aspect|RunTimeAspect
+                 */
+                 $annoItem->around();
             }
         }
     }
@@ -206,12 +211,12 @@ class Gear implements IDispatcher
              * @var $annoItem AnnoItem
              */
             $k = $annoItem->annoName;
-            $v = $annoItem->value;
+            $v = $annoItem->getValue();
             $annoReflection = new ReflectionClass($k);
             $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
-            $dependConf = $annoReflection->getConstant("DEPEND");
-            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
+            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
+            $dependConf = null;//$annoReflection->getConstant("DEPEND");
+            //DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
             $dependList = null;
             $aspectClass = $annoReflection->getConstant("ASPECT");
             DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");

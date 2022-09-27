@@ -1,5 +1,5 @@
 <?php
-class Required implements Anno
+class EzCacheAnno implements Anno
 {
     /**
      * @var string 数据类型
@@ -13,11 +13,12 @@ class Required implements Anno
 
     public const POLICY = AnnoPolicyEnum::POLICY_RUNTIME;
     public const ASPECT = LombokDataAspect::class;
-    public const TARGET = AnnoElementType::TYPE_FIELD;
+    public const TARGET = AnnoElementType::TYPE_METHOD;
+    public const DEPEND = [];
 
     public function combine($values)
     {
         $this->dataType = $values['dataType'];
-        $this->defaultValue = $values['defaultValue'];
+        $this->defaultValue = $values['defaultValue']??null;
     }
 }

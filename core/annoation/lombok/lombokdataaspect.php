@@ -3,21 +3,16 @@ class LombokDataAspect extends Aspect implements RunTimeAspect
 {
     public function check(): bool
     {
-        // TODO: Implement check() method.
+        return true;
     }
 
-    public function before(): void
+    public function before(RunTimeProcessPoint $rpp): void
     {
         // TODO: Implement before() method.
     }
 
-    public function after(): void
+    public function after(RunTimeProcessPoint $rpp): void
     {
 
-    }
-
-    public function around(): void
-    {
-        BeanFinder::get()->pull($this->getAtClass()->getName());
     }
 }
