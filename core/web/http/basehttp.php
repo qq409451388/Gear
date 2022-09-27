@@ -44,7 +44,7 @@ abstract class BaseHTTP
         $request->setContentLenActual($httpRequestInfos->contentLengthActual);
         $request->setContentType($httpRequestInfos->contentType);
         $this->buildRequestArgs($requestBody, $args, $request);
-        $request->setRequestMethod($httpRequestInfos->requestMethod);
+        $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
         return $request;
     }
 

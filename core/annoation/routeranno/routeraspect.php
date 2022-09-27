@@ -1,6 +1,10 @@
 <?php
 class RouterAspect extends Aspect
 {
+    public function getHttpMethodLimit(){
+        return HttpMethod::get(str_replace("Mapping", "", $this->getAnnoName()));
+    }
+
     public function check(): bool
     {
         if(!$this->getAtClass()->isSubclassOf(BaseController::class)){
@@ -18,12 +22,15 @@ class RouterAspect extends Aspect
         return $hasValid;
     }
 
+    /**
+     * @var RouterAspect $dependSon
+     */
     public function adhere(): void
     {
         foreach($this->getDependList() as $dependSon){
             $path = trim($this->getValue(), "/") . "/" .trim($dependSon->getValue(), "/");
             if(!empty($path)){
-                EzRouter::get()->setMapping($path, $this->getAtClass()->getName(), $dependSon->getAtMethod()->getName());
+                EzRouter::get()->setMapping($path, $this->getAtClass()->getName(), $dependSon->getAtMethod()->getName(), $dependSon->getHttpMethodLimit());
             }
         }
     }

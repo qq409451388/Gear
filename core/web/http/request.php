@@ -46,6 +46,10 @@ class Request implements IRequest
         $this->requestMethod = $requestMethod;
     }
 
+    public function getRequestMethod(){
+        return $this->requestMethod;
+    }
+
     public function getPath():string{
         return $this->path;
     }
@@ -91,5 +95,9 @@ class Request implements IRequest
             $response = EzString::encodeJson($response);
         }
         return new Response(HttpStatus::OK(), $response);
+    }
+
+    public function getArgumentErrorResponse($content):IResponse{
+        return new Response(HttpStatus::BAD_REQUEST(), $content);
     }
 }

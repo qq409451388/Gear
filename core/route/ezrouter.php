@@ -10,12 +10,12 @@ class EzRouter
         return self::$ins;
     }
 
-    public function setMapping($path, $class, $func){
+    public function setMapping($path, $class, $func, $httpMethod = null){
         $path = strtolower($path);
         if(array_key_exists($path, $this->urlMap)){
            Logger::warn("EzRouter Has Setted Path:".$path.", From Obj:".$class."::".$func);
         }
-        $this->urlMap[$path] = new UrlMapping($class, $func);
+        $this->urlMap[$path] = new UrlMapping($class, $func, $httpMethod);
     }
 
     public function getMapping($path):IRouteMapping{

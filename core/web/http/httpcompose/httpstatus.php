@@ -21,6 +21,10 @@ class HttpStatus
         return new self(200, "OK");
     }
 
+    public static function BAD_REQUEST(){
+        return new self(400, "BAD_REQUEST");
+    }
+
     public static function NOT_FOUND(){
         return new self(404, "NOT_FOUND");
     }
