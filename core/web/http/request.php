@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * build for http
+ */
 class Request implements IRequest
 {
     //content-type
@@ -87,11 +91,13 @@ class Request implements IRequest
         return new Response(HttpStatus::INTERNAL_SERVER_ERROR(), $msg);
     }
 
-    public function getDynamicResponse(IRouteMapping $router): IResponse{
+    public function getDynamicResponse(IRouteMapping $router): IResponse {
         $response = $router->disPatch($this);
         if($response instanceof IResponse){
             return $response;
-        }else if (is_array($response) || is_object($response)){
+        }else if ( $response instanceof EzRpcResponse ) {
+            $response = $response->toJson();
+        } else if (is_array($response) || is_object($response)){
             $response = EzString::encodeJson($response);
         }
         return new Response(HttpStatus::OK(), $response);

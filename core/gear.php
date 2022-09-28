@@ -381,19 +381,4 @@ class Gear implements IDispatcher
             DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}");
         }
     }
-
-    public function invokeInterceptor():bool{
-        return true;
-    }
-
-    public function invokeMethod($item, Array $params):String{
-        $obj = BeanFinder::get()->pull(current($item));
-        if(null == $obj){
-            return EzRpcResponse::EMPTY_RESPONSE;
-        }
-        if(!$this->invokeInterceptor()){
-            return EzRpcResponse::EMPTY_RESPONSE;
-        }
-        return call_user_func_array([$obj,end($item)], $params)->toJson();
-    }
 }

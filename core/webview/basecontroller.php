@@ -23,7 +23,7 @@ class BaseController
      * @param $contentType HttpMimeType
      * @return IResponse
      */
-    protected function response(string $content, $contentType = HttpMimeType::MIME_TEXT):IResponse{
+    protected function response(string $content, $contentType = HttpMimeType::MIME_HTML):IResponse{
         return new Response(HttpStatus::OK(), $content, $contentType);
     }
 }
