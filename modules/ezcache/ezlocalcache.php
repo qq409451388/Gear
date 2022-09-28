@@ -76,31 +76,38 @@ class EzLocalCache implements IEzCache
         if(!$this->has($k)){
             return true;
         }
-        return time() > $this->_totalHash[$k][1];
+        return time() >= $this->_totalHash[$k][1];
     }
 
     public function exists(string $k): bool
     {
-        return $this->has($k);
+        return $this->has($k) && !$this->isExpire($k);
     }
 
     public function del(string $k): bool
     {
-        // TODO: Implement del() method.
+        unset($this->_totalHash[$k]);
+        return true;
     }
 
     public function keys(string $k): array
     {
-        // TODO: Implement keys() method.
+        return array_keys($this->_totalHash);
     }
 
     public function setNX(string $k, string $v, int $expire = 7200): bool
     {
-        // TODO: Implement setNX() method.
+        if($this->exists($k)){
+            return false;
+        }
+        return $this->set($k, $v, $expire);
     }
 
     public function setXX(string $k, string $v, int $expire = 7200): bool
     {
-        // TODO: Implement setXX() method.
+        if(!$this->exists($k)){
+            return false;
+        }
+        return $this->set($k, $v, $expire);
     }
 }
