@@ -31,15 +31,16 @@ class RunTimeProcessPoint
     private $returnValue;
 
     /**
-     * @var mixed 经过篡改的新值
+     * @var bool 是否跳过调用
      */
-    private $newReturn;
+    private $isSkip;
 
     public function __construct($c, $f, $a, $r){
         $this->className = $c;
         $this->functionName = $f;
         $this->args = $a;
         $this->returnValue = $r;
+        $this->isSkip = false;
     }
 
     /**
@@ -111,15 +112,7 @@ class RunTimeProcessPoint
      * @return void
      */
     public function tampering($newReturn){
-        $this->newReturn = $newReturn;
-    }
-
-    public function hasTampered(){
-        return !is_null($this->newReturn);
-    }
-
-    public function getNewValueTampered(){
-        return $this->newReturn;
+        $this->returnValue = $newReturn;
     }
 
     public function __toString(){
@@ -146,5 +139,21 @@ class RunTimeProcessPoint
     public function setClassInstance(ReflectionClass $classInstance): void
     {
         $this->classInstance = $classInstance;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkip(): bool
+    {
+        return $this->isSkip;
+    }
+
+    /**
+     * @param bool $isSkip
+     */
+    public function setIsSkip(bool $isSkip): void
+    {
+        $this->isSkip = $isSkip;
     }
 }

@@ -7,7 +7,7 @@
  * TARGET：指定注解可以放置的位置（默认: 所有）@see AnnoElementType
  * POLICY：指定注解的执行模式 @see AnnoPolicyEnum
  */
-interface Anno
+interface Anno extends EzComponent
 {
     /**
      * 将传入的字符串或map格式的数组赋值到注解对象中

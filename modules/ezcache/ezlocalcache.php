@@ -79,9 +79,9 @@ class EzLocalCache implements IEzCache
         return time() > $this->_totalHash[$k][1];
     }
 
-    public function exists(string $K): bool
+    public function exists(string $k): bool
     {
-        // TODO: Implement exists() method.
+        return $this->has($k);
     }
 
     public function del(string $k): bool

@@ -29,12 +29,16 @@ class DynamicProxy
         if($this->hasBefore($rpp->getFunctionName())){
             $this->callBefore($rpp);
         }
-        $return = call_user_func_array([$this->obj, $rpp->getFunctionName()], $rpp->getArgs());
+        if($rpp->isSkip()){
+            $return = $rpp->getReturnValue();
+        }else{
+            $return = call_user_func_array([$this->obj, $rpp->getFunctionName()], $rpp->getArgs());
+        }
         $rpp->setReturnValue($return);
         if($this->hasAfter($rpp->getFunctionName())){
             $this->callAfter($rpp);
         }
-        return $rpp->hasTampered() ? $rpp->getNewValueTampered() : $return;
+        return $rpp->getReturnValue();
     }
 
     private function hasBefore($funcName){

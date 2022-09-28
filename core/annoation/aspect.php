@@ -226,7 +226,7 @@ abstract class Aspect
             $dynamic = $object;
         }
 
-        $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
+        $dynamic->registeBefore($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
             /**
              * @var $this RunTimeAspect
              */

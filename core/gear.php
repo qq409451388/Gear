@@ -55,7 +55,6 @@ class Gear implements IDispatcher
                 $this->relationshipAnno2($classAnnoList, $propertyAnnoList, $reflection, $reflectionProperty, $annoList);
             }
         }
-
         /**
          * @var $annoItem Aspect
          */
@@ -372,6 +371,9 @@ class Gear implements IDispatcher
      */
     private function createObject($class){
         try {
+            if(is_subclass_of($class, EzComponent::class)){
+                return;
+            }
             BeanFinder::get()->save($class, new $class);
             $className = get_class(BeanFinder::get()->pull($class));
             Logger::console("[Gear]Create Bean {$className}");
