@@ -41,6 +41,10 @@ class DynamicProxy
         return $rpp->getReturnValue();
     }
 
+    public function getSourceObj(){
+        return $this->obj;
+    }
+
     private function hasBefore($funcName){
         return array_key_exists($funcName, $this->callBefore) && $this->callBefore[$funcName] instanceof Closure;
     }

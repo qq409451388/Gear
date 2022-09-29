@@ -21,6 +21,7 @@ class DiAspect extends Aspect implements BuildAspect
             $object =  BeanFinder::get()->pull($className);
             $this->getAtProperty()->setAccessible(true);
             $classObj = BeanFinder::get()->pull($this->getAtClass()->getName());
+            $classObj = $classObj instanceof DynamicProxy ? $classObj->getSourceObj() : $classObj;
             $this->getAtProperty()->setValue($classObj, $object);
             $this->getAtProperty()->setAccessible(false);
         }else{
