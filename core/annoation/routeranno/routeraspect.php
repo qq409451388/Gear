@@ -14,6 +14,7 @@ class RouterAspect extends Aspect implements BuildAspect
          * 存在一个有效就往下走
          */
         $hasValid = false;
+        DBC::assertTrue(!is_null($this->getDependList()), "[RouterAspect] DependList Is Empty !");
         foreach($this->getDependList() as $dependSon){
             if($dependSon->getAtMethod()->isPublic() && BaseController::class !== $dependSon->getAtMethod()->getDeclaringClass()->getName()){
                 $hasValid = true;

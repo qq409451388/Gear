@@ -33,7 +33,7 @@ class EzLocalCache implements IEzCache
         return $this->_totalHash;
     }
 
-    public function lpop(string $k): bool
+    public function lpop(string $k)
     {
         if(!$this->has($k)){
             return false;
@@ -41,8 +41,7 @@ class EzLocalCache implements IEzCache
             $this->remove($k);
             return false;
         }
-        array_pop($this->_totalHash[$k][0]);
-        return true;
+        return array_pop($this->_totalHash[$k][0]);
     }
 
     public function lpush(string $k, $v, int $expire = 7200): bool

@@ -4,16 +4,16 @@ abstract class Aspect
     //标识注解可以保留到什么时候{启动时、运行时}
     private $policy;
     private $annoName;
+
+    /**
+     * @var bool 是否需要配对使用
+     */
+    private $isCombination = false;
+
     /**
      * @var Anno
      */
     private $value;
-
-    /**
-     * @var
-     * @link AnnoElementType::$descMap
-     */
-    private $pos;
 
     /**
      * 注解被设置在哪个类上面
@@ -112,9 +112,9 @@ abstract class Aspect
     }
 
     /**
-     * @return ReflectionMethod
+     * @return ReflectionMethod|null
      */
-    public function getAtMethod():ReflectionMethod
+    public function getAtMethod()
     {
         return $this->atMethod;
     }
@@ -157,6 +157,9 @@ abstract class Aspect
     public function setDependConf($dependConf): void
     {
         $this->dependConf = $dependConf;
+        if(!is_null($dependConf)){
+            $this->dependList = [];
+        }
     }
 
     /**
@@ -165,6 +168,17 @@ abstract class Aspect
     public function getDependList()
     {
         return $this->dependList;
+    }
+
+    /**
+     * @param array<Aspect> $aspectList
+     * @return void
+     */
+    public function addDepend($aspectList){
+        if(empty($aspectList)){
+            return;
+        }
+        $this->dependList = array_merge($this->dependList, $aspectList);
     }
 
     /**
@@ -191,22 +205,6 @@ abstract class Aspect
         $this->atProperty = $atProperty;
     }
 
-    /**
-     * @return Anno
-     */
-    public function getAnnoObject()
-    {
-        return $this->annoObject;
-    }
-
-    /**
-     * @param mixed $annoObject
-     */
-    public function setAnnoObject($annoObject): void
-    {
-        $this->annoObject = $annoObject;
-    }
-
     public function check(): bool {
         return true;
     }
@@ -226,18 +224,50 @@ abstract class Aspect
             $dynamic = $object;
         }
 
-        $dynamic->registeBefore($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
-            /**
-             * @var $this RunTimeAspect
-             */
-            $this->before($rpp);
-        });
-        $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp){
-            /**
-             * @var $this RunTimeAspect
-             */
-            $this->after($rpp);
-        });
+        if(!is_null($this->getAtMethod())){
+            $dynamic->registeBefore($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
+                /**
+                 * @var $this RunTimeAspect
+                 */
+                $this->before($rpp);
+            });
+            $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp){
+                /**
+                 * @var $this RunTimeAspect
+                 */
+                $this->after($rpp);
+            });
+        }else{
+            $dynamic->registeBeforeAll(function(RunTimeProcessPoint $rpp) {
+                /**
+                 * @var $this RunTimeAspect
+                 */
+                $this->before($rpp);
+            });
+            $dynamic->registeAfterAll(function(RunTimeProcessPoint $rpp){
+                /**
+                 * @var $this RunTimeAspect
+                 */
+                $this->after($rpp);
+            });
+        }
+
         BeanFinder::get()->replace(strtolower($this->getAtClass()->getName()), $dynamic);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isCombination(): bool
+    {
+        return $this->isCombination;
+    }
+
+    /**
+     * @param bool $isCombination
+     */
+    public function setIsCombination(bool $isCombination): void
+    {
+        $this->isCombination = $isCombination;
     }
 }

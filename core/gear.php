@@ -37,6 +37,11 @@ class Gear implements IDispatcher
      * @throws ReflectionException
      */
     private function initAnno(){
+        $annoList = $this->fetchAnno();
+        $this->startAnno($annoList);
+    }
+
+    private function fetchAnno(){
         $annoList = [];
         foreach(BeanFinder::get()->getAll() as $obj){
             $reflection = new ReflectionClass($obj);
@@ -44,20 +49,61 @@ class Gear implements IDispatcher
             $reflectionProperties = $reflection->getProperties();
             $classDocComment = $reflection->getDocComment();
             $classAnnoList = $this->analyzeDocComment($classDocComment, AnnoElementType::TYPE_CLASS);
-            foreach($reflectionMethods as $reflectionMethod) {
-                $methodDocComment = $reflectionMethod->getDocComment();
-                $methodAnnoList = $this->analyzeDocComment($methodDocComment, AnnoElementType::TYPE_METHOD);
-                $this->relationshipAnno($classAnnoList, $methodAnnoList, $reflection, $reflectionMethod, $annoList);
+            $twichClassAnno = [];
+            foreach($classAnnoList as $classAnno){
+                $aspectClass = $this->buildPoorAspect($classAnno);
+                $aspectClass->setAtClass($reflection);
+                if(!is_null($aspectClass->getDependConf())){
+                    $twichClassAnno[] = $aspectClass;
+                }else{
+                    $annoList[] = $aspectClass;
+                }
             }
+            $annoMethodList = [];
+            foreach($reflectionMethods as $reflectionMethod){
+                $methodAnnoList = $this->analyzeDocComment($reflectionMethod->getDocComment(), AnnoElementType::TYPE_METHOD);
+                foreach($methodAnnoList as $methodAnno){
+                    $aspectMethod = $this->buildPoorAspect($methodAnno);
+                    $aspectMethod->setAtClass($reflection);
+                    $aspectMethod->setAtMethod($reflectionMethod);
+                    if($aspectMethod->isCombination()){
+                        $annoMethodList[$aspectMethod->getAnnoName()][] = $aspectMethod;
+                    }else{
+                        $annoList[] = $aspectMethod;
+                    }
+                }
+            }
+            $annoPropertyList = [];
             foreach($reflectionProperties as $reflectionProperty){
-                $propertyDocComment = $reflectionProperty->getDocComment();
-                $propertyAnnoList = $this->analyzeDocComment($propertyDocComment, AnnoElementType::TYPE_FIELD);
-                $this->relationshipAnno2($classAnnoList, $propertyAnnoList, $reflection, $reflectionProperty, $annoList);
+                $propertyAnnoList = $this->analyzeDocComment($reflectionProperty->getDocComment(), AnnoElementType::TYPE_FIELD);
+                foreach($propertyAnnoList as $propertyAnno){
+                    $aspectProperty = $this->buildPoorAspect($propertyAnno);
+                    $aspectProperty->setAtClass($reflection);
+                    $aspectProperty->setAtProperty($reflectionProperty);
+                    if($aspectProperty->isCombination()){
+                        $annoPropertyList[$aspectProperty->getAnnoName()][] = $aspectProperty;
+                    }else{
+                        $annoList[] = $aspectProperty;
+                    }
+                }
+            }
+            foreach($twichClassAnno as $classAnno){
+                $dependClassList = $classAnno->getDependConf();
+                foreach($dependClassList as $dependClass){
+                    $classAnno->addDepend($annoMethodList[$dependClass]??[]);
+                    $classAnno->addDepend($annoPropertyList[$dependClass]??[]);
+                }
+                $annoList[] = $classAnno;
             }
         }
-        /**
-         * @var $annoItem Aspect
-         */
+        return $annoList;
+    }
+
+    /**
+     * @param array<Aspect> $annoList
+     * @return void
+     */
+    private function startAnno($annoList){
         foreach($annoList as $annoItem){
             DBC::assertTrue($annoItem->check(), "[Gear] Init Anno Check Fail! AnnoInfo:".$annoItem->getAnnoName());
             if(AnnoPolicyEnum::POLICY_BUILD == $annoItem->getPolicy()){
@@ -71,9 +117,37 @@ class Gear implements IDispatcher
                 /**
                  * @var $annoItem Aspect|RunTimeAspect
                  */
-                 $annoItem->around();
+                $annoItem->around();
             }
         }
+    }
+
+    /**
+     * @param AnnoItem $annoItem
+     * @return Aspect
+     */
+    private function buildPoorAspect(AnnoItem $annoItem){
+        $k = $annoItem->annoName;
+        $v = $annoItem->getValue();
+        $annoReflection = new ReflectionClass($k);
+        $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
+        DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
+        $dependConf = $annoReflection->getConstant("DEPEND");
+        $aspectClass = $annoReflection->getConstant("ASPECT");
+        DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");
+        /**
+         * @var $aspect Aspect
+         */
+        $aspect = new $aspectClass;
+        $policy = $annoReflection->getConstant("POLICY");
+        DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
+        $aspect->setPolicy($policy);
+        $aspect->setAnnoName($k);
+        $aspect->setValue($v);
+        $aspect->setIsCombination($annoReflection->getConstant("ISCOMBINATION")??false);
+        $aspect->setTarget($target);
+        $aspect->setDependConf($dependConf);
+        return $aspect;
     }
 
     /**
@@ -149,213 +223,6 @@ class Gear implements IDispatcher
         return $result;
     }
 
-    /**
-     * @param $methodAnnoList array<AnnoItem> 某一个方法上的注解列表
-     * @throws ReflectionException
-     */
-    private function relationshipAnno($classAnnoList, $methodAnnoList, $reflectionClass, $reflectionMethod, &$annoList){
-        foreach($classAnnoList as $annoItem){
-            /**
-             * @var $annoItem AnnoItem
-             */
-            $k = $annoItem->annoName;
-            $v = $annoItem->getValue();
-            $annoReflection = new ReflectionClass($k);
-            $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
-            $dependConf = $annoReflection->getConstant("DEPEND");
-            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
-            $dependList = null;
-            $aspectClass = $annoReflection->getConstant("ASPECT");
-            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const ASPECT!");
-            if(!is_null($dependConf)){
-                if(empty($dependConf)){
-                    Logger::warn("[Gear] Anno {} Set DEPEND But Empty", $k);
-                    continue;
-                }
-                $dependListIntersect = [];
-                foreach($methodAnnoList as $methodAnnoKey => $methodAnno){
-                    if(in_array($methodAnno->annoName, $dependConf)){
-                        $dependListIntersect[] = $methodAnno;
-                        unset($methodAnnoList[$methodAnnoKey]);
-                    }
-                }
-                if(empty($dependListIntersect)){
-                    continue;
-                }
-                $dependList = [];
-                foreach($dependListIntersect as $dependItem){
-                    $dependItemName = $dependItem->annoName;
-                    $annoReflectionSon = new ReflectionClass($dependItemName);
-                    $dependConf = $annoReflectionSon->getConstant("DEPEND");
-                    $dependList = null;
-                    $aspectClass = $annoReflectionSon->getConstant("ASPECT");
-                    DBC::assertTrue($aspectClass, "[Gear] Anno $dependItemName Must Defined Const ASPECT!");
-                    $aspectSon = new $aspectClass;
-                    $policy = $annoReflectionSon->getConstant("POLICY");
-                    DBC::assertTrue($policy, "[Gear] Anno $dependItemName Must Defined Const POLICY!");
-                    $aspectSon->setPolicy($policy);
-                    $aspectSon->setAnnoName($dependItemName);
-                    $aspectSon->setValue($dependItem->getValue());
-                    $aspectSon->setAtClass($reflectionClass);
-                    $aspectSon->setAtMethod($reflectionMethod);
-                    $target = $annoReflectionSon->getConstant("TARGET")?:AnnoElementType::TYPE;
-                    DBC::assertEquals($target, $dependItem->at, "[Gear] Anno $dependItem->annoName Must Used At "
-                        .AnnoElementType::getDesc($target)."!");
-                    $aspectSon->setTarget($target);
-                    $aspectSon->setDependConf($dependConf);
-                    $aspectSon->setDependList($dependList);
-                    $dependList[] = $aspectSon;
-                }
-            }
-            /**
-             * @var $aspect Aspect
-             */
-            $aspect = new $aspectClass;
-            $policy = $annoReflection->getConstant("POLICY");
-            DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
-            $aspect->setPolicy($policy);
-            $aspect->setAnnoName($k);
-            $aspect->setValue($v);
-            $aspect->setAtClass($reflectionClass);
-            $aspect->setAtMethod($reflectionMethod);
-            $aspect->setTarget($target);
-            $aspect->setDependConf($dependConf);
-            $aspect->setDependList($dependList);
-            $annoList[] = $aspect;
-        }
-        foreach($methodAnnoList as $annoItem){
-            /**
-             * @var $annoItem AnnoItem
-             */
-            $k = $annoItem->annoName;
-            $v = $annoItem->getValue();
-            $annoReflection = new ReflectionClass($k);
-            $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
-            $dependConf = null;//$annoReflection->getConstant("DEPEND");
-            //DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
-            $dependList = null;
-            $aspectClass = $annoReflection->getConstant("ASPECT");
-            DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");
-            /**
-             * @var $aspect Aspect
-             */
-            $aspect = new $aspectClass;
-            $policy = $annoReflection->getConstant("POLICY");
-            DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
-            $aspect->setPolicy($policy);
-            $aspect->setAnnoName($k);
-            $aspect->setValue($v);
-            $aspect->setAtClass($reflectionClass);
-            $aspect->setAtMethod($reflectionMethod);
-            $aspect->setTarget($target);
-            $aspect->setDependConf($dependConf);
-            $aspect->setDependList($dependList);
-            $annoList[] = $aspect;
-        }
-    }
-
-    /**
-     * @param $propertyAnnoList array<AnnoItem> 某一个方法上的注解列表
-     * @throws ReflectionException
-     */
-    private function relationshipAnno2($classAnnoList, $propertyAnnoList, $reflectionClass, $reflectionProperty, &$annoList){
-        /*foreach($classAnnoList as $annoItem){
-            $k = $annoItem->annoName;
-            $v = $annoItem->value;
-            $annoReflection = new ReflectionClass($k);
-            $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($annoItem->at)."!");
-            $dependConf = $annoReflection->getConstant("DEPEND");
-            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const DEPEND!");
-            $dependList = null;
-            $aspectClass = $annoReflection->getConstant("ASPECT");
-            DBC::assertTrue($dependConf, "[Gear] Anno $k Must Defined Const ASPECT!");
-            if(!is_null($dependConf)){
-                if(empty($dependConf)){
-                    Logger::warn("[Gear] Anno {} Set DEPEND But Empty", $k);
-                    continue;
-                }
-                $dependListIntersect = [];
-                foreach($propertyAnnoList as $propertyAnnoKey => $perprotyAnno){
-                    if(in_array($perprotyAnno->annoName, $dependConf)){
-                        $dependListIntersect[] = $perprotyAnno;
-                        unset($propertyAnnoList[$propertyAnnoKey]);
-                    }
-                }
-                if(empty($dependListIntersect)){
-                    continue;
-                }
-                $dependList = [];
-                foreach($dependListIntersect as $dependItem){
-                    $dependItemName = $dependItem->annoName;
-                    $annoReflectionSon = new ReflectionClass($dependItemName);
-                    $dependConf = $annoReflectionSon->getConstant("DEPEND");
-                    $dependList = null;
-                    $aspectClass = $annoReflectionSon->getConstant("ASPECT");
-                    DBC::assertTrue($aspectClass, "[Gear] Anno $dependItemName Must Defined Const ASPECT!");
-                    $aspectSon = new $aspectClass;
-                    $policy = $annoReflectionSon->getConstant("POLICY");
-                    DBC::assertTrue($policy, "[Gear] Anno $dependItemName Must Defined Const POLICY!");
-                    $aspectSon->setPolicy($policy);
-                    $aspectSon->setAnnoName($dependItemName);
-                    $aspectSon->setValue($dependItem->value);
-                    $aspectSon->setAtClass($reflectionClass);
-                    $aspectSon->setAtProperty($reflectionProperty);
-                    $target = $annoReflectionSon->getConstant("TARGET")?:AnnoElementType::TYPE;
-                    DBC::assertEquals($target, $dependItem->at, "[Gear] Anno $dependItem->annoName Must Used At "
-                        .AnnoElementType::getDesc($dependItem->at)."!");
-                    $aspectSon->setTarget($target);
-                    $aspectSon->setDependConf($dependConf);
-                    $aspectSon->setDependList($dependList);
-                    $dependList[] = $aspectSon;
-                }
-            }
-            $aspect = new $aspectClass;
-            $policy = $annoReflection->getConstant("POLICY");
-            DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
-            $aspect->setPolicy($policy);
-            $aspect->setAnnoName($k);
-            $aspect->setValue($v);
-            $aspect->setAtClass($reflectionClass);
-            $aspect->setAtProperty($reflectionProperty);
-            $aspect->setTarget($target);
-            $aspect->setDependConf($dependConf);
-            $aspect->setDependList($dependList);
-            $annoList[] = $aspect;
-        }*/
-        foreach($propertyAnnoList as $annoItem){
-            /**
-             * @var $annoItem AnnoItem
-             */
-            $k = $annoItem->annoName;
-            $v = $annoItem->getValue();
-            $annoReflection = new ReflectionClass($k);
-            $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
-            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
-            $dependConf = null;
-            $dependList = null;
-            $aspectClass = $annoReflection->getConstant("ASPECT");
-            DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");
-            /**
-             * @var $aspect Aspect
-             */
-            $aspect = new $aspectClass;
-            $policy = $annoReflection->getConstant("POLICY");
-            DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
-            $aspect->setPolicy($policy);
-            $aspect->setAnnoName($k);
-            $aspect->setValue($v);
-            $aspect->setAtClass($reflectionClass);
-            $aspect->setAtProperty($reflectionProperty);
-            $aspect->setTarget($target);
-            $aspect->setDependConf($dependConf);
-            $aspect->setDependList($dependList);
-            $annoList[] = $aspect;
-        }
-    }
-
     public function judgePath(string $path):bool{
         return EzRouter::get()->judgePath($path);
     }
@@ -365,7 +232,7 @@ class Gear implements IDispatcher
     }
 
     /**
-     * create a obj if none in objects[]
+     * create an obj if none in objects[]
      * @param $class
      * @return void
      */
@@ -374,8 +241,7 @@ class Gear implements IDispatcher
             if(is_subclass_of($class, EzComponent::class)){
                 return;
             }
-            BeanFinder::get()->save($class, new $class);
-            $className = get_class(BeanFinder::get()->pull($class));
+            $className = BeanFinder::get()->import($class);
             Logger::console("[Gear]Create Bean {$className}");
         } catch (Exception $e) {
             DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}");

@@ -14,9 +14,9 @@ class DiAspect extends Aspect implements BuildAspect
     public function adhere(): void
     {
         if($this->getAnnoName() == Resource::class){
-            $className = $this->getValue();
+            $className = $this->getValue()->className;
             if(!BeanFinder::get()->has($className)){
-                BeanFinder::get()->save($this->getValue()->className, (new $className));
+                BeanFinder::get()->save($className, (new $className));
             }
             $object =  BeanFinder::get()->pull($className);
             $this->getAtProperty()->setAccessible(true);

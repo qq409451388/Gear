@@ -2,7 +2,8 @@
 class RequestController implements Anno
 {
     public const DEPEND = [
-        GetMapping::class
+        GetMapping::class,
+        PostMapping::class
     ];
 
     public const POLICY = AnnoPolicyEnum::POLICY_BUILD;

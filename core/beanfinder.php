@@ -38,4 +38,10 @@ class BeanFinder
     public function getAll(){
         return $this->objects;
     }
+
+    public function import($className){
+        $o = new $className;
+        $this->save($className, $o);
+        return get_class($o);
+    }
 }

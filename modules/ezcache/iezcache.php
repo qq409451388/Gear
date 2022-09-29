@@ -9,6 +9,6 @@ Interface IEzCache
     public function setNX(string $k, string $v, int $expire = 7200):bool;
     public function setXX(string $k, string $v, int $expire = 7200):bool;
     public function get(string $k);
-    public function lpop(string $k):bool;
+    public function lpop(string $k);
     public function lpush(string $k, $v, int $expire = 7200):bool;
 }

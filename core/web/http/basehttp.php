@@ -8,6 +8,9 @@ abstract class BaseHTTP
     protected $_root;
     protected $staticCache = [];
 
+    /**
+     * socket 读取8k
+     */
     protected const SOCKET_READ_LENGTH = 8192;
 
     private const MIME_TEXT = HttpMimeType::MIME_HTML;

@@ -50,20 +50,38 @@ class DynamicProxy
     }
 
     public function registeBefore($targetFunc, $anony){
-        $this->callBefore[$targetFunc] = $anony;
+        $this->callBefore[$targetFunc][] = $anony;
     }
 
     public function registeAfter($targetFunc, $anony){
-        $this->callAfter[$targetFunc] = $anony;
+        $this->callAfter[$targetFunc][] = $anony;
+    }
+
+    public function registeBeforeAll($anony){
+        $this->callBefore["*"][] = $anony;
+    }
+
+    public function registeAfterAll($anony){
+        $this->callAfter["*"][] = $anony;
     }
 
     private function callBefore(RunTimeProcessPoint $rpp){
-        $call = $this->callBefore[$rpp->getFunctionName()];
-        $call($rpp);
+        $calls = $this->callBefore[$rpp->getFunctionName()];
+        if($this->callBefore['*']){
+            $calls[] += $this->callBefore["*"];
+        }
+        foreach($calls as $call){
+            $call($rpp);
+        }
     }
 
     private function callAfter(RunTimeProcessPoint $rpp){
-        $call = $this->callAfter[$rpp->getFunctionName()];
-        $call($rpp);
+        $calls = $this->callAfter[$rpp->getFunctionName()];
+        if($this->callAfter['*'] instanceof Closure){
+            $calls[] = $this->callAfter["*"];
+        }
+        foreach ($calls as $call){
+            $call($rpp);
+        }
     }
 }
