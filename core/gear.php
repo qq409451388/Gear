@@ -29,6 +29,7 @@ class Gear implements IDispatcher
                 }
                 $defaultPath = $objName . '/' . $reflectionMethod->getName();
                 EzRouter::get()->setMapping($defaultPath, $objName, $reflectionMethod->getName());
+                Logger::console("[Gear] Mapping Path ".$defaultPath." To Controller ".$objName);
             }
         }
     }

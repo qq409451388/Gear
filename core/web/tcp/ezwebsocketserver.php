@@ -87,26 +87,25 @@ class EzWebSocketServer
             $except = NULL;
             $ready = @socket_select($readSockets, $writeSockets, $except, $this->timeOut);
             $startSucc = false !== $ready;
-            //$this->periodicityCheck();
+            $this->periodicityCheck();
             DBC::assertTrue($startSucc, "[EzTcpServer] Srart Fail!".socket_strerror(socket_last_error()));
             foreach ($readSockets as $readSocket) {
                 if($this->master == $readSocket) {
                     $this->newConnect();
                 } else {
                     $recv = @socket_recv($readSocket, $buffer, 8192, 0);
-                    var_dump($recv, $buffer);
                     if ($recv == 0) {
                         $this->disConnect($readSocket);
                         continue;
                     }
                     //接收并处理消息体
-                    //$this->receiveConnect($buffer, $readSocket, $funcAfterHandShake, $funcClientSend);
+                    $this->receiveConnect($buffer, $readSocket, $funcAfterHandShake, $funcClientSend);
                 }
             }
         }
     }
 
-   /* private function periodicityCheck(){
+    private function periodicityCheck(){
         if(time() % 10 != 0){
             return;
         }
@@ -129,7 +128,7 @@ class EzWebSocketServer
                 Logger::console("[EzWebSocketServer] Check Socket {$userKey} Active, {$this->checkActiveList[$userKey]} Times !");
             }
         }
-    }*/
+    }
 
     private function newConnect(){
         //新连接加入
@@ -155,6 +154,7 @@ class EzWebSocketServer
         } else {
             $clientMsg = $this->decode($buffer);
             $obj = EzCollection::decodeJson($clientMsg);
+            var_dump($clientMsg);
             if(!is_null($obj) && isset($obj['toMaster']) && $obj['toMaster']){
                 DBC::assertTrue(!empty($obj['userName']), "[EzWebSocketServer] Unknow UserName!");
                 if(method_exists($this, $obj['systemFunc'])){
