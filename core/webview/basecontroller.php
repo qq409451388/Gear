@@ -8,7 +8,7 @@ class BaseController implements EzBean
         return BeanFinder::get()->pull($obj);
     }
 
-    protected function show($response, $path):string{
+    protected function show($response, $path) {
         DBC::assertTrue(defined("TEMPLATE_DIR"), "[Controller] Must Define const TEMPLATE_DIR At Enter File!");
         extract($response);
         $template = strtolower(TEMPLATE_DIR.'/'.$path.'.php');
@@ -16,7 +16,7 @@ class BaseController implements EzBean
         include($template);
         $res = ob_get_contents();
         ob_end_clean();
-        return $res;
+        return $this->response($res);
     }
 
     /**

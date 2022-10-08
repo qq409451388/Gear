@@ -48,6 +48,7 @@ abstract class BaseHTTP
         $request->setContentType($httpRequestInfos->contentType);
         $this->buildRequestArgs($requestBody, $args, $request);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
+        $request->setIsInit(true);
         return $request;
     }
 

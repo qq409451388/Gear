@@ -17,6 +17,8 @@ class Request implements IRequest
     private $path;
     private $request = [];
     private $body = [];
+    //request build succ
+    private $isInit = false;
 
     public function setRequest($key, $value){
         $this->request[$key] = $value;
@@ -43,6 +45,7 @@ class Request implements IRequest
     }
 
     public function isEmpty():bool{
+        DBC::assertTrue($this->isInit(), "[Request] Exception Has Not Inited!");
         return empty($this->request);
     }
 
@@ -93,11 +96,11 @@ class Request implements IRequest
 
     public function getDynamicResponse(IRouteMapping $router): IResponse {
         $response = $router->disPatch($this);
-        if($response instanceof IResponse){
+        if ($response instanceof IResponse) {
             return $response;
-        }else if ( $response instanceof EzRpcResponse ) {
+        } elseif ($response instanceof EzRpcResponse) {
             $response = $response->toJson();
-        } else if (is_array($response) || is_object($response)){
+        } elseif (is_array($response) || is_object($response)) {
             $response = EzString::encodeJson($response);
         }
         return new Response(HttpStatus::OK(), $response);
@@ -105,5 +108,21 @@ class Request implements IRequest
 
     public function getArgumentErrorResponse($content):IResponse{
         return new Response(HttpStatus::BAD_REQUEST(), $content);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInit(): bool
+    {
+        return $this->isInit;
+    }
+
+    /**
+     * @param bool $isInit
+     */
+    public function setIsInit(bool $isInit): void
+    {
+        $this->isInit = $isInit;
     }
 }
