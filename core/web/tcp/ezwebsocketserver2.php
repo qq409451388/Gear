@@ -49,7 +49,6 @@ class EzWebSocketServer2
             $except = null;
             $ready = @socket_select($readSockets, $writeSockets, $except, $this->timeOut);
             $startSucc = false !== $ready;
-            var_dump($readSockets);
             DBC::assertTrue($startSucc, "[EzWebSocketServer] Srart Fail!".socket_strerror(socket_last_error()));
             foreach ($readSockets as $readSocket) {
                 if ($this->master == $readSocket) {
