@@ -23,12 +23,13 @@ class EzWebSocketServer2
 
     private const MASTER = "EZTCP_MASTER";
 
-    public function init($ip, $port){
+    public function init($ip, $port)
+    {
         $this->ip = $ip;
         $this->port = $port;
-        $this->master = socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
+        $this->master = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
-        socket_bind($this->master,$this->ip,$this->port);
+        socket_bind($this->master, $this->ip, $this->port);
         socket_listen($this->master);
         $errCode = socket_last_error();
         DBC::assertTrue(0 == $errCode, "[EzWebSocketServer]init fail! ".socket_strerror($errCode));
@@ -39,18 +40,19 @@ class EzWebSocketServer2
     /**
      * @param Closure $funcClientSend 回调函数，接收客户端msg并处理
      */
-    public function startHttp($funcClientSend){
+    public function startHttp($funcClientSend)
+    {
         Logger::console("Start Http Server Success! http://".$this->ip.":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;
-            $writeSockets = NULL;
-            $except = NULL;
+            $writeSockets = null;
+            $except = null;
             $ready = @socket_select($readSockets, $writeSockets, $except, $this->timeOut);
             $startSucc = false !== $ready;
             var_dump($readSockets);
             DBC::assertTrue($startSucc, "[EzWebSocketServer] Srart Fail!".socket_strerror(socket_last_error()));
             foreach ($readSockets as $readSocket) {
-                if($this->master == $readSocket) {
+                if ($this->master == $readSocket) {
                     $this->newConnect();
                 } else {
                     $recv = @socket_recv($readSocket, $buffer, 8192, 0);
@@ -65,20 +67,23 @@ class EzWebSocketServer2
         }
     }
 
-    private function addConnectPool($clientSocket, $alias){
+    private function addConnectPool($clientSocket, $alias)
+    {
         DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         $this->connectPool[$alias] = $clientSocket;
-        if(self::MASTER != $alias){
+        if (self::MASTER != $alias) {
             socket_set_nonblock($clientSocket);
             Logger::console($clientSocket." CONNECTED!");
         }
     }
 
-    private function hasConnect($alias){
+    private function hasConnect($alias)
+    {
         return isset($this->connectPool[$alias]);
     }
 
-    private function newConnect(){
+    private function newConnect()
+    {
         //新连接加入
         $client = socket_accept($this->master);
         if ($client < 0) {
@@ -93,13 +98,14 @@ class EzWebSocketServer2
         $this->addConnectPool($client, (string)$client);
     }
 
-    private function decode($buffer) {
+    private function decode($buffer)
+    {
         $decoded = null;
         $len = ord($buffer[1]) & 127;
         if ($len === 126) {
             $masks = substr($buffer, 4, 4);
             $data = substr($buffer, 8);
-        } else if ($len === 127) {
+        } elseif ($len === 127) {
             $masks = substr($buffer, 10, 4);
             $data = substr($buffer, 14);
         } else {
@@ -112,8 +118,9 @@ class EzWebSocketServer2
         return $decoded;
     }
 
-    private function disConnect($clientSocket){
-        if($this->master == $clientSocket){
+    private function disConnect($clientSocket)
+    {
+        if ($this->master == $clientSocket) {
             return;
         }
         $clientKey = array_search($clientSocket, $this->connectPool);
@@ -122,7 +129,8 @@ class EzWebSocketServer2
         unset($this->connectPool[$clientKey]);
     }
 
-    private function receiveConnect($buffer, $readSocket, $funcClientSend){
+    private function receiveConnect($buffer, $readSocket, $funcClientSend)
+    {
         $content = $funcClientSend($buffer);
         socket_write($readSocket, $content, strlen($content));
         $this->disConnect($readSocket);
