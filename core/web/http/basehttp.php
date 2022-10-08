@@ -87,17 +87,12 @@ abstract class BaseHTTP
                 $requestName = null;
                 $isEmptyLine = false;
                 foreach($requestBodyArrInit as $requestBodyLine){
-                    /*if(EzString::containString($requestBodyLine, $requestSource->contentType->boundary) || empty($requestBodyLine)){
-                        continue;
-                    }*/
-                    if(EzString::containString($requestBodyLine, "Content-Disposition")){
-                        var_dump($requestBodyLine);
+                    if (EzString::containString($requestBodyLine, "Content-Disposition")) {
                         preg_match('/Content-Disposition: (?<contentType>\S+);.*/', $requestBodyLine, $matches);
                         $flag = $matches['contentType'];
                         preg_match('/(.*)name="(?<requestName>(.*)])";(.*)/', $requestBodyLine, $matches);
                         $requestName = $matches['requestName'];
-                        var_dump($flag, $requestName);die;
-                    }else if(!empty($flag) && !empty($requestName) && $isEmptyLine){
+                    } elseif (!empty($flag) && !empty($requestName) && $isEmptyLine) {
                         $requestBodyArr[$requestName] = $this->buildHttpRequest($flag, $requestBodyLine);
                         $flag = null;
                         $requestName = null;
