@@ -1,5 +1,5 @@
 <?php
-class BaseController
+class BaseController implements EzBean
 {
     public function __get($obj){
         if(!BeanFinder::get()->has($obj)){

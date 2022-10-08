@@ -1,5 +1,5 @@
 <?php
-abstract class BaseDAO
+abstract class BaseDAO implements EzBean
 {
     abstract public function getEntity();
     abstract public function getTable();
