@@ -105,7 +105,8 @@ abstract class BaseHTTP
                 $requestBodyArr = [];
                 break;
         }
-        DBC::assertTrue(!is_null($requestBodyArr), "[Http] BuildRequestBody Fail! Params:".EzString::encodeJson(func_get_args()));
+        DBC::assertTrue(!is_null($requestBodyArr),
+            "[Http] BuildRequestBody Fail! Params:" .EzString::encodeJson(func_get_args()));
         return $requestBodyArr;
     }
 
@@ -207,7 +208,7 @@ abstract class BaseHTTP
      * @return string
      **/
     private function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = self::MIME_TEXT):String{
-        return (new EzHeader($httpStatus, $content, $contentType))->get();
+        return (new EzHeader($httpStatus, $content, $contentType))->toString();
     }
 
     public function getResponse(Request $request):string{

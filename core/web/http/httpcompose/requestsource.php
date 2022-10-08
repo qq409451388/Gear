@@ -17,5 +17,8 @@ class RequestSource
     //when post
     public $contentLength;
     public $contentLengthActual;
+    /**
+     * @var HttpContentType
+     */
     public $contentType;
 }

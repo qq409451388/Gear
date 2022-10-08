@@ -29,7 +29,7 @@ class EzHeader
         return $this->contentType.';'.$this->charset;
     }
 
-    public function get():String{
+    public function toString():string{
         $header = "HTTP/1.1 {$this->getCode()} {$this->getStatus()}\r\n";
         $header .= "Server: Gear2\r\n";
         $header .= "Date: ".gmdate('D, d M Y H:i:s T')."\r\n";
