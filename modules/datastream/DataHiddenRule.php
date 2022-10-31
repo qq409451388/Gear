@@ -1,5 +1,5 @@
 <?php
-class DataHiddenRule
+class DataHiddenRule extends AbstractDataSpliterRule
 {
     public $matchMode;
     public $matchColumn;
@@ -16,6 +16,11 @@ class DataHiddenRule
      * 匹配规则-根据split字段正向匹配, For Split_Copy
      */
     const MATCH_MODE_SPLIT = "MATCH_SPLIT_RULE";
+
+    public function __construct() {
+        $this->commandSort = 1;
+        $this->command = "doCovered";
+    }
 
     public function addHiddenColumn($column, $coveredTo = "*") {
         $this->hiddenColumnList[] = [
@@ -36,11 +41,11 @@ class DataHiddenRule
             $matchFunction = "coveredMatchModeCopy";
         }
         if(is_null($matchFunction) || !method_exists($this, $matchFunction)){
-            return false;
+            return;
         }
         if(DataHiddenRule::MATCH_MODE_ALL !== $this->matchMode
             && is_null($this->matchValue)){
-            return false;
+            return;
         }
 
         $hiddenColumnList = $this->getHiddenColumnList();
@@ -52,7 +57,6 @@ class DataHiddenRule
             }
         }
         $this->matchValue = [];
-        return true;
     }
 
     /**
@@ -62,6 +66,9 @@ class DataHiddenRule
         return true;
     }
 
+    /**
+     * @return bool
+     */
     private function coveredMatchModeCopy($data, DataHiddenRule $rule) {
         if(count($rule->matchColumn) > count($rule->matchValue)){
             return false;
