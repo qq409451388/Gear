@@ -1,9 +1,24 @@
 <?php
 class EzHeader
 {
+    /**
+     * @var HttpStatus
+     */
     private $httpStatus;
+
+    /**
+     * @var string
+     */
     private $content;
+
+    /**
+     * @var string
+     */
     private $contentType;
+
+    /**
+     * @var string
+     */
     private $charset;
 
     public function __construct(HttpStatus $httpStatus, $content, $contentType = "text/html;", $charset = "charset=utf-8;"){

@@ -11,8 +11,7 @@ class EzDataUtils
     }
 
     /**
-     * @param $obj
-     * @return false is index array
+     * @return bool is index array
      */
     public static function isArray($obj){
         if(!is_array($obj)){
@@ -29,13 +28,13 @@ class EzDataUtils
     }
 
     public static function toString($obj){
-        if(is_string($obj) || is_numeric($obj)){
+        if (is_string($obj) || is_numeric($obj)) {
             return (string) $obj;
-        }else if(is_array($obj) || is_object($obj)){
+        } elseif (is_array($obj) || is_object($obj)) {
             return json_encode($obj);
-        }else if(is_resource($obj)){
+        } elseif (is_resource($obj)) {
             return "[Resource]#".((int)$obj);
-        }else{
+        } else {
             return "null";
         }
     }

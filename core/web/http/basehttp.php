@@ -26,7 +26,7 @@ abstract class BaseHTTP
         $this->dispatcher = $dispatcher;
     }
 
-    public function init(string $host, $port, $root = ''){
+    public function init(string $host, $port, $root = './'){
         $this->host = $host;
         $this->port = $port;
         $this->_root = $root;

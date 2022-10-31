@@ -1,6 +1,9 @@
 <?php
 class Response implements IResponse
 {
+    /**
+     * @var HttpStatus
+     */
     private $httpStatus;
     private $content;
     private $contentType;
@@ -32,12 +35,12 @@ class Response implements IResponse
         if(isset($this->contentType)){
             return $this->contentType;
         }
-        if($this->content instanceof EzRpcResponse) {
+        if ($this->content instanceof EzRpcResponse) {
             $this->content = $this->content->toJson();
             return HttpContentType::H_JSON;
-        }else if(null !== json_decode($this->content, true)){
+        } elseif (null !== json_decode($this->content, true)) {
             return HttpContentType::H_JSON;
-        }else{
+        } else {
             return HttpContentType::H_HTML;
         }
     }
