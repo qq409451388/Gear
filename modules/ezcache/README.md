@@ -1,5 +1,5 @@
-### 3.3 Redis操作类 EzRedis
-> PHP使用redis需要安装redis拓展，EzRedis通过PHP自带的stream操作建立连接，符合框架开箱即用的设计初衷 <br/>
+### Redis操作类 EzRedis
+> PHP使用redis需要安装redis拓展，EzRedis通过PHP自带的stream操作建立连接，符合Gear框架开箱即用的设计初衷 <br/>
 > 如果需要更高的性能，仍推荐使用PHP拓展Redis类 <br/>
 > EzRedis暂时支持单机、集群两种模式，如果是集群模式需要配置/gear/config/rediscluster.json <br>
 > 键为集群名（clusterName），server对应集群服务列表，auth为密码，可以为空
@@ -26,7 +26,7 @@
     $ezRedis->keys($pattern):array;
 ```
 
-#### 3.3.1 连接redis
+#### 1 连接redis
 ```php
     $ezRedis = new EzRedis();
     //1. 单机模式
@@ -35,7 +35,7 @@
     $ezRedis->connectCluster("default");
 ```
 
-#### 3.3.2 string操作
+#### 2 string操作
 ```php
     $ezRedis = new EzRedis();
     $ezRedis->connectCluster("default");

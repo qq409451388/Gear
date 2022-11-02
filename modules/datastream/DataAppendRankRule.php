@@ -64,4 +64,12 @@ class DataAppendRankRule extends AbstractDataAppendRule
         $this->isDataSorted = $isDataSorted;
     }
 
+    public function setAsc(){
+        $this->appendMode = DataAppendEnum::MODE_SORT_ASC;
+    }
+
+    public function setDesc(){
+        $this->appendMode = DataAppendEnum::MODE_SORT_DESC;
+    }
+
 }

@@ -247,10 +247,9 @@ class DataSpliter
             }
             $sort = DataAppendEnum::MODE_SORT_ASC == $rule->getAppendMode() ? SORT_ASC : SORT_DESC;
             if(!$rule->isDataSorted()){
-                $data = $this->data;
-                array_multisort(array_column($data, $rule->getSortColumn()), $sort, $data);
+                array_multisort(array_column($this->data, $rule->getSortColumn()), $sort, $this->data);
             }
-            foreach($data as $k => &$dataItem){
+            foreach($this->data as $k => &$dataItem){
                 $dataItem[$rule->getNewColumn()] = $k+1;
             }
         }
