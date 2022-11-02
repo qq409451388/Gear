@@ -791,9 +791,9 @@ Array
 #### END 根据场景随意搭配函数调用顺序，更多骚操作等待发掘
 ```php
 DataSpliter::stream($data)
-->split($rule)
-->split($rule2)
-->covered($rule3)
-->appendColumn($rule4)
-->collect();
+    ->split($rule)
+    ->split($rule2)
+    ->covered($rule3)
+    ->appendColumn($rule4)
+    ->collect();
 ```
