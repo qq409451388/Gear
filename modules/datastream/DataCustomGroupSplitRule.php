@@ -2,17 +2,16 @@
 /**
  * 将数据源根据指定自定义函数进行分组-切分成多个DataSplit对象
  */
-class DataCustomGroupSplitRule extends DataGroupSplitRule
+class DataCustomGroupSplitRule extends AbstractGroupSplitRule
 {
     /**
-     * @var Closure | null 自定义函数
+     * @var Closure|null 自定义函数
+     * @example function(array $dataItem){return ($dataItem['time'] > strtotime("2022-01-01")) ? "2022年之后" : "2022年以前";}
+     * @template function($dataItem){}
      */
     private $customFunction = null;
 
-    public function __construct(){
-        parent::__construct();
-        $this->groupMode = self::MODEL_CUSTOM;
-    }
+    private $groupMode = DataGroupSplitEnum::MODE_CUSTOM;
 
     /**
      * 自定义分组逻辑
@@ -25,18 +24,15 @@ class DataCustomGroupSplitRule extends DataGroupSplitRule
         $this->customFunction = $customFunction;
     }
 
-    public function calc($data, &$tempData) {
-        $func = $this->customFunction;
-        if(is_null($func)){
-            return false;
-        }
-        foreach($data as $item) {
-            $column = $func($item);
-            if(!isset($tempData[$column])) {
-                $tempData[$column] = [];
-            }
-            $tempData[$column][] = $item;
-        }
-        return true;
+    public function getComporeFunction() {
+        return $this->customFunction;
+    }
+
+    /**
+     * @return string
+     */
+    public function getGroupMode(): string
+    {
+        return $this->groupMode;
     }
 }

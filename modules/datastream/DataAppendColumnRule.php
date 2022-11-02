@@ -4,18 +4,39 @@ class DataAppendColumnRule extends AbstractDataAppendRule
     /**
      * @var array<string, mixed>
      */
-    public $dataLine;
+    private $dataLine;
+
+    /**
+     * @var Closure|null $customFunction
+     */
+    private $customFunction;
 
     public function __construct() {
         parent::__construct();
-        $this->appendMode = self::MODE_DATALINE;
+        $this->appendMode = DataAppendEnum::MODE_DATALINE;
     }
 
-    public function calc(&$data) {
-        if(self::MODE_DATALINE == $this->appendMode){
-            foreach($data as &$dataItem) {
-                $dataItem+=$this->dataLine;
-            }
-        }
+    public function getDataLine() {
+        return $this->dataLine;
+    }
+
+    public function setDataLine($dataLine) {
+        $this->dataLine = $dataLine;
+    }
+
+    /**
+     * @return Closure|null
+     */
+    public function getCustomFunction(): ?Closure
+    {
+        return $this->customFunction;
+    }
+
+    /**
+     * @param Closure|null $customFunction
+     */
+    public function setCustomFunction(?Closure $customFunction): void
+    {
+        $this->customFunction = $customFunction;
     }
 }

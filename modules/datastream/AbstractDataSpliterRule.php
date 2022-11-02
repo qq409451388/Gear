@@ -10,9 +10,17 @@ class AbstractDataSpliterRule
      */
     protected $commandSort;
 
-    public $command;
+    protected $command;
 
     public function getSort(){
         return $this->commandSort;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getCommand()
+    {
+        return $this->command;
     }
 }

@@ -4,28 +4,64 @@ class DataAppendRankRule extends AbstractDataAppendRule
     /**
      * @var string 排序字段
      */
-    public $sortColumn;
+    private $sortColumn;
 
     /**
      * @var string 新字段名称
      */
-    public $newColumn;
+    private $newColumn;
 
     /**
      * @var bool 是否依据{sortColumn}排序过
      */
-    public $isDataSorted = false;
+    private $isDataSorted = false;
 
-    public function calc(&$data) {
-        if(empty($this->sortColumn)){
-            return;
-        }
-        $sort = self::MODE_SORT_ASC == $this->appendMode ? SORT_ASC : SORT_DESC;
-        if(!$this->isDataSorted){
-            array_multisort(array_column($data, $this->sortColumn), $sort, $data);
-        }
-        foreach($data as $k => &$dataItem){
-            $dataItem[$this->newColumn] = $k+1;
-        }
+    /**
+     * @return string
+     */
+    public function getSortColumn(): string
+    {
+        return $this->sortColumn;
     }
+
+    /**
+     * @param string $sortColumn
+     */
+    public function setSortColumn(string $sortColumn): void
+    {
+        $this->sortColumn = $sortColumn;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNewColumn(): string
+    {
+        return $this->newColumn;
+    }
+
+    /**
+     * @param string $newColumn
+     */
+    public function setNewColumn(string $newColumn): void
+    {
+        $this->newColumn = $newColumn;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDataSorted(): bool
+    {
+        return $this->isDataSorted;
+    }
+
+    /**
+     * @param bool $isDataSorted
+     */
+    public function setIsDataSorted(bool $isDataSorted): void
+    {
+        $this->isDataSorted = $isDataSorted;
+    }
+
 }
