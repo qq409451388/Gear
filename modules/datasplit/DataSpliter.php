@@ -300,4 +300,12 @@ class DataSpliter
         return $result;
     }
 
+    public function count(){
+
+    }
+
+    public function sum(){
+
+    }
+
 }

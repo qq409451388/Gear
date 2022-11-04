@@ -1,5 +1,15 @@
 <?php
 class EzEncoder{
+    public static function md5($obj){
+        if(is_null($obj)){
+            return null;
+        }
+        if(is_array($obj) || is_object($obj)){
+            asort($obj);
+            return md5(EzString::encodeJson($obj));
+        }
+        return md5($obj);
+    }
 
     public static function imgBase64Encode($img = '', $imgHtmlCode = true)
     {
