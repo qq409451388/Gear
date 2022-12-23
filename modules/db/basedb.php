@@ -55,7 +55,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
                 $setString .= '`'.$k.'`='.$v.",";
             }
         }
-
+        $setString = trim($setString, ",");
         $sql = "update $table set ".$setString." where ".$singleString;
         return $this->query($sql, []);
     }

@@ -1,12 +1,55 @@
 <?php
-abstract class BaseDO
+abstract class EntityBase
 {
     public $id;
-    public $createTime;
-    public $updateTime;
+    private $isDeleted = false;
+    private $summary;
 
-    public function toArray(){
-        return get_object_vars($this);
+    public function __construct() {
+        $this->summary = '';
+    }
+
+    abstract public function getTable();
+
+    public function getId() {
+        return $this->id;
+    }
+
+    public function calcSummary() {
+        return md5(serialize(get_object_vars($this)));
+    }
+
+    public function getSummary() {
+        return $this->summary;
+    }
+
+    public function createSummary() {
+        $this->summary = $this->calcSummary();
+    }
+
+    public function delete() {
+        $this->isDeleted = true;
+    }
+
+    public function isDeleted() {
+        return $this->isDeleted;
+    }
+
+    public function toArray():array {
+        $data = get_object_vars($this);
+        unset($data['summary']);
+        unset($data['isDeleted']);
+        return $data;
+    }
+
+    public function toDbArray():array {
+        $res = [];
+        $arr = $this->toArray();
+        foreach($arr as $k => $v) {
+            $newKey = $this->transferToColumn($k);
+            $res[$newKey] = $v;
+        }
+        return $res;
     }
 
     public static function decodeJson(string $json, $defaultValue = null){
@@ -33,7 +76,21 @@ abstract class BaseDO
         return lcfirst(implode("", $keyShards));
     }
 
-    public static function fillDTO($jsonArray, $object){
+    private function transferToColumn($k){
+        $newKey = "";
+        for($i=0;$i<strlen($k);$i++) {
+            $ord = ord($k[$i]);
+            //65 - 90
+            if(64 < $ord && $ord < 91){
+                $newKey .= "_".chr($ord+32);
+            } else {
+                $newKey .= $k[$i];
+            }
+        }
+        return $newKey;
+    }
+
+    public static function fillDTO(array $jsonArray, EntityBase $object){
         foreach ($jsonArray as $k => $v){
             $k = self::transferToObj($k);
             if(isset($object->dtoKeys()[$k])){
@@ -52,6 +109,7 @@ abstract class BaseDO
                 $object->$k = $v;
             }
         }
+        $object->createSummary();
     }
 
     /**
