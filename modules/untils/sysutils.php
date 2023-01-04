@@ -20,4 +20,49 @@ class SysUtils
             return round($byte/1073741824, $precision)."GB";
         }
     }
+
+    public static function scanDir($path, $deep = 1) {
+        $result = [];
+        if ($deep == 0) {
+            return $result;
+        }
+        $objs = @scandir($path);
+        if (empty($objs)) {
+            return $result;
+        }
+        foreach ($objs as $obj) {
+            $tmpPath = $path."/".$obj;
+            if (is_dir($tmpPath)) {
+                if ("." == $obj || ".." == $obj) {
+                    continue;
+                }
+                $result[] = $tmpPath;
+                $result = array_merge($result, self::scanDir($tmpPath, $deep - 1));
+            }
+        }
+        return $result;
+    }
+
+    public static function scanFile($path, $deep = 1) {
+        $result = [];
+        if ($deep == 0) {
+            return $result;
+        }
+        $objs = @scandir($path);
+        if (empty($objs)) {
+            return $result;
+        }
+        foreach ($objs as $obj) {
+            $tmpPath = $path."/".$obj;
+            if (is_dir($tmpPath)) {
+                if ("." == $obj || ".." == $obj) {
+                    continue;
+                }
+                $result = array_merge($result, self::scanFile($tmpPath, $deep - 1));
+            } else if (is_file($tmpPath)) {
+                $result[] = $tmpPath;
+            }
+        }
+        return $result;
+    }
 }
