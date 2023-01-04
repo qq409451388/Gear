@@ -47,41 +47,46 @@ class DataBaseUtils
                     $newName .= $n;
                 }
             }
-            var_dump($newName);die;
-            return self::convertName($name, $type);
+            if (self::NAMED_UNDERSCORE == $type || $newName == $name) {
+                return $newName;
+            }
+            $newName = strtolower($newName);
+            return self::convertName($newName, $type);
         }
         return $name;
     }
 
     public static function generateClass($database, $tableName, $type = self::NAMED_SOURCE, $targetClassName = "") {
-        if (empty($targetClassName)) {
-            if (false === strstr("_", $tableName)) {
-                $targetClassName = $tableName;
-            } else {
-
-            }
-            $targetClassName = self::convertName($tableName, self::NAMED_CAMELCASE);
-        }
+        $targetClassName = empty($targetClassName) ? self::convertName($tableName, self::NAMED_CAMELCASE) : $targetClassName;
         $information = DB::get($database)
             ->query("select * from information_schema.`COLUMNS` where TABLE_SCHEMA = '$database' and TABLE_NAME = '$tableName'");
 
         $hash = [
             "varchar" => "string",
             "tinyint" => "integer",
+            "smallint" => "integer",
+            "mediumint" => "integer",
             "int" => "integer",
             "bigint" => "integer",
+            "float" => "float",
             "decimal" => "string",
-            "datetime" => "string"
+            "datetime" => "string",
+            "mediumtext" => "string",
+            "text" => "string",
+            "timestamp" => "string",
+            "date" => "string",
         ];
         $str = "class $targetClassName {".PHP_EOL;
         foreach ($information as $item) {
+            $column = self::convertName($item['COLUMN_NAME'], $type);
+
             $str .= "    /**".PHP_EOL;
             if (!empty($item['COLUMN_COMMENT'])) {
                 $str .= "     * ".$item['COLUMN_COMMENT'].PHP_EOL;
             }
-            $str .= "     * @var ".$hash[$item['DATA_TYPE']]." $".$item['COLUMN_NAME'].PHP_EOL;
+            $str .= "     * @var ".$hash[$item['DATA_TYPE']]." $".$column.PHP_EOL;
             $str .= "     */".PHP_EOL;
-            $str .= "    public $".self::convertName($item['COLUMN_NAME'], $type).";".PHP_EOL.PHP_EOL;
+            $str .= "    public $".$column.";".PHP_EOL.PHP_EOL;
         }
         $str .= "}";
 
@@ -89,11 +94,38 @@ class DataBaseUtils
     }
 
     public static function generateClassFile($database, $tableName, $targetClassPath, $targetClassName = "") {
-        $str = self::generateClass($database, $tableName, $targetClassName);
+        $str = self::generateClass($database, $tableName, self::NAMED_LOW_CAMELCASE, $targetClassName);
         if (!is_dir($targetClassPath)) {
             mkdir($targetClassPath);
         }
         file_put_contents($targetClassPath."/$targetClassName.php", "<?php".PHP_EOL.$str);
         return $targetClassPath;
+    }
+
+    public static function generateClasses($database, $classType, $propertyType, $funcTableFilter = null) {
+        $tableNameList = DB::get($database)->queryColumn("show tables;", [], "Tables_in_".$database);
+        if (!is_null($funcTableFilter)) {
+            $tableNameList = $funcTableFilter($tableNameList);
+        }
+        $result = [];
+        foreach ($tableNameList as $tableName) {
+            $result[$tableName] = self::generateClass($database, $tableName, $propertyType, self::convertName($tableName, $classType));
+        }
+        return $result;
+    }
+
+    public static function generateClassFiles($database, $targetClassPath, $classType = self::NAMED_CAMELCASE,
+                                              $propertyType = self::NAMED_LOW_CAMELCASE, $funcTableFilter = null) {
+        $classes = self::generateClasses($database, $classType, $propertyType, $funcTableFilter);
+        if (!is_dir($targetClassPath)) {
+            mkdir($targetClassPath);
+        }
+        $result = [];
+        foreach ($classes as $tableName => $class) {
+            $targetClassName = self::convertName($tableName, $classType);
+            file_put_contents($targetClassPath."/$targetClassName.php", "<?php".PHP_EOL.$class);
+            $result[] = $targetClassName;
+        }
+        return $result;
     }
 }
