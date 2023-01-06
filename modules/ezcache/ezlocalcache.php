@@ -1,9 +1,10 @@
 <?php
-class EzLocalCache extends EzCache
+class EzLocalCache// extends EzCache
 {
+    protected static $ins;
     /**
      * 数据空间
-     * @var array
+     * @var array<string, EzLocalCacheObject>
      */
     private $_concurrentHashMap = [];
 
@@ -11,70 +12,14 @@ class EzLocalCache extends EzCache
 
     private $transactionSwitch = false;
 
-    public function startTransaction(): void
-    {
-
-    }
-
-    public function set(string $k, string $v, int $expire = 7200): bool
-    {
-        if($this->has($k)){
-            return false;
-        }
-        $this->_concurrentHashMap[$k] = [$v, time()+$expire];
-        return true;
-    }
-
-    public function setOrReplace(string $k, string $v, int $expire = 7200): bool
-    {
-        $this->_concurrentHashMap[$k] = [$v, time()+$expire];
-        return true;
-    }
-
-    public function get(string $k): string
-    {
-        if (!$this->has($k) || ($this->isExpire($k) && $this->remove($k))) {
-            return "";
-        }
-        return $this->_concurrentHashMap[$k][0];
-    }
-
-    public function getAll(){
-        return $this->_concurrentHashMap;
-    }
-
-    public function lPop(string $k): string
-    {
-        if (!$this->has($k) || ($this->isExpire($k) && $this->remove($k))) {
-            return false;
-        }
-        return array_pop($this->_concurrentHashMap[$k][0]);
-    }
-
-    public function lPush(string $k, $v): int
-    {
-        if(!$this->has($k)){
-            $this->_concurrentHashMap[$k] = [[]];;
-        }elseif($this->isExpire($k)){
-            $this->remove($k);
-            return false;
-        }
-        array_push($this->_concurrentHashMap[$k][0], $v);
-        return true;
-    }
-
-    private function remove($k)
-    {
-        if(!$this->has($k)){
-            return false;
-        }
-        unset($this->_concurrentHashMap[$k]);
-        return true;
-    }
-
-    private function has($k)
+    private function has(string $k)
     {
         return isset($this->_concurrentHashMap[$k]);
+    }
+
+    private function fetch(string $k): EzLocalCacheObject
+    {
+        return $this->_concurrentHashMap[$k];
     }
 
     private function isExpire($k)
@@ -82,12 +27,24 @@ class EzLocalCache extends EzCache
         if(!$this->has($k)){
             return true;
         }
-        return time() >= $this->_concurrentHashMap[$k][1];
+        return $this->_concurrentHashMap[$k]->isExpire();
     }
 
+    private function initEmptyList(string $k){
+        $this->_concurrentHashMap[$k] = EzLocalCacheObject::create([], null, EzLocalCacheObject::T_LIST);
+    }
+
+    /**
+     * 存在 或 过期（并删除）
+     * @param string $k
+     * @return bool
+     */
     public function exists(string $k): bool
     {
-        return $this->has($k) && !$this->isExpire($k);
+        if (!$this->has($k) || ($this->isExpire($k) && $this->del($k))) {
+            return false;
+        }
+        return true;
     }
 
     public function del(string $k): bool
@@ -101,12 +58,42 @@ class EzLocalCache extends EzCache
         return array_keys($this->_concurrentHashMap);
     }
 
+    public function flushAll():bool {
+        $this->_concurrentHashMap = [];
+        return true;
+    }
+
+    public function expire(string $k, int $expire): bool
+    {
+        DBC::assertTrue($this->has($k), "[EzLocalCache Exception] No Match Key: $k");
+        $this->fetch($k)->setExpire($expire);
+        return true;
+    }
+
+    public function ttl(string $k):int
+    {
+        DBC::assertTrue($this->has($k), "[EzLocalCache Exception] No Match Key: $k");
+        return $this->fetch($k)->ttl();
+    }
+
+    public function set(string $k, string $v): bool
+    {
+        $this->_concurrentHashMap[$k] = EzLocalCacheObject::create($v);
+        return true;
+    }
+
+    public function setEX(string $k, string $v, int $expire = 7200):bool
+    {
+        $this->_concurrentHashMap[$k] = EzLocalCacheObject::create($v, $expire);
+        return true;
+    }
+
     public function setNX(string $k, string $v, int $expire = 7200): bool
     {
         if($this->exists($k)){
             return false;
         }
-        return $this->set($k, $v, $expire);
+        return $this->setEX($k, $v, $expire);
     }
 
     public function setXX(string $k, string $v, int $expire = 7200): bool
@@ -114,66 +101,243 @@ class EzLocalCache extends EzCache
         if(!$this->exists($k)){
             return false;
         }
-        return $this->set($k, $v, $expire);
+        return $this->setEX($k, $v, $expire);
     }
 
-    public function hExists(string $k, string $field): bool
+    public function get(string $k): string
     {
-        // TODO: Implement hExists() method.
+        if (!$this->exists($k)) {
+            return "";
+        }
+        return $this->_concurrentHashMap[$k]->dataSource;
     }
 
-    public function hGet(string $k, string $field): string
+    public function incr(string $k):int
     {
-        // TODO: Implement hGet() method.
+        $val = $this->get($k);
+        if (empty($val)) {
+            $val = 0;
+        }
+        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        $val++;
+        $this->set($k, $val);
+        return $val;
     }
 
-    public function hGetAll(string $k): array
+    public function incrBy(string $k, int $by): int
     {
-        // TODO: Implement hGetAll() method.
+        $val = $this->get($k);
+        if (empty($val)) {
+            $val = 0;
+        }
+        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        $val+=$by;
+        $this->set($k, $val);
+        return $val;
     }
 
-    public function hIncrBy(string $k, $field): bool
+    public function incrByFloat(string $k, string $by): string
     {
-        // TODO: Implement hIncrBy() method.
+        $val = $this->get($k);
+        if (empty($val)) {
+            $val = "0";
+        }
+        DBC::assertTrue(is_numeric($by), "[EzLocalCache Exception] input value $by is not an float");
+        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an float");
+        $val = bcadd($val, $by);
+        $this->set($k, $val);
+        return $val;
     }
 
-    public function hDel(string $k, string ...$fields): bool
+    public function decr(string $k): int
     {
-        // TODO: Implement hDel() method.
+        $val = $this->get($k);
+        if (empty($val)) {
+            $val = 0;
+        }
+        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        $val--;
+        $this->set($k, $val);
+        return $val;
     }
 
-    public function hKeys(string $k): array
+    public function decrBy(string $k, int $by): int
     {
-        // TODO: Implement hKeys() method.
+        $val = $this->get($k);
+        if (empty($val)) {
+            $val = "0";
+        }
+        DBC::assertTrue(is_numeric($by), "[EzLocalCache Exception] input value $by is not an integer");
+        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        $val -= $by;
+        $this->set($k, $val);
+        return $val;
     }
 
-    public function commit()
-    {
-        // TODO: Implement commit() method.
+    /**
+     * @description build for debug
+     * @deprecated only for debug
+     * @return EzLocalCacheObject[]
+     */
+    public function getAll() {
+        return $this->_concurrentHashMap;
     }
 
-    public function rollBack(): void
+    public function lPop(string $k): string
     {
-        // TODO: Implement rollBack() method.
+        if (!$this->exists($k)){
+            return "";
+        }
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lPop From ".$this->_concurrentHashMap[$k]->getDataType());
+        //return array_pop($this->_concurrentHashMap[$k]->dataSource);
+        return array_shift($this->_concurrentHashMap[$k]->dataSource);
     }
 
-    public function setEX(string $k, string $v, int $expire = 7200): bool
+    public function rPop(string $k): string
     {
-        // TODO: Implement setEX() method.
+        if (!$this->exists($k)){
+            return "";
+        }
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command rPop From ".$this->_concurrentHashMap[$k]->getDataType());
+        return array_pop($this->_concurrentHashMap[$k]->dataSource);
     }
 
-    public function flushAll(): bool
+    public function lPush(string $k, string ...$v): int
     {
-        // TODO: Implement flushAll() method.
+        if (!$this->exists($k)) {
+            $this->initEmptyList($k);
+        }
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lPush From ".$this->_concurrentHashMap[$k]->getDataType());
+        $cnt = 0;
+        foreach ($v as $iv) {
+            array_unshift($this->_concurrentHashMap[$k]->dataSource, $iv);
+            $cnt++;
+        }
+        return $cnt;
     }
 
-    public function rPush(string $k, $v): int
+    public function rPush(string $k, string ...$v): int
     {
-        // TODO: Implement rPush() method.
+        if (!$this->exists($k)) {
+            $this->initEmptyList($k);
+        }
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command rPush From ".$this->_concurrentHashMap[$k]->getDataType());
+        $cnt = 0;
+        foreach ($v as $iv) {
+            array_push($this->_concurrentHashMap[$k]->dataSource, $iv);
+            $cnt++;
+        }
+        return $cnt;
     }
 
-    public function lRange($k, $start, $end): array
+    public function rPopLPush(string $k1, string $k2): string
     {
-        // TODO: Implement lRange() method.
+        DBC::assertTrue($this->exists($k1), "[EzLocalCache Exception] Unset $k1!");
+        DBC::assertTrue($this->_concurrentHashMap[$k1]->isList(),
+            "[EzLocalCache Exception] Unsupport Command rPopLPush From ".$this->_concurrentHashMap[$k1]->getDataType());
+        DBC::assertTrue($this->_concurrentHashMap[$k2]->isList(),
+            "[EzLocalCache Exception] Unsupport Command rPopLPush From ".$this->_concurrentHashMap[$k2]->getDataType());
+        $val = $this->rPop($k1);
+        $this->lPush($k2, $val);
+        return $val;
+    }
+
+    public function lRange(string $k, int $start, int $end): array
+    {
+        DBC::assertTrue($this->exists($k), "[EzLocalCache Exception] Unset $k!");
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lRange From ".$this->_concurrentHashMap[$k]->getDataType());
+        return array_slice($this->fetch($k)->dataSource, $start, $end);
+    }
+
+    public function lLen(string $k): int
+    {
+        if (!$this->exists($k)) {
+            return 0;
+        }
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lLen From ".$this->_concurrentHashMap[$k]->getDataType());
+        return count($this->fetch($k)->dataSource);
+    }
+
+    public function lPos(string $k, string $elementValue, int $rank = null): int
+    {
+        if (!$this->exists($k)) {
+            return 0;
+        }
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lPos From ".$this->_concurrentHashMap[$k]->getDataType());
+        $list = $this->fetch($k)->dataSource;
+        $cnt = 0;
+        foreach ($list as $index => $value) {
+            if ($value == $elementValue) {
+                $cnt++;
+                if (null === $rank) {
+                    return $index;
+                } else if ($cnt == $rank) {
+                    return $index;
+                }
+            }
+        }
+        return -1;
+    }
+
+    public function lRem(string $k, int $count, $val): int
+    {
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lRem From ".$this->_concurrentHashMap[$k]->getDataType());
+        $list = $this->fetch($k)->dataSource;
+        $cnt = 0;
+        if ($count < 0) {
+            rsort($list);
+        }
+        $absCount = abs($count);
+        foreach ($list as $index => $value) {
+            if ($value === $val) {
+                $cnt++;
+                if (0 === $count) {
+                    unset($index);
+                } else if ($cnt === $absCount) {
+                    unset($index);
+                }
+            }
+        }
+        if ($count < 0) {
+            rsort($list);
+        }
+        $this->fetch($k)->dataSource = array_values($list);
+        return $cnt;
+    }
+
+    public function lIndex(string $k, int $index): string
+    {
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lIndex From ".$this->_concurrentHashMap[$k]->getDataType());
+        $list = $this->fetch($k)->dataSource;
+        return $list[$index]??"";
+    }
+
+    public function lSet(string $k, int $index, string $val): bool
+    {
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lSet From ".$this->_concurrentHashMap[$k]->getDataType());
+        $size = count($this->fetch($k)->dataSource);
+        $trueIndex = $index >= 0 ? $index : $size + $index;
+        DBC::assertTrue(!is_null($this->fetch($k)->dataSource[$trueIndex]), "[EzLocalCache Exception] Out Of Bounds!");
+        $this->fetch($k)->dataSource[$trueIndex] = $val;
+        return true;
+    }
+
+    public function lTrim(string $k, int $start, int $end): bool
+    {
+        DBC::assertTrue($this->_concurrentHashMap[$k]->isList(),
+            "[EzLocalCache Exception] Unsupport Command lTrim From ".$this->_concurrentHashMap[$k]->getDataType());
+        $list = $this->lRange($k, $start, $end);
+        $this->fetch($k)->dataSource = $list;
+        return true;
     }
 }

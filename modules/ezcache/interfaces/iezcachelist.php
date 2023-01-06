@@ -21,7 +21,7 @@ interface IEzCacheList
      * @param $v
      * @return int 执行后列表长度
      */
-    public function lPush(string $k, ...$v):int;
+    public function lPush(string $k, string ...$v):int;
 
     /**
      * 向列表尾部增加元素
@@ -29,7 +29,7 @@ interface IEzCacheList
      * @param $v
      * @return int 执行后列表长度
      */
-    public function rPush(string $k, ...$v):int;
+    public function rPush(string $k, string ...$v):int;
 
     /**
      * 将列表1的最后一个元素移出，并添加到列表2的头部

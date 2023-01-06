@@ -32,12 +32,6 @@ class EzRedis extends EzCache
      */
     private const REQ_OK = "OK";
 
-/*    //是否开启事务
-    private $isStartTransaction = false;
-
-    //事务命令集合
-    private $transactionCmdSize;*/
-
     public function connect($host = '127.0.0.1', $port = 6379, $timeout = 0){
         $this->tcp = EzTCP::get($host, $port);
         $this->mode = self::MODE_SINGLE;
@@ -196,9 +190,8 @@ class EzRedis extends EzCache
         return $this->exec("FLUSHALL");
     }
 
-    public function set(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool {
-        $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
-        return $this->exec("SET", $key, $value, "EX", $expire);
+    public function set(string $key, string $value):bool {
+        return $this->exec("SET", $key, $value);
     }
 
     public function setNX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool {
@@ -271,12 +264,12 @@ class EzRedis extends EzCache
         return $this->exec("RPOP", $k);
     }
 
-    public function lPush(string $k, ...$v): int
+    public function lPush(string $k, string ...$v): int
     {
         return $this->exec("LPUSH", $k, ...$v);
     }
 
-    public function rPush(string $k, ...$v): int
+    public function rPush(string $k, string ...$v): int
     {
         if (empty($k)) {
             return 0;
