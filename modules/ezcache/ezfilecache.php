@@ -1,5 +1,5 @@
 <?php
-class EzFileCache implements IEzCache
+class EzFileCache extends EzCache
 {
     private static $ins;
 

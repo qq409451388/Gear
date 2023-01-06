@@ -1,5 +1,5 @@
 <?php
-class EzRedis implements IEzCache
+class EzRedis extends EzCache
 {
     protected $tcp = null;
 
@@ -11,12 +11,6 @@ class EzRedis implements IEzCache
 
     protected $command = null;
 
-    protected $isPipeline = false;
-
-    protected $pipelineCmd = '';
-
-    protected $pipelineCount = 0;
-
     protected $auth;
 
     protected $isAuthed;
@@ -27,6 +21,22 @@ class EzRedis implements IEzCache
     private const MODE_CLUSTER = 2;
 
     private const EXPIRE_WEEK = 604800;
+
+    /**
+     * 事务模式，执行命令的结果
+     */
+    private const REQ_QUEUED = "QUEUED";
+
+    /**
+     * 命令执行结果，成功
+     */
+    private const REQ_OK = "OK";
+
+/*    //是否开启事务
+    private $isStartTransaction = false;
+
+    //事务命令集合
+    private $transactionCmdSize;*/
 
     public function connect($host = '127.0.0.1', $port = 6379, $timeout = 0){
         $this->tcp = EzTCP::get($host, $port);
@@ -104,7 +114,7 @@ class EzRedis implements IEzCache
         return $ret;
     }
 
-    public function exec(...$args){
+    private function exec(...$args) {
         $tcpIns = $this->getTcp();
         $key = $tcpIns->getIp().":".$tcpIns->getPort();
         if((!isset($this->isAuthed[$key]) || !$this->isAuthed[$key]) && !empty($this->auth)){
@@ -118,11 +128,6 @@ class EzRedis implements IEzCache
             DBC::throwEx("[EzRedis Exception]参数不可以为空", 301);
         }
         $this->buildCommand($args);
-        if (true === $this->isPipeline) {
-            $this->pipelineCmd .= $this->command;
-            $this->pipelineCount++;
-            return "";
-        }
         $this->response = $tcpIns->send($this->command);
         return $this->buildResult();
     }
@@ -138,12 +143,6 @@ class EzRedis implements IEzCache
             $this->appoint = $point;
         }
         return $this->tcp[$point];
-    }
-
-    public function initPipeline(){
-        $this->isPipeline = true;
-        $this->pipelineCount = 0;
-        $this->pipelineCmd = '';
     }
 
     public function isSingleMode(){
@@ -177,6 +176,26 @@ class EzRedis implements IEzCache
         return $this;
     }
 
+    public function exists(string $k): bool
+    {
+        return $this->exec("EXISTS", $k);
+    }
+
+    public function expire(string $k, int $expire): bool
+    {
+        return $this->exec("EXPIRE", $k, $expire);
+    }
+
+    public function ttl(string $k):int
+    {
+        return $this->exec("TTL", $k);
+    }
+
+    public function flushAll(): bool
+    {
+        return $this->exec("FLUSHALL");
+    }
+
     public function set(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool {
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "EX", $expire);
@@ -197,34 +216,123 @@ class EzRedis implements IEzCache
         return $this->exec("SET", $key, $value, "EX", $expire);
     }
 
-    public function get(string $key){
+    public function get(string $key):string {
         return $this->exec("GET", $key);
     }
 
-    public function del(string $key):bool{
+    public function del(string $key):bool
+    {
+        if (empty($key)) {
+            return false;
+        }
         return $this->exec("DEL", $key);
     }
 
-    public function keys(string $pattern):array{
+    public function keys(string $pattern):array
+    {
         if (empty($pattern)) {
             return [];
         }
         return $this->exec("KEYS", $pattern);
     }
 
-    public function lPop(string $k): bool
+    public function lPop(string $k): string
     {
-        // TODO: Implement lpop() method.
+        return $this->exec("LPOP", $k);
     }
 
-    public function lPush(string $k, $v, int $expire = 7200): bool
+    public function rPop(string $k): string
     {
-        // TODO: Implement lpush() method.
+        return $this->exec("RPOP", $k);
     }
 
-    public function exists(string $k): bool
+    public function lPush(string $k, ...$v): int
     {
-        return $this->exec("EXISTS ", $k);
+        return $this->exec("LPUSH", $k, ...$v);
+    }
+
+    public function rPush(string $k, ...$v): int
+    {
+        if (empty($k)) {
+            return 0;
+        }
+        return $this->exec("RPUSH", $k, ...$v);
+    }
+
+    public function rPopLPush(string $k1, string $k2): string
+    {
+        return $this->exec("RPOPLPUSH", $k1, $k2);
+    }
+
+    public function lRange($k, $start, $end): array
+    {
+        return $this->exec("LRANGE", $k, $start, $end);
+    }
+
+    public function lLen(string $k): int
+    {
+        return $this->exec("LLEN", $k);
+    }
+
+    /**
+     * 返回列表中指定元素第一次出现的索引
+     * @param string $k
+     * @param string $elementValue
+     * @param int|null $rank
+     * @return int
+     * @version redis >= 6.0.6
+     */
+    public function lPos(string $k, string $elementValue, int $rank = null): int
+    {
+        return $this->exec("LPOS", $k, $elementValue, $rank);
+    }
+
+    public function lRem(string $k, int $count, $val): int
+    {
+        return $this->exec("LREM", $k, $count, $val);
+    }
+
+    public function lIndex(string $k, int $index): string
+    {
+        return $this->exec("LINDEX", $k, $index);
+    }
+
+    public function lSet(string $k, int $index, string $val): bool
+    {
+        return $this->exec("LSET", $k, $index, $val);
+    }
+
+    public function lTrim(string $k, int $start, int $end): bool
+    {
+        return $this->exec("LTRIM", $k, $start, $end);
+    }
+
+    public function startTransaction(): void
+    {
+        $res = $this->exec("MULTI");
+        DBC::assertEquals(self::REQ_OK, $res, "[EzRedis Exception] start transaction fail!");
+        $this->isStartTransaction = true;
+        $this->transactionCmdSize = 0;
+    }
+
+    public function commit(): bool
+    {
+        $res = $this->exec("EXEC");
+        if (!is_array($res)) {
+            return false;
+        }
+        if (count($res) !== $this->transactionCmdSize) {
+            return false;
+        }
+        if (array_count_values($res)[self::REQ_OK] !== $this->transactionCmdSize ) {
+            return false;
+        }
+        return true;
+    }
+
+    public function rollBack(): void
+    {
+        $this->exec("DISCARD");
     }
 
     public function hExists(string $k, string $field): bool
@@ -255,20 +363,5 @@ class EzRedis implements IEzCache
     public function hKeys(string $k): array
     {
         // TODO: Implement hKeys() method.
-    }
-
-    public function startTransaction(): void
-    {
-        $this->exec("MULTI");
-    }
-
-    public function commit()
-    {
-        $this->exec("EXEC");
-    }
-
-    public function rollBack(): void
-    {
-        $this->exec("DISCARD");
     }
 }

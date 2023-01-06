@@ -1,5 +1,5 @@
 <?php
-class EzLocalCache implements IEzCache
+class EzLocalCache extends EzCache
 {
     /**
      * 数据空间
@@ -31,10 +31,10 @@ class EzLocalCache implements IEzCache
         return true;
     }
 
-    public function get(string $k)
+    public function get(string $k): string
     {
         if (!$this->has($k) || ($this->isExpire($k) && $this->remove($k))) {
-            return null;
+            return "";
         }
         return $this->_concurrentHashMap[$k][0];
     }
@@ -43,7 +43,7 @@ class EzLocalCache implements IEzCache
         return $this->_concurrentHashMap;
     }
 
-    public function lPop(string $k)
+    public function lPop(string $k): string
     {
         if (!$this->has($k) || ($this->isExpire($k) && $this->remove($k))) {
             return false;
@@ -51,10 +51,10 @@ class EzLocalCache implements IEzCache
         return array_pop($this->_concurrentHashMap[$k][0]);
     }
 
-    public function lPush(string $k, $v, int $expire = 7200): bool
+    public function lPush(string $k, $v): int
     {
         if(!$this->has($k)){
-            $this->_concurrentHashMap[$k] = [[], time()+$expire];;
+            $this->_concurrentHashMap[$k] = [[]];;
         }elseif($this->isExpire($k)){
             $this->remove($k);
             return false;
@@ -160,5 +160,20 @@ class EzLocalCache implements IEzCache
     public function setEX(string $k, string $v, int $expire = 7200): bool
     {
         // TODO: Implement setEX() method.
+    }
+
+    public function flushAll(): bool
+    {
+        // TODO: Implement flushAll() method.
+    }
+
+    public function rPush(string $k, $v): int
+    {
+        // TODO: Implement rPush() method.
+    }
+
+    public function lRange($k, $start, $end): array
+    {
+        // TODO: Implement lRange() method.
     }
 }

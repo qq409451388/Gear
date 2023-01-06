@@ -16,11 +16,11 @@ class CacheFactory
     public static function __callStatic($n, $v){
         $class = str_replace("get", "", $n);
         DBC::assertTrue(class_exists($class), "[CacheFactory Exception] Cacher ".$class. " Is Not Exists!");
-        DBC::assertTrue(is_subclass_of($class, IEzCache::class), "[CacheFactory Exception] Cacher ".$class. " Is Not Exists!");
+        DBC::assertTrue(is_subclass_of($class, EzCache::class), "[CacheFactory Exception] Cacher ".$class. " Is Not Exists!");
         return new $class();
     }
 
-    public static function getInstance($cacheType):IEzCache{
+    public static function getInstance($cacheType):EzCache{
         if(!isset(self::$ins[$cacheType])){
             self::$ins[$cacheType] = self::getCacheClient($cacheType);
         }
