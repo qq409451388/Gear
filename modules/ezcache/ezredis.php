@@ -360,33 +360,98 @@ class EzRedis extends EzCache
         $this->exec("DISCARD");
     }
 
-    public function hExists(string $k, string $field): bool
+    public function hSet(string $k, string $field, string $value): int
     {
-        // TODO: Implement hExists() method.
+        return $this->exec("HSET", $k, $field, $value);
+    }
+
+    public function hSetMulti(string $k, string ...$args): int
+    {
+        DBC::assertEquals(0, count($args)%2, "[EzRedis Exception] Wrong Num Of Arguments For hSetMulti!");
+        $fullArgs = [
+            "SET", $k
+        ];
+        $fullArgs = array_merge($fullArgs, $args);
+        return call_user_func_array([$this, "exec"], $fullArgs);
+    }
+
+    public function hSetNx(string $k, string $field, string $value): int
+    {
+        return $this->exec("HSETNX", $k, $field, $value);
+    }
+
+    public function hMSet(string $k, string ...$args): bool
+    {
+        DBC::assertEquals(0, count($args)%2, "[EzRedis Exception] Wrong Num Of Arguments For hMSet!");
+        $fullArgs = [
+            "HMSET", $k
+        ];
+        $fullArgs = array_merge($fullArgs, $args);
+        return call_user_func_array([$this, "exec"], $fullArgs);
+    }
+
+    public function hExists(string $k, string $field): int
+    {
+        return $this->exec("HEXISTS", $k, $field);
     }
 
     public function hGet(string $k, string $field): string
     {
-        // TODO: Implement hGet() method.
+        return $this->exec("HGET", $k, $field);
+    }
+
+    public function hMGet(string $k, string ...$fields): array
+    {
+        $fullArgs = [
+            "HMGET", $k
+        ];
+        $fullArgs = array_merge($fullArgs, $fields);
+        return call_user_func_array([$this, "exec"], $fullArgs);
     }
 
     public function hGetAll(string $k): array
     {
-        // TODO: Implement hGetAll() method.
+        $map = [];
+        $res = $this->exec("HGETALL", $k);
+        $size = count($res);
+        $mapSize = $size/2;
+        for ($i = 0; $i < $mapSize; $i++) {
+            $key = $res[2*$i];
+            $value = $res[2*$i + 1];
+            $map[$key] = $value;
+        }
+        return $map;
     }
 
-    public function hIncrBy(string $k, $field): bool
+    public function hIncrBy(string $k, string $field, int $by): int
     {
-        // TODO: Implement hIncrBy() method.
+        return $this->exec("HINCRBY", $k, $field, $by);
     }
 
-    public function hDel(string $k, string ...$fields): bool
+    public function hIncrByFloat(string $k, string $field, string $by): string
     {
-        // TODO: Implement hDel() method.
+        return $this->exec("HINCRBYFLOAT", $k, $field, $by);
+    }
+
+    public function hDel(string $k, string ...$fields): int
+    {
+        $fullArgs = ["HDEL", $k];
+        $fullArgs = array_merge($fullArgs, $fields);
+        return call_user_func_array([$this, "exec"], $fullArgs);
     }
 
     public function hKeys(string $k): array
     {
-        // TODO: Implement hKeys() method.
+        return $this->exec("HKEYS", $k);
+    }
+
+    public function hVals(string $k): array
+    {
+        return $this->exec("HVALS", $k);
+    }
+
+    public function hLen(string $k): int
+    {
+        return $this->exec("HLEN", $k);
     }
 }

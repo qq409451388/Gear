@@ -1,5 +1,5 @@
 <?php
-abstract class EzCache implements IEzCacheKey,IEzCacheString,IEzCacheList
+abstract class EzCache implements IEzCacheKey,IEzCacheString,IEzCacheList,IEzCacheHash
 {
 
 }
