@@ -1,58 +1,65 @@
 <?php
 class EzLocalCache implements IEzCache
 {
-    private $_totalHash = [];
+    /**
+     * 数据空间
+     * @var array
+     */
+    private $_concurrentHashMap = [];
+
+    private $_hashMapBuffer = [];
+
+    private $transactionSwitch = false;
+
+    public function startTransaction(): void
+    {
+
+    }
 
     public function set(string $k, string $v, int $expire = 7200): bool
     {
         if($this->has($k)){
             return false;
         }
-        $this->_totalHash[$k] = [$v, time()+$expire];
+        $this->_concurrentHashMap[$k] = [$v, time()+$expire];
         return true;
     }
 
     public function setOrReplace(string $k, string $v, int $expire = 7200): bool
     {
-        $this->_totalHash[$k] = [$v, time()+$expire];
+        $this->_concurrentHashMap[$k] = [$v, time()+$expire];
         return true;
     }
 
     public function get(string $k)
     {
-        if(!$this->has($k)){
-            return null;
-        }elseif($this->isExpire($k)){
-            $this->remove($k);
+        if (!$this->has($k) || ($this->isExpire($k) && $this->remove($k))) {
             return null;
         }
-        return $this->_totalHash[$k][0];
+        return $this->_concurrentHashMap[$k][0];
     }
 
     public function getAll(){
-        return $this->_totalHash;
+        return $this->_concurrentHashMap;
     }
 
-    public function lpop(string $k)
+    public function lPop(string $k)
+    {
+        if (!$this->has($k) || ($this->isExpire($k) && $this->remove($k))) {
+            return false;
+        }
+        return array_pop($this->_concurrentHashMap[$k][0]);
+    }
+
+    public function lPush(string $k, $v, int $expire = 7200): bool
     {
         if(!$this->has($k)){
-            return false;
+            $this->_concurrentHashMap[$k] = [[], time()+$expire];;
         }elseif($this->isExpire($k)){
             $this->remove($k);
             return false;
         }
-        return array_pop($this->_totalHash[$k][0]);
-    }
-
-    public function lpush(string $k, $v, int $expire = 7200): bool
-    {
-        if(!$this->has($k)){
-            $this->_totalHash[$k] = [[], time()+$expire];;
-        }elseif($this->isExpire($k)){
-            $this->remove($k);
-            return false;
-        }
-        array_push($this->_totalHash[$k][0], $v);
+        array_push($this->_concurrentHashMap[$k][0], $v);
         return true;
     }
 
@@ -61,13 +68,13 @@ class EzLocalCache implements IEzCache
         if(!$this->has($k)){
             return false;
         }
-        unset($this->_totalHash[$k]);
+        unset($this->_concurrentHashMap[$k]);
         return true;
     }
 
     private function has($k)
     {
-        return isset($this->_totalHash[$k]);
+        return isset($this->_concurrentHashMap[$k]);
     }
 
     private function isExpire($k)
@@ -75,7 +82,7 @@ class EzLocalCache implements IEzCache
         if(!$this->has($k)){
             return true;
         }
-        return time() >= $this->_totalHash[$k][1];
+        return time() >= $this->_concurrentHashMap[$k][1];
     }
 
     public function exists(string $k): bool
@@ -85,13 +92,13 @@ class EzLocalCache implements IEzCache
 
     public function del(string $k): bool
     {
-        unset($this->_totalHash[$k]);
+        unset($this->_concurrentHashMap[$k]);
         return true;
     }
 
     public function keys(string $k): array
     {
-        return array_keys($this->_totalHash);
+        return array_keys($this->_concurrentHashMap);
     }
 
     public function setNX(string $k, string $v, int $expire = 7200): bool
@@ -108,5 +115,50 @@ class EzLocalCache implements IEzCache
             return false;
         }
         return $this->set($k, $v, $expire);
+    }
+
+    public function hExists(string $k, string $field): bool
+    {
+        // TODO: Implement hExists() method.
+    }
+
+    public function hGet(string $k, string $field): string
+    {
+        // TODO: Implement hGet() method.
+    }
+
+    public function hGetAll(string $k): array
+    {
+        // TODO: Implement hGetAll() method.
+    }
+
+    public function hIncrBy(string $k, $field): bool
+    {
+        // TODO: Implement hIncrBy() method.
+    }
+
+    public function hDel(string $k, string ...$fields): bool
+    {
+        // TODO: Implement hDel() method.
+    }
+
+    public function hKeys(string $k): array
+    {
+        // TODO: Implement hKeys() method.
+    }
+
+    public function commit()
+    {
+        // TODO: Implement commit() method.
+    }
+
+    public function rollBack(): void
+    {
+        // TODO: Implement rollBack() method.
+    }
+
+    public function setEX(string $k, string $v, int $expire = 7200): bool
+    {
+        // TODO: Implement setEX() method.
     }
 }

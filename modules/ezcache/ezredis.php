@@ -187,9 +187,14 @@ class EzRedis implements IEzCache
         return $this->exec("SET", $key, $value, "NX", "EX", $expire);
     }
 
-    public function setXx(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool{
+    public function setXX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool{
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "XX", "EX", $expire);
+    }
+
+    public function setEX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool{
+        $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
+        return $this->exec("SET", $key, $value, "EX", $expire);
     }
 
     public function get(string $key){
@@ -201,21 +206,69 @@ class EzRedis implements IEzCache
     }
 
     public function keys(string $pattern):array{
+        if (empty($pattern)) {
+            return [];
+        }
         return $this->exec("KEYS", $pattern);
     }
 
-    public function setOrReplace(string $k, string $v, int $expire = 7200): bool
-    {
-        // TODO: Implement setOrReplace() method.
-    }
-
-    public function lpop(string $k): bool
+    public function lPop(string $k): bool
     {
         // TODO: Implement lpop() method.
     }
 
-    public function lpush(string $k, $v, int $expire = 7200): bool
+    public function lPush(string $k, $v, int $expire = 7200): bool
     {
         // TODO: Implement lpush() method.
+    }
+
+    public function exists(string $k): bool
+    {
+        return $this->exec("EXISTS ", $k);
+    }
+
+    public function hExists(string $k, string $field): bool
+    {
+        // TODO: Implement hExists() method.
+    }
+
+    public function hGet(string $k, string $field): string
+    {
+        // TODO: Implement hGet() method.
+    }
+
+    public function hGetAll(string $k): array
+    {
+        // TODO: Implement hGetAll() method.
+    }
+
+    public function hIncrBy(string $k, $field): bool
+    {
+        // TODO: Implement hIncrBy() method.
+    }
+
+    public function hDel(string $k, string ...$fields): bool
+    {
+        // TODO: Implement hDel() method.
+    }
+
+    public function hKeys(string $k): array
+    {
+        // TODO: Implement hKeys() method.
+    }
+
+    public function startTransaction(): void
+    {
+        $this->exec("MULTI");
+    }
+
+    public function commit()
+    {
+        $this->exec("EXEC");
+    }
+
+    public function rollBack(): void
+    {
+        $this->exec("DISCARD");
     }
 }

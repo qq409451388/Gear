@@ -34,6 +34,8 @@ abstract class BaseTcpClient
         return $this;
     }
 
+    public abstract function setNonBlock();
+
     public function getIp(){
         return $this->ip;
     }

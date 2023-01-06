@@ -144,4 +144,49 @@ class EzFileCache implements IEzCache
     {
         // TODO: Implement setXX() method.
     }
+
+    public function hExists(string $k, string $field): bool
+    {
+        // TODO: Implement hExists() method.
+    }
+
+    public function hGet(string $k, string $field): string
+    {
+        // TODO: Implement hGet() method.
+    }
+
+    public function hGetAll(string $k): array
+    {
+        // TODO: Implement hGetAll() method.
+    }
+
+    public function hIncrBy(string $k, $field): bool
+    {
+        // TODO: Implement hIncrBy() method.
+    }
+
+    public function hDel(string $k, string ...$fields): bool
+    {
+        // TODO: Implement hDel() method.
+    }
+
+    public function hKeys(string $k): array
+    {
+        // TODO: Implement hKeys() method.
+    }
+
+    public function startTransaction(): void
+    {
+        // TODO: Implement startTransaction() method.
+    }
+
+    public function commit()
+    {
+        // TODO: Implement commit() method.
+    }
+
+    public function rollBack(): void
+    {
+        // TODO: Implement rollBack() method.
+    }
 }
