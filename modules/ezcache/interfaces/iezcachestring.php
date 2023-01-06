@@ -43,4 +43,42 @@ interface IEzCacheString
      * @return string
      */
     public function get(string $k): string;
+
+    /**
+     * 将key存储的数字自增1，key不存在会创建（并返回结果 1）
+     * @param string $k
+     * @return int 自增1的结果
+     */
+    public function incr(string $k):int;
+
+    /**
+     * 将key存储的数字增加$by，key不存在会创建（并返回结果 $by）
+     * @param string $k
+     * @param int $by
+     * @return int
+     */
+    public function incrBy(string $k, int $by):int;
+
+    /**
+     * 将key存储的浮点数字增加$by，key不存在会创建（并返回结果 $by）
+     * @param string $k
+     * @param int $by
+     * @return int
+     */
+    public function incrByFloat(string $k, string $by):string;
+
+    /**
+     * 将key存储的数字自减1，key不存在会创建（并返回结果 -1）
+     * @param string $k
+     * @return int 自减1的结果
+     */
+    public function decr(string $k):int;
+
+    /**
+     * 将key存储的数字减少$by，key不存在会创建（并返回结果 $by）
+     * @param string $k
+     * @param int $by
+     * @return int
+     */
+    public function decrBy(string $k, int $by):int;
 }

@@ -220,6 +220,31 @@ class EzRedis extends EzCache
         return $this->exec("GET", $key);
     }
 
+    public function incr(string $k): int
+    {
+        return $this->exec("INCR", $k);
+    }
+
+    public function incrBy(string $k, int $by): int
+    {
+        return $this->exec("INCRBY", $k, $by);
+    }
+
+    public function incrByFloat(string $k, string $by): string
+    {
+        return $this->exec("INCRBYFLOAT", $k, $by);
+    }
+
+    public function decr(string $k): int
+    {
+        return $this->exec("DECR", $k);
+    }
+
+    public function decrBy(string $k, int $by): int
+    {
+        return $this->exec("DECRBY", $k, $by);
+    }
+
     public function del(string $key):bool
     {
         if (empty($key)) {
