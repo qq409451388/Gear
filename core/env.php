@@ -40,7 +40,7 @@ class Env
     }
 
     public static function staticPath(){
-        DBC::assertTrue(@defined("STATIC_PATH"), "静态文件路径未设置");
-        return STATIC_PATH;
+        #DBC::assertTrue(@defined("STATIC_PATH"), "静态文件路径未设置");
+        return defined("STATIC_PATH") ? STATIC_PATH : "";
     }
 }

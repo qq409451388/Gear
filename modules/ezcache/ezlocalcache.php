@@ -1,5 +1,5 @@
 <?php
-class EzLocalCache// extends EzCache
+class EzLocalCache extends EzCache
 {
     protected static $ins;
     /**
@@ -339,5 +339,75 @@ class EzLocalCache// extends EzCache
         $list = $this->lRange($k, $start, $end);
         $this->fetch($k)->dataSource = $list;
         return true;
+    }
+
+    public function hSet(string $k, string $field, string $value): int
+    {
+        // TODO: Implement hSet() method.
+    }
+
+    public function hSetMulti(string $k, string ...$args): int
+    {
+        // TODO: Implement hSetMulti() method.
+    }
+
+    public function hSetNx(string $k, string $field, string $value): int
+    {
+        // TODO: Implement hSetNx() method.
+    }
+
+    public function hMSet(string $k, string ...$args): bool
+    {
+        // TODO: Implement hMSet() method.
+    }
+
+    public function hExists(string $k, string $field): int
+    {
+        // TODO: Implement hExists() method.
+    }
+
+    public function hGet(string $k, string $field): string
+    {
+        // TODO: Implement hGet() method.
+    }
+
+    public function hMGet(string $k, string ...$fields): array
+    {
+        // TODO: Implement hMGet() method.
+    }
+
+    public function hGetAll(string $k): array
+    {
+        // TODO: Implement hGetAll() method.
+    }
+
+    public function hIncrBy(string $k, string $field, int $by): int
+    {
+        // TODO: Implement hIncrBy() method.
+    }
+
+    public function hIncrByFloat(string $k, string $field, string $by): string
+    {
+        // TODO: Implement hIncrByFloat() method.
+    }
+
+    public function hDel(string $k, string ...$fields): int
+    {
+        // TODO: Implement hDel() method.
+    }
+
+    public function hKeys(string $k): array
+    {
+        // TODO: Implement hKeys() method.
+    }
+
+    public function hVals(string $k): array
+    {
+        // TODO: Implement hVals() method.
+    }
+
+    public function hLen(string $k): int
+    {
+        // TODO: Implement hLen() method.
     }
 }
