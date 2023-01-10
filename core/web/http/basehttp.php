@@ -90,12 +90,17 @@ abstract class BaseHTTP
                     if (EzString::containString($requestBodyLine, "Content-Disposition")) {
                         preg_match('/Content-Disposition: (?<contentType>\S+);.*/', $requestBodyLine, $matches);
                         $flag = $matches['contentType'];
-                        preg_match('/(.*)name="(?<requestName>(.*)])";(.*)/', $requestBodyLine, $matches);
-                        $requestName = $matches['requestName'];
+                        preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
+                        $requestName = $matches['requestName']??"";
+                    } elseif (empty($requestBodyLine)) {
+                        $isEmptyLine = true;
+                        continue;
                     } elseif (!empty($flag) && !empty($requestName) && $isEmptyLine) {
-                        $requestBodyArr[$requestName] = $this->buildHttpRequest($flag, $requestBodyLine);
+                        $requestBodyArr[$requestName] = $requestBodyLine;//$this->buildHttpRequest($flag, $requestBodyLine);
                         $flag = null;
                         $requestName = null;
+                    } else {
+                        $flag = $requestName = null;
                     }
                     //为下一行数据使用
                     $isEmptyLine = empty($requestBodyLine);
@@ -111,6 +116,7 @@ abstract class BaseHTTP
     }
 
     private function buildHttpRequestSource($buf, &$body):RequestSource{
+        print_r($buf);
         $requestSource = new RequestSource();
         $httpOptions = explode("\r\n", $buf);
         $firstLine = explode(" ", array_shift($httpOptions));
@@ -145,7 +151,8 @@ abstract class BaseHTTP
             }
 
         }
-        $body = trim($body, PHP_EOL);
+        //$body = trim($body, PHP_EOL);
+        $body = substr($body, 0, -2);
         $requestSource->contentLengthActual = strlen($body);
         $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $body, $requestSource);
         return $requestSource;
