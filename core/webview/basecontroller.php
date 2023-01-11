@@ -2,9 +2,7 @@
 class BaseController implements EzBean
 {
     public function __get($obj){
-        if(!BeanFinder::get()->has($obj)){
-            DBC::throwEx('['.__CLASS__.'] class'.$obj.' is not exists!');
-        }
+        DBC::assertTrue(BeanFinder::get()->has($obj), '['.__CLASS__.'] class'.$obj.' is not exists!');
         return BeanFinder::get()->pull($obj);
     }
 

@@ -154,7 +154,6 @@ class EzWebSocketServer
         } else {
             $clientMsg = $this->decode($buffer);
             $obj = EzCollection::decodeJson($clientMsg);
-            var_dump($clientMsg);
             if(!is_null($obj) && isset($obj['toMaster']) && $obj['toMaster']){
                 DBC::assertTrue(!empty($obj['userName']), "[EzWebSocketServer] Unknow UserName!");
                 if(method_exists($this, $obj['systemFunc'])){

@@ -50,6 +50,6 @@ class HttpStatus
     }
 
     public static function CONTINUE(){
-        return new self(100, "OK");
+        return new self(100, "CONTINUE");
     }
 }

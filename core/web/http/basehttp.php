@@ -116,7 +116,6 @@ abstract class BaseHTTP
     }
 
     private function buildHttpRequestSource($buf, &$body):RequestSource{
-        print_r($buf);
         $requestSource = new RequestSource();
         $httpOptions = explode("\r\n", $buf);
         $firstLine = explode(" ", array_shift($httpOptions));
@@ -215,7 +214,8 @@ abstract class BaseHTTP
      * @return string
      **/
     private function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = self::MIME_TEXT):String{
-        return (new EzHeader($httpStatus, $content, $contentType))->toString();
+        $ezHeader = new EzHeader($httpStatus, $content, $contentType);
+        return ($ezHeader)->toString();
     }
 
     public function getResponse(Request $request):string{
