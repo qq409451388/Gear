@@ -9,7 +9,7 @@ class BaseController implements EzBean
     protected function show($response, $path) {
         DBC::assertTrue(defined("TEMPLATE_DIR"), "[Controller] Must Define const TEMPLATE_DIR At Enter File!");
         extract($response);
-        $template = strtolower(TEMPLATE_DIR.'/'.$path.'.php');
+        $template = strtolower(TEMPLATE_DIR.DIRECTORY_SEPARATOR.$path.'.php');
         ob_start();
         include($template);
         $res = ob_get_contents();

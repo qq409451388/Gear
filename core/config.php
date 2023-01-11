@@ -2,7 +2,7 @@
 class Config
 {
     private static $config;
-    private const PATH_CONFIG = "/config/";
+    private const PATH_CONFIG = DIRECTORY_SEPARATOR."config".DIRECTORY_SEPARATOR;
     private const EXT_JSON = ".json";
     public static function get($key, $from = CORE_PATH, $useCache = true){
         if(empty($key)){

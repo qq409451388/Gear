@@ -1,7 +1,7 @@
 <?php
 class Logger
 {
-    const LOG_PATH = '/tmp/logs/';
+    const LOG_PATH = DIRECTORY_SEPARATOR.'tmp'.DIRECTORY_SEPARATOR.'logs'.DIRECTORY_SEPARATOR;
     //仅记录
     const TYPE_RECORD = 'record';
     //关键性数据储存
@@ -53,7 +53,7 @@ class Logger
 
     private static function write($msg, $type, $fileName = '')
     {
-        $dirPath = self::LOG_PATH.$type.'/';
+        $dirPath = self::LOG_PATH.$type.DIRECTORY_SEPARATOR;
         if(!is_dir($dirPath))
         {
             mkdir($dirPath, 0777, true);
@@ -84,7 +84,7 @@ class Logger
 
     public static function removeDir($type)
     {
-        $dirPath = self::LOG_PATH.$type.'/';
+        $dirPath = self::LOG_PATH.$type.DIRECTORY_SEPARATOR;
         if(is_dir($dirPath))
         {
             rmdir($dirPath);

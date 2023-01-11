@@ -17,7 +17,7 @@ class HTTP extends BaseHTTP
         }
     }
 
-    private function s(){
+    private function s() {
         //创建socket套接字
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         // set the option to reuse the port

@@ -5,6 +5,9 @@ class Env
     public const DEV = "DEV";
     public const TEST = "TEST";
 
+    private const OS_UNIX = "UNIX";
+    private const OS_WINDOWS = "WINDOWS";
+
     public static function isDev(){
         return self::getEnv() == self::DEV;
     }
@@ -43,4 +46,54 @@ class Env
         #DBC::assertTrue(@defined("STATIC_PATH"), "静态文件路径未设置");
         return defined("STATIC_PATH") ? STATIC_PATH : "";
     }
+
+    /**
+     * 获取系统家族名称
+     * @return string
+     */
+    public static function getSimlpeOs() {
+        if (defined("PHP_OS_FAMILY")) {
+            switch (PHP_OS_FAMILY) {
+                case "Windows":
+                    return self::OS_WINDOWS;
+                case "BSD":
+                case "Linux":
+                case "Solaris":
+                    return self::OS_UNIX;
+                case "Unknown":
+                default:
+                    return "";
+
+            }
+        } else if (defined("PHP_OS")) {
+            switch (PHP_OS) {
+                case "Linux":
+                    return self::OS_UNIX;
+                case "WINNT":
+                case "WIN32":
+                case "Windows":
+                    return self::OS_WINDOWS;
+                default:
+                    return "";
+            }
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * 获取系统根目录
+     * @return string
+     */
+    public static function getRootPath() {
+        switch (self::getSimlpeOs()) {
+            case self::OS_UNIX:
+                return "/";
+            case self::OS_WINDOWS:
+                return "C:\\";
+            default:
+                return "";
+        }
+    }
+
 }
