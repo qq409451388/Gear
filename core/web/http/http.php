@@ -1,5 +1,5 @@
 <?php
-class HTTP extends BaseHTTP implements IHttp
+class HTTP extends BaseHTTP
 {
     /**
      * 启动http服务

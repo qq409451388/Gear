@@ -7,10 +7,6 @@ class Http2 extends BaseHTTP implements IHttp
 {
     private $swoole;
 
-    public function __construct(IDispatcher $dispatcher){
-        $this->dispatcher = $dispatcher;
-    }
-
     public function init(string $host, $port, $root = ''){
         parent::init($host, $port, $root);
         $this->initSwoole();
@@ -64,12 +60,5 @@ class Http2 extends BaseHTTP implements IHttp
         parse_str($query, $args);
         $path = trim($path, '/');
         return [$path, $args];
-    }
-
-    public function getResponse(Request $request):string{
-        if(empty($request->getPath())){
-            return EzRpcResponse::EMPTY_RESPONSE;
-        }
-        return $request->getDynamicResponse($this->dispatcher->matchedRouteMapping($request->getPath()))->toString();
     }
 }

@@ -1,5 +1,5 @@
 <?php
-abstract class BaseHTTP
+abstract class BaseHTTP implements IHttp
 {
     protected $host;
     protected $port;
@@ -206,7 +206,7 @@ abstract class BaseHTTP
         }
     }
 
-    public function getResponse(Request $request):Response{
+    public function getResponse(Request $request):IResponse{
         $path = $request->getPath();
         if(empty($path) || "/" == $path){
             $content = "<h1>It Works! ENV:".ENV::get()."</h1>";
@@ -237,7 +237,7 @@ abstract class BaseHTTP
         return $this->dispatcher->judgePath($path);
     }
 
-    public function getDynamicResponse(IRequest $request):IResponse{
+    public function getDynamicResponse(IRequest $request):Response{
         try {
             $router = $this->dispatcher->matchedRouteMapping($request->getPath());
             if ($router instanceof NullMapping) {
