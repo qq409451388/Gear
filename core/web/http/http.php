@@ -42,7 +42,8 @@ class HTTP extends BaseHTTP implements IHttp
             if($msgsocket = socket_accept($this->socket)){
                 //读取请求内容
                 $request = $this->buildRequest(socket_read($msgsocket, self::SOCKET_READ_LENGTH));
-                $content = $this->getResponse($request);
+                $response = $this->getResponse($request);
+                $content = $response->toString();
                 socket_write($msgsocket, $content, strlen($content));
                 socket_close($msgsocket);
             }

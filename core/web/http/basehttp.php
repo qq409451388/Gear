@@ -206,49 +206,31 @@ abstract class BaseHTTP
         }
     }
 
-    /**
-     * 组装消息头信息模板
-     * @param HttpStatus $httpStatus 状态
-     * @param string $content 发送的文本内容
-     * @param string $contentType 发送的内容类型
-     * @return string
-     **/
-    private function getHeaders(HttpStatus $httpStatus, $content = "", $contentType = self::MIME_TEXT):String{
-        $ezHeader = new EzHeader($httpStatus, $content, $contentType);
-        return ($ezHeader)->toString();
-    }
-
-    public function getResponse(Request $request):string{
+    public function getResponse(Request $request):Response{
         $path = $request->getPath();
         if(empty($path) || "/" == $path){
             $content = "<h1>It Works! ENV:".ENV::get()."</h1>";
-            return $this->getHeaders(HttpStatus::OK(), $content);
+            return (new Response(HttpStatus::OK(), $content));
         }
         if(($httpStatus = $request->check()) instanceof HttpStatus){
-           return $this->getHeaders($httpStatus);
+           return (new Response($httpStatus));
         }
         $judged = $this->judgePath($path);
         if(!$judged){
             if(empty($this->_root)){
-                return $this->getHeaders(HttpStatus::NOT_FOUND());
+                return (new Response(HttpStatus::NOT_FOUND()));
             }
             $fullPath = Env::staticPath()."/".$path;
             if(empty($path) || !is_file($fullPath)){
-                return $this->getHeaders(HttpStatus::NOT_FOUND());
+                return (new Response(HttpStatus::NOT_FOUND()));
             }
             if(!isset($this->staticCache[$path])){
                 $this->staticCache[$path] = file_get_contents($fullPath);
             }
-            $content = $this->staticCache[$path];
-            $contentType = $this->getMime($path);
-            $header = HttpStatus::OK();
+            return new Response(HttpStatus::OK(), $this->staticCache[$path], $this->getMime($path));
         }else{
-            $response = $this->getDynamicResponse($request);
-            $content = $response->getContent();
-            $header = $response->getHeader();
-            $contentType = $response->getContentType();
+            return $this->getDynamicResponse($request);
         }
-        return $this->getHeaders($header, $content, $contentType);
     }
 
     private function judgePath($path){

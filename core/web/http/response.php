@@ -7,12 +7,17 @@ class Response implements IResponse
     private $httpStatus;
     private $content;
     private $contentType;
+    private $charset;
 
-    public function __construct(HttpStatus $header, $content, $contentType = null){
+    public function __construct(HttpStatus $header, $content = null, $contentType = HttpMimeType::MIME_HTML, $charset = "charset=utf-8;"){
         $this->httpStatus = $header;
         $this->setContent($content);
-        $this->setContentType($contentType);
-        $this->setContentType($this->guessContent());
+        if (empty($contentType)) {
+            $this->setContentType($this->guessContent());
+        } else {
+            $this->setContentType($contentType);
+        }
+        $this->setCharset($charset);
     }
 
     public function setContent($content){
@@ -25,6 +30,10 @@ class Response implements IResponse
 
     public function setContentType($contentType){
         $this->contentType = $contentType;
+    }
+
+    public function setCharset($charset) {
+        $this->charset = $charset;
     }
 
     public function getContentType(){
@@ -45,11 +54,24 @@ class Response implements IResponse
         }
     }
 
+    public function getCharset() {
+        return $this->charset;
+    }
+
     public function getHeader(){
         return $this->httpStatus;
     }
 
-    public function toString(): string{
-        return EzDataUtils::toString($this);
+    public function toString():string{
+        $header = "HTTP/1.1 {$this->getHeader()->getCode()} {$this->getHeader()->getStatus()}\r\n";
+        $header .= "Server: Gear2\r\n";
+        $header .= "Date: ".gmdate('D, d M Y H:i:s T')."\r\n";
+        $header .= "Content-Type: {$this->getContentType()}\r\n";
+        $header .= "Content-Length: ".strlen($this->getContent());
+        if (!empty($this->getContent())) {
+            $header .= "\r\n\r\n";
+            $header .= $this->getContent();
+        }
+        return $header;
     }
 }

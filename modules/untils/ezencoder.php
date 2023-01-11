@@ -38,10 +38,10 @@ class EzEncoder{
      * 片base64解码
      * @param string $base64_image_content 图片文件流
      * @param bool $save_img    是否保存图片
-     * @param string $path  文件保存路径
-     * @return bool|string
+     * @param string $path 文件保存路径
+     * @return string
      */
-    public static function imgBase64Decode($base64_image_content = '', $path='')
+    public static function imgBase64Decode($base64_image_content)
     {
         if (empty($base64_image_content)) {
             return '';
@@ -57,25 +57,11 @@ class EzEncoder{
         $base64_image = str_replace($result[1], '', $base64_image_content);
         $file_content = base64_decode($base64_image);
         $file_type = $result[2];
-
         //如果没指定目录,则保存在当前目录下
         if (empty($path)) {
-            $path = "/tmp/";
+            return $file_content;
         }
-        if (!is_dir($path)) {
-            //检查是否有该文件夹，如果没有就创建
-            mkdir($path, 0777, true);
-        }
-        $file_name = uniqid() . ".{$file_type}";
-        $filePath = $path . $file_name;
-        if (file_exists($filePath)) {
-            //有同名文件删除
-            @unlink($filePath);
-        }
-        if (file_put_contents($filePath, $file_content)) {
-            return $filePath;
-        }
-        return '';
+        return empty($path) ? "" : $file_content;
     }
 
     /**
