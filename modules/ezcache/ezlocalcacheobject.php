@@ -42,8 +42,12 @@ class EzLocalCacheObject
         return self::T_LIST === $this->dataType;
     }
 
+    public function isMap():bool {
+        return self::T_HASH === $this->dataType;
+    }
+
     public function isNormal():bool {
-        return self::T_LIST !== $this->dataType;
+        return self::T_LIST !== $this->dataType && self::T_HASH !== $this->dataType;
     }
 
     public function getDataType():string
