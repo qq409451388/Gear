@@ -11,7 +11,7 @@
 * └── static   项目静态文件目录
 * 首次使用：将此文件改名为autoload.php 并移到与gear框架目录同级
 */
-const CORE_PATH = __DIR__ . DIRECTORY_SEPARATOR . "gear";
+const CORE_PATH = __DIR__ . DIRECTORY_SEPARATOR . "Gear";
 const VENDOR_PATH = CORE_PATH . DIRECTORY_SEPARATOR . "vendor";
 /**
 * 需要使用http服务器时可选,USER_PATH为mvc项目路径，STATIC_PATH为静态文件路径
