@@ -11,6 +11,9 @@ class Gear implements IDispatcher
     }
 
     private function initObjects($classess){
+        if (empty($classess)) {
+            return;
+        }
         foreach($classess as $class) {
             $this->createObject($class);
         }

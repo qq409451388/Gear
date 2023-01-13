@@ -46,9 +46,33 @@ class Logger
         self::write($msg, self::TYPE_DATA, $name);
     }
 
+    public static function reSave($msg, $name)
+    {
+        self::clear(self::TYPE_DATA, $name);
+        self::write($msg, self::TYPE_DATA, $name);
+    }
+
+    public static function get($name) {
+        return self::read(self::TYPE_DATA, $name);
+    }
+
     public static function saveAndShow($msg, $name){
         self::write($msg, self::TYPE_DATA, $name);
         self::console($msg);
+    }
+
+    private static function generateFilePath($type, $fileName) {
+        $dirPath = self::LOG_PATH.$type.DIRECTORY_SEPARATOR;
+        $ext = '.log';
+        return $dirPath.$fileName.$ext;
+    }
+
+    public static function clear($type, $fileName) {
+        return @unlink(self::generateFilePath($type, $fileName));
+    }
+
+    private static function read($type, $fileName) {
+        return file_get_contents(self::generateFilePath($type, $fileName));
     }
 
     private static function write($msg, $type, $fileName = '')

@@ -81,6 +81,14 @@ class Env
         }
     }
 
+    public static function isWin() {
+        return self::OS_WINDOWS === self::getSimlpeOs();
+    }
+
+    public static function isUnix() {
+        return self::OS_UNIX === self::getSimlpeOs();
+    }
+
     /**
      * 获取系统根目录
      * @return string

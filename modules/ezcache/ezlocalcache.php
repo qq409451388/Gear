@@ -8,7 +8,7 @@ class EzLocalCache extends EzCache
      * 数据空间
      * @var array<string, EzLocalCacheObject>
      */
-    private $_concurrentHashMap = [];
+    protected $_concurrentHashMap = [];
 
     private $_hashMapBuffer = [];
 
