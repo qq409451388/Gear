@@ -71,3 +71,5 @@ spl_autoload_register(function ($className) use($hash){
         include($filePath2);
     }
 });
+CacheFactory::getInstance(CacheFactory::TYPE_MEM)->set("GLOBAL_USER_CLASS", json_encode($userClasses));
+unset($hash);
