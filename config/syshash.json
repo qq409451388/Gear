@@ -2,7 +2,8 @@
   "LOCAL": {
   },
   "DEV": {
-    "mydevmanual": "centos"
+    "mydevmanual": "centos",
+    "@all": "centos"
   },
   "TEST": {
     "@all": "gh"

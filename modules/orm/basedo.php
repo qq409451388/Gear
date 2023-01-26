@@ -2,8 +2,17 @@
 abstract class BaseDO
 {
     public $id;
+    public $ver;
     public $createTime;
     public $updateTime;
+
+    public function __construct() {
+        $this->id = null;
+        $this->ver = 1;
+        $dateTime = EzDate::now();
+        $this->createTime = $dateTime;
+        $this->updateTime = $dateTime;
+    }
 
     public function toArray(){
         return get_object_vars($this);

@@ -7,13 +7,18 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $keys = $vals = "";
         foreach($info as $k => $v){
             $keys .= '`'.$k.'`,';
-            $vals .= is_numeric($v) ? $v : '"'.$v.'"';
+            if (is_null($v)) {
+                $vals .= "null";
+            } else {
+                $vals .= is_numeric($v) ? $v : '"'.$v.'"';
+            }
             $vals .= ",";
         }
         $keys = trim($keys, ",");
         $vals = trim($vals, ",");
         $vals = "(".$vals.")";
         $sql = "insert into ".$table." (".$keys.") values ".$vals;
+        var_dump($sql);
         return $this->query($sql, [], SqlOptions::new());
     }
 
@@ -95,8 +100,14 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             return $dbInfoItem['Type'] == 'timestamp' ? $dbInfoItem : null;
         }), "Field");
         foreach($info as $column => &$value){
+            if (is_null($value)) {
+                continue;
+            }
             if(in_array($column, $timeStampKeys) && empty($value)){
                 $value = "1970-00-00 00:00:00";
+            }
+            if ($value instanceof EzDate) {
+                $value = $value->formatDate();
             }
             $value = htmlentities($value);
         }

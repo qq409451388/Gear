@@ -1,12 +1,12 @@
 <?php
 abstract class BaseDAO implements EzBean
 {
-    abstract public function getEntity();
-    abstract public function getTable();
+    abstract public function getEntity():string;
+    abstract public function getTable():string;
 
     protected function findOne($sql, $params){
         $sql = "select * from ".$this->getTable()." ".$sql." limit 1";
-        $res = DB::get("cuishou")->queryOne($sql, $params);
+        $res = DB::get(DATABASE)->queryOne($sql, $params);
         $className = $this->getEntity();
         return $className::generate($res);
     }
@@ -24,7 +24,16 @@ abstract class BaseDAO implements EzBean
         if(empty($data)){
             return null;
         }
-        null != $localCache && $localCache->setOrReplace($this->getEntity().$id, EzString::encodeJson($data));
+        null != $localCache && $localCache->set($this->getEntity().$id, EzString::encodeJson($data));
         return $data;
+    }
+
+    public function save(BaseDO $domain) {
+        $data = $domain->toArray();
+        $data2 = [];
+        foreach ($data as $k => $v) {
+            $data2[strtolower($k)] = $v;
+        }
+        return DB::get(DATABASE)->save($this->getTable(), $data2);
     }
 }
