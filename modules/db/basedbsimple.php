@@ -59,6 +59,14 @@ abstract class BaseDBSimple extends AbstractDB
         return $cur[$val] ?? '';
     }
 
+    public function getSql($sqlTemplate, &$binds, SqlOptions $sqlOptions = null) {
+        if(null == $sqlOptions){
+            $sqlOptions = SqlOptions::new();
+        }
+        $this->buildSql($sqlTemplate, $binds, $sqlOptions);
+        return $this->sql;
+    }
+
     protected function buildSql($sqlTemplate, &$binds, SqlOptions $sqlOptions){
         $this->preCheck4Query($sqlTemplate, $binds, $sqlOptions);
         if(empty($binds)){
