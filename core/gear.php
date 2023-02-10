@@ -6,6 +6,9 @@ class Gear implements IDispatcher
         $classess = EzCollection::decodeJson($classess);
         //初始化对象
         $this->initObjects($classess);
+    }
+
+    public function initWithHttp() {
         $this->initRouter();
         $this->initAnno();
     }
@@ -19,7 +22,7 @@ class Gear implements IDispatcher
         }
     }
 
-    private function initRouter(){
+    private function initRouter() {
         foreach(BeanFinder::get()->getAll() as $objName => $obj) {
             $reflection = new ReflectionClass($obj);
             $reflectionMethods = $reflection->getMethods();

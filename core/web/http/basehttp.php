@@ -31,6 +31,7 @@ abstract class BaseHTTP implements IHttp
         $this->port = $port;
         $this->_root = $root;
         Config::set(['host'=>$host, 'port'=>$port]);
+        $this->dispatcher->initWithHttp();
         return $this;
     }
 
