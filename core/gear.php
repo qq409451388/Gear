@@ -25,10 +25,10 @@ class Gear implements IDispatcher
             $reflectionMethods = $reflection->getMethods();
             foreach($reflectionMethods as $reflectionMethod) {
                 if(!$reflection->isSubclassOf(BaseController::class)){
-                    return;
+                    continue;
                 }
                 if(!$reflectionMethod->isPublic() || BaseController::class === $reflectionMethod->getDeclaringClass()->getName()){
-                    return;
+                    continue;
                 }
                 $defaultPath = $objName . '/' . $reflectionMethod->getName();
                 EzRouter::get()->setMapping($defaultPath, $objName, $reflectionMethod->getName());
