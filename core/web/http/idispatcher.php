@@ -1,5 +1,5 @@
 <?php
-Interface IDispatcher
+interface IDispatcher
 {
     /**
      * 使用Http协议初始化
