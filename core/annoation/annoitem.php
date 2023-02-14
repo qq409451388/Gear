@@ -35,6 +35,9 @@ class AnnoItem
 
     public function getValue():Anno{
         $class = $this->annoName;
+        /**
+         * @var $anno Anno
+         */
         $anno = new $class;
         if($this->isNormal()){
             $anno->combine($this->value);
