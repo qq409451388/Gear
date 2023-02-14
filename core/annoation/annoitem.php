@@ -39,6 +39,7 @@ class AnnoItem
          * @var $anno Anno
          */
         $anno = new $class;
+        DBC::assertTrue($anno instanceof Anno, "[Anno Exception] Anno $class is not exists!");
         if($this->isNormal()){
             $anno->combine($this->value);
         }else{
