@@ -203,7 +203,7 @@ abstract class BaseHTTP implements IHttp
             return;
         }
         if(empty(array_diff(self::MIME_TYPE_LIST, explode(",", $type)))){
-            Logger::console("[EzServer] UnSupport Type : {$type}");
+            Logger::console("[EzServer] UnSupport Type : $type");
         }
     }
 
