@@ -36,7 +36,7 @@ abstract class BaseHTTP implements IHttp
     }
 
     protected function buildRequest($buf):Request{
-        $httpRequestInfos = $this->buildHttpRequestSource($buf, $requestBody);
+        $httpRequestInfos = $this->buildHttpRequestSource($buf);
         //检查请求类型
         $this->check($httpRequestInfos->accept);
         //获取web路径
@@ -47,19 +47,24 @@ abstract class BaseHTTP implements IHttp
         $request->setContentLen($httpRequestInfos->contentLength);
         $request->setContentLenActual($httpRequestInfos->contentLengthActual);
         $request->setContentType($httpRequestInfos->contentType);
-        $this->buildRequestArgs($requestBody, $args, $request);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
-        $request->setIsInit(true);
+        if (self::TYPE_MULTIPART_FORMDATA === $httpRequestInfos->contentType->contentType) {
+            $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
+        } else {
+            $request->setIsInit(true);
+        }
+        if ($request->isInit()) {
+            $requestBody = $this->buildHttpRequestBody($httpRequestInfos);
+            $this->buildRequestArgs($requestBody, $args, $request);
+        }
+        $request->setRequestSource($httpRequestInfos);
         return $request;
     }
 
     private function buildRequestArgs($requestBody, $args, Request $request){
         $request->setBody($requestBody);
-        foreach($requestBody as $k => $v){
-            $request->setRequest($k, $v);
-        }
         foreach($args as $k => $v){
-            $request->setRequest($k, $v);
+            $request->setQuery($k, $v);
         }
     }
 
@@ -72,8 +77,9 @@ abstract class BaseHTTP implements IHttp
         }
     }
 
-    private function buildHttpRequestBody($contentType, $requestBody, RequestSource $requestSource = null){
-        $requestBodyArr = null;
+    private function buildHttpRequestBody(RequestSource $requestSource){
+        $contentType = $requestSource->contentType->contentType;
+        $requestBody = $requestSource->bodyContent;
         switch ($contentType){
             case self::TYPE_X_WWW_FORM_URLENCODE:
                 parse_str($requestBody, $requestBodyArr);
@@ -82,33 +88,10 @@ abstract class BaseHTTP implements IHttp
                 $requestBodyArr = EzCollection::decodeJson($requestBody);
                 break;
             case self::TYPE_MULTIPART_FORMDATA:
-                $requestBodyArrInit = explode(PHP_EOL, $requestBody);
-                $requestBodyArr = [];
-                $flag = null;
-                $requestName = null;
-                $isEmptyLine = false;
-                foreach($requestBodyArrInit as $requestBodyLine){
-                    if (EzString::containString($requestBodyLine, "Content-Disposition")) {
-                        preg_match('/Content-Disposition: (?<contentType>\S+);.*/', $requestBodyLine, $matches);
-                        $flag = $matches['contentType'];
-                        preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
-                        $requestName = $matches['requestName']??"";
-                    } elseif (empty($requestBodyLine)) {
-                        $isEmptyLine = true;
-                        continue;
-                    } elseif (!empty($flag) && !empty($requestName) && $isEmptyLine) {
-                        $requestBodyArr[$requestName] = $requestBodyLine;//$this->buildHttpRequest($flag, $requestBodyLine);
-                        $flag = null;
-                        $requestName = null;
-                    } else {
-                        $flag = $requestName = null;
-                    }
-                    //为下一行数据使用
-                    $isEmptyLine = empty($requestBodyLine);
-                }
+                $requestBodyArr = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);
                 break;
             default:
-                $requestBodyArr = [];
+                $requestBodyArr = null;
                 break;
         }
         DBC::assertTrue(!is_null($requestBodyArr),
@@ -116,15 +99,59 @@ abstract class BaseHTTP implements IHttp
         return $requestBodyArr;
     }
 
-    private function buildHttpRequestSource($buf, &$body):RequestSource{
+    private function buildHttpRequestBodyMultiPartForm(RequestSource $requestSource, string $requestBody) {
+        $requestBodyArrInit = explode("\r\n", $requestBody);
+        $requestBodyArr = [];
+        foreach ($requestBodyArrInit as $requestBodyLine) {
+            $matchBoundary = false;
+            if (!empty($requestBodyLine)) {
+                $matchBoundary = false !== strpos($requestBodyLine, $requestSource->contentType->boundary);
+            }
+            if ($matchBoundary) {
+                $requestBodyObj = new RequestBody();
+                //是否完成body行参数取值
+                $flag = true;
+            } else if (($flag && !empty($requestBodyLine))) {
+                preg_match('/Content-Disposition: (?<contentDispostion>\S+);.*/', $requestBodyLine, $matches);
+                if (is_null($requestBodyObj->contentDispostion)) {
+                    $requestBodyObj->contentDispostion = $matches['contentDispostion']??null;
+                }
+                preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
+                if (is_null($requestBodyObj->requestName)) {
+                    $requestBodyObj->requestName = $matches['requestName']??null;
+                    //初始化
+                    $requestBodyArr[$requestBodyObj->requestName] = $requestBodyObj;
+                }
+                preg_match('/Content-Type: (?<contentType>[\/a-zA-Z0-9]+)(.*)/', $requestBodyLine, $matches);
+                if (is_null($requestBodyObj->contentType)) {
+                    $requestBodyObj->contentType = $matches['contentType']??null;
+                }
+            } elseif (empty($requestBodyLine)) {
+                $flag = false;
+            } elseif (!$flag && $isEmptyLine) {
+                if (is_null($requestBodyObj->content)) {
+                    $requestBodyObj->content = $requestBodyLine;
+                } else {
+                    $requestBodyObj->content .= "\r\n".$requestBodyLine;
+                }
+                $isEmptyLine = true;
+                continue;
+            }
+            //为下一行数据使用
+            $isEmptyLine = empty($requestBodyLine);
+        }
+        return $requestBodyArr;
+    }
+
+    private function buildHttpRequestSource($buf):RequestSource{
         $requestSource = new RequestSource();
         $httpOptions = explode("\r\n", $buf);
         $firstLine = explode(" ", array_shift($httpOptions));
         $requestSource->requestMethod = strtolower($firstLine[0]);
         $requestSource->path = $firstLine[1]??"";
         $requestSource->httpVer = $firstLine[2]??"";
-        $whenBody = false;
         $requestSource->contentLengthActual = 0;
+        $whenBody = false;
         $body = "";
         while(true){
             $httpOption = array_shift($httpOptions);
@@ -144,17 +171,17 @@ abstract class BaseHTTP implements IHttp
                 if($key == "contentType"){
                     $contentType = explode(";", $value);
                     $value = new HttpContentType();
-                    $value->contentType = $contentType[0];
-                    $value->boundary = str_replace("boundary=", "", $contentType[1]??"");
+                    $value->contentType = trim($contentType[0]);
+                    $value->boundary = trim(str_replace("boundary=", "", $contentType[1]??""));
                 }
-                $requestSource->$key = $value;
+                $requestSource->$key = is_numeric($value) ? (int) $value : $value;
             }
 
         }
         //$body = trim($body, PHP_EOL);
         $body = substr($body, 0, -2);
         $requestSource->contentLengthActual = strlen($body);
-        $body = $this->buildHttpRequestBody(@$requestSource->contentType->contentType??null, $body, $requestSource);
+        $requestSource->bodyContent = $body;
         return $requestSource;
     }
 
@@ -204,6 +231,19 @@ abstract class BaseHTTP implements IHttp
         }
         if(empty(array_diff(self::MIME_TYPE_LIST, explode(",", $type)))){
             Logger::console("[EzServer] UnSupport Type : $type");
+        }
+    }
+
+    protected function appendRequest(Request $request, string $buf) {
+        $requestSource = $request->getRequestSource();
+        $requestSource->bodyContent .= $buf;
+        $requestSource->contentLengthActual = strlen($requestSource->bodyContent);
+        if ($requestSource->contentLengthActual === $requestSource->contentLength) {
+            $bodyArr = $this->buildHttpRequestBody($requestSource);
+            $this->buildRequestArgs($bodyArr, [], $request);
+            $request->setIsInit(true);
+        } else {
+            $request->setIsInit(false);
         }
     }
 

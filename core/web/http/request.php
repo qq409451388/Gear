@@ -15,13 +15,19 @@ class Request implements IRequest
     //get post mixed
     private $requestMethod = null;
     private $path;
-    private $request = [];
+
+    private $query = [];
     private $body = [];
     //request build succ
     private $isInit = false;
 
-    public function setRequest($key, $value){
-        $this->request[$key] = $value;
+    /**
+     * @var RequestSource $requestSource
+     */
+    private $requestSource = null;
+
+    public function setQuery($key, $value){
+        $this->query[$key] = $value;
     }
 
     public function get($key, $default=null){
@@ -29,15 +35,20 @@ class Request implements IRequest
     }
 
     public function getAll(){
-        return $this->request;
+        return $this->query;
     }
 
-    public function setBody($body){
+    public function setBody(array $body){
         $this->body = $body;
     }
 
-    public function getBody(){
-        return $this->body;
+    /**
+     * 获取请求体
+     * @param $key
+     * @return RequestBody
+     */
+    public function getBody($key){
+        return $this->body[$key]??new RequestNullBody();
     }
 
     public function filter(){
@@ -123,6 +134,19 @@ class Request implements IRequest
      */
     public function setIsInit(bool $isInit): void
     {
+        $this->contentLenActual = $this->contentLen;
         $this->isInit = $isInit;
+    }
+
+    public function getContentLen() {
+        return $this->contentLen;
+    }
+
+    public function setRequestSource(RequestSource $requestSource) {
+        $this->requestSource = $requestSource;
+    }
+
+    public function getRequestSource():RequestSource {
+        return $this->requestSource;
     }
 }

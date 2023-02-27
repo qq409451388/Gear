@@ -21,4 +21,6 @@ class RequestSource
      * @var HttpContentType
      */
     public $contentType;
+
+    public $bodyContent;
 }

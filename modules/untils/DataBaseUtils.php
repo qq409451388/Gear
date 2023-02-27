@@ -128,4 +128,21 @@ class DataBaseUtils
         }
         return $result;
     }
+
+    public static function generateSqlLite($sql) {
+        $splited = self::splitSql($sql);
+        var_dump($splited);die;
+    }
+
+    public static function generateSqlBeauty($sql) {
+
+    }
+
+    private static function splitSql($sql) {
+        $template = "(.*)@(?<annoName>[a-zA-Z0-9]+)\(\'?\"?(?<content>[\/a-zA-Z0-9]+)\'?\"?\)/";
+        $sql = "select * from table_cs where 1 = 1";
+        $template = "/^select\s+(?<fieldList>(.*))\s+from\s+(?<tableName>(.*))where\s+(?<after>(.*))/";
+        preg_match_all($template, $sql, $matched);
+        return $matched;
+    }
 }
