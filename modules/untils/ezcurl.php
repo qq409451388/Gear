@@ -60,6 +60,9 @@ class EzCurl
     }
 
     public function setQuery(array $query){
+        if (empty($query)) {
+            return $this;
+        }
         $this->query = http_build_query($query);
         $parseUrl = parse_url($this->url);
         $fixParams = empty($parseUrl['query']) ? "?" : "&";
@@ -293,7 +296,7 @@ class EzCurl
     private function geneRequestMsg($httpMethod, &$res){
         $requestHeader = "";
         $responseHeader = "";
-        $msg = 'EzCurl ['.strtoupper($httpMethod).'] '.$this->url."?".$this->query.PHP_EOL;
+        $msg = 'EzCurl ['.strtoupper($httpMethod).'] '.$this->url.PHP_EOL;
         if($this->showHeader)
         {
             $requestHeader = $this->getInfo()['request_header']??"";

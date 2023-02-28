@@ -48,7 +48,7 @@ abstract class BaseHTTP implements IHttp
         $request->setContentLenActual($httpRequestInfos->contentLengthActual);
         $request->setContentType($httpRequestInfos->contentType);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
-        if (self::TYPE_MULTIPART_FORMDATA === $httpRequestInfos->contentType->contentType) {
+        if (self::TYPE_MULTIPART_FORMDATA === @$httpRequestInfos->contentType->contentType??null) {
             $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
         } else {
             $request->setIsInit(true);
@@ -78,7 +78,7 @@ abstract class BaseHTTP implements IHttp
     }
 
     private function buildHttpRequestBody(RequestSource $requestSource){
-        $contentType = $requestSource->contentType->contentType;
+        $contentType = @$requestSource->contentType->contentType??null;
         $requestBody = $requestSource->bodyContent;
         switch ($contentType){
             case self::TYPE_X_WWW_FORM_URLENCODE:
@@ -91,11 +91,9 @@ abstract class BaseHTTP implements IHttp
                 $requestBodyArr = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);
                 break;
             default:
-                $requestBodyArr = null;
+                $requestBodyArr = [];
                 break;
         }
-        DBC::assertTrue(!is_null($requestBodyArr),
-            "[Http] BuildRequestBody Fail! Params:" .EzString::encodeJson(func_get_args()));
         return $requestBodyArr;
     }
 

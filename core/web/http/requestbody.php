@@ -7,6 +7,3 @@ class RequestBody
 
     public $content;
 }
-
-class RequestNullBody extends RequestBody {
-}

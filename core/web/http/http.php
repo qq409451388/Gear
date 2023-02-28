@@ -42,14 +42,14 @@ class HTTP extends BaseHTTP
             if($msgsocket = socket_accept($this->socket)){
                 //读取请求内容
                 $request = $this->buildRequest(socket_read($msgsocket, self::SOCKET_READ_LENGTH));
-                do {
+                while (!$request->isInit()) {
                     $contentLenShard = $request->getRequestSource()->contentLength - $request->getRequestSource()->contentLengthActual;
                     $this->appendRequest($request, socket_read($msgsocket, $contentLenShard));
-                } while (!$request->isInit());
+                }
                 $response = $this->getResponse($request);
                 $content = $response->toString();
-                socket_write($msgsocket, $content, strlen($content));
-                socket_close($msgsocket);
+                @socket_write($msgsocket, $content, strlen($content));
+                @socket_close($msgsocket);
             }
         }
     }
