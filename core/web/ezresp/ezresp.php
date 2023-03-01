@@ -38,7 +38,6 @@ class EzResp
         $this->socket->setResponseHandler(function(RespRequest $request){
             try {
                 $result = call_user_func_array([$this->localCache, $request->command], $request->args);
-                var_dump($this->localCache->getAll(), $result);
                 $response = $this->respInterpreter->encode($result);
             } catch (Exception $e) {
                 $response = new RespResponse();
