@@ -6,19 +6,19 @@ abstract class BaseTcpServer
     /**
      * @var socket|null 主进程
      */
-    private $master = null;
+    protected $master = null;
     /**
      * @var int 最大连接数
      */
-    private $maxConnectNum = 200;
+    protected $maxConnectNum = 200;
 
-    private $timeOut = 3;
+    protected $timeOut = 3;
 
     /**
      * userKey => userSocket
      * @var array socket连接池
      */
-    private $connectPool = [];
+    protected $connectPool = [];
 
     const SOCKET_READ_LENGTH = 1024;
     const MASTER = "EZTCP_MASTER";
@@ -38,7 +38,7 @@ abstract class BaseTcpServer
         $this->addConnectPool($this->master, self::MASTER);
     }
 
-    private function addConnectPool($clientSocket, $alias) {
+    protected function addConnectPool($clientSocket, $alias) {
         DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         $this->connectPool[$alias] = $clientSocket;
         if (self::MASTER != $alias) {

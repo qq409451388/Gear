@@ -6,21 +6,8 @@
  * 2、client管理
  * 3、client通知
  */
-class EzWebSocketServer
+class EzWebSocketServer extends EzTcpServer
 {
-    /**
-     * @var null 主进程
-     */
-    private $master = null;
-    /**
-     * @var int 最大连接数
-     */
-    private static $maxConnectNum = 200;
-    /**
-     * userKey => userSocket
-     * @var array socket连接池
-     */
-    private $connectPool = [];
     /**
      * userName => userKey
      * @var array $socketKeys
@@ -40,15 +27,7 @@ class EzWebSocketServer
      * @var array 待检查的socket列表
      */
     private $checkActiveList = [];
-    /**
-     * @var int 超时时间
-     */
-    private $timeOut = 3;
 
-    private $ip;
-    private $port;
-
-    private const MASTER = "EZTCP_MASTER";
     private const BIND_USER_KEY = "BIND_USER_KEY";
     private const BIND_USER_KEY_OK = "BIND_USER_KEY_OK";
     private const CHECK_ACTIVE = "CHECK_ACTIVE";
@@ -57,29 +36,14 @@ class EzWebSocketServer
      * 丢弃socket对象，检查次数阈值
      */
     private const THRESOLD_THROW = 5;
-
-    public function init($ip, $port){
-        $this->ip = $ip;
-        $this->port = $port;
-
-        $this->master = socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
-        socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
-        socket_bind($this->master,$this->ip,$this->port);
-        socket_listen($this->master);
-        $isSucc = socket_last_error();
-        if(0 != $isSucc){
-            $err = socket_strerror($isSucc);
-            DBC::throwEx("[EzTcpServer]Init Fail! ".$err);
-        }
-        $this->addConnectPool($this->master, self::MASTER);
-        return $this;
+    public function _construct(string $ip, $port) {
+        parent::_construct($ip, $port);
     }
 
     /**
-     * @param $funcClientSend @var回调函数，接收客户端msg并处理
      * @param $funcAfterHandShake @var回调函数，处理握手后的动作
      */
-    public function start($funcClientSend, $funcAfterHandShake = null){
+    public function start($funcAfterHandShake = null){
         Logger::console("Start Server Success! ws://".$this->ip.":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;
@@ -93,13 +57,13 @@ class EzWebSocketServer
                 if($this->master == $readSocket) {
                     $this->newConnect();
                 } else {
-                    $recv = @socket_recv($readSocket, $buffer, 8192, 0);
+                    $recv = @socket_recv($readSocket, $buffer, self::SOCKET_READ_LENGTH, 0);
                     if ($recv == 0) {
                         $this->disConnect($readSocket);
                         continue;
                     }
                     //接收并处理消息体
-                    $this->receiveConnect($buffer, $readSocket, $funcAfterHandShake, $funcClientSend);
+                    $this->receiveConnect($buffer, $readSocket, $funcAfterHandShake);
                 }
             }
         }
@@ -137,7 +101,7 @@ class EzWebSocketServer
             Logger::console("Client Connect Fail!");
             return;
         }
-        if (count($this->connectPool) > self::$maxConnectNum) {
+        if (count($this->connectPool) > $this->maxConnectNum) {
             Logger::console("Over MaxConnectNum!");
             return;
         }
@@ -145,8 +109,8 @@ class EzWebSocketServer
         $this->addTempConnectPool($client);
     }
 
-    private function receiveConnect($buffer, $readSocket, $funcAfterHandShake, $funcClientSend){
-        if(!($this->isHandShake[(string) $readSocket]??false)){
+    private function receiveConnect($buffer, $readSocket, $funcAfterHandShake){
+        if(!($this->isHandShake[(int) $readSocket]??false)){
             list($resource, $host, $origin, $key) = $this->doHandShake($readSocket, $buffer);
             if(!is_null($funcAfterHandShake)){
                 $funcAfterHandShake($readSocket, $key);
@@ -161,56 +125,23 @@ class EzWebSocketServer
                     @$this->$systemFunc($obj['userName'], $obj['key'], $readSocket);
                 }
             }else{
-                $funcClientSend($readSocket, $clientMsg);
+                $requst = $this->buildRequest($clientMsg);
+                $response = $this->buildResponse($requst);
+                $this->sendToClient($readSocket, $response->toString());
             }
         }
     }
 
-    private function bindUserName($socket, $key){
-        $data = [
-            'key' => $key,
-            'dataType' => self::BIND_USER_KEY
-        ];
-        $data = EzString::encodeJson($data);
-        $this->sendToUser($socket, $data);
-        $this->connectPool[$key] = $socket;
-        unset($this->connectPool[(string) $socket]);
+    private function addTempConnectPool($clientSocket){
+        $this->addConnectPool($clientSocket, (int)$clientSocket);
     }
 
-    private function bindUserNameOk($userName, $key, $socket){
-        $this->socketKeys[$userName] = $this->socketKeys[(string) $socket];
-        unset($this->socketKeys[(string) $socket]);
-        $data = [
-            'key' => $key,
-            'dataType' => self::BIND_USER_KEY_OK
-        ];
-        $data = EzString::encodeJson($data);
-        $this->sendToUser($socket, $data);
-    }
-
-    private function checkClientActive($socket){
+    private function checkClientActive($socket) {
         $data = [
             'dataType' => self::CHECK_ACTIVE
         ];
         $data = EzString::encodeJson($data);
-        $this->sendToUser($socket, $data);
-    }
-
-    private function checkClientActiveOk($userName, $key, $socket){
-        unset($this->checkActiveList[$key]);
-    }
-
-    private function addConnectPool($clientSocket, $alias){
-        DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
-        $this->connectPool[$alias] = $clientSocket;
-        if(self::MASTER != $alias){
-            socket_set_nonblock($clientSocket);
-            Logger::console($clientSocket." CONNECTED!");
-        }
-    }
-
-    private function addTempConnectPool($clientSocket){
-        $this->addConnectPool($clientSocket, (string)$clientSocket);
+        $this->sendToClient($socket, $data);
     }
 
     private function hasConnect($alias){
@@ -222,10 +153,10 @@ class EzWebSocketServer
             return;
         }
         $userKey = array_search($clientSocket, $this->connectPool);
-        unset($this->isHandShake[(string)$clientSocket]);
+        unset($this->isHandShake[(int)$clientSocket]);
         $userName = array_search($userKey, $this->socketKeys);
         unset($this->socketKeys[$userName]);
-        unset($this->socketNoHash[(string) $clientSocket]);
+        unset($this->socketNoHash[(int) $clientSocket]);
         socket_close($clientSocket);
         unset($this->connectPool[$userKey]);
     }
@@ -257,11 +188,22 @@ class EzWebSocketServer
             "Connection: Upgrade\r\n" .
             "Sec-WebSocket-Accept: " . $this->calcKey($key) . "\r\n\r\n";  //必须以两个回车结尾
         socket_write($socket, $upgrade, strlen($upgrade));
-        $this->isHandShake[(string)$socket] = true;
-        $this->socketKeys[(string)$socket] = $key;
+        $this->isHandShake[(int)$socket] = true;
+        $this->socketKeys[(int)$socket] = $key;
         $this->bindUserName($socket, $key);
-        $this->socketNoHash[(string)$socket] = $key;
+        $this->socketNoHash[(int)$socket] = $key;
         return [$resource, $host, $origin, $key];
+    }
+
+    private function bindUserName($socket, $key){
+        $data = [
+            'key' => $key,
+            'dataType' => self::BIND_USER_KEY
+        ];
+        $data = EzString::encodeJson($data);
+        $this->sendToClient($socket, $data);
+        $this->connectPool[$key] = $socket;
+        unset($this->connectPool[(int) $socket]);
     }
 
     //获取请求头
@@ -304,9 +246,9 @@ class EzWebSocketServer
      * @param $receiver
      * @param string $content
      */
-    public function sendToUser($receiver, string $content){
+    public function sendToClient($receiver, string $content){
         $content = $this->frame($content);
-        socket_write($receiver, $content);
+        socket_write($receiver, $content, strlen($content));
     }
 
     /**
@@ -314,7 +256,7 @@ class EzWebSocketServer
      * @param $receiver
      * @param string $content
      */
-    public function sendToUserByAlias($alias, string $content){
+    public function sendToClientByAlias($alias, string $content){
         if(!$this->hasConnect($alias)){
             Logger::console("[EzWebSocketServer] Unknow User {$alias}!");
            return;
@@ -345,7 +287,7 @@ class EzWebSocketServer
      * @param string $content
      */
     public function sendToMaster(string $content){
-        $this->sendToUser($this->master, $content);
+        $this->sendToClient($this->master, $content);
     }
 
     /**
@@ -353,7 +295,7 @@ class EzWebSocketServer
      * @param array $receivers
      * @param string $content
      */
-    public function sendToUsers(array $receivers, string $content){
+    public function sendToClients(array $receivers, string $content){
         $content = $this->frame($content);
         foreach($receivers as $receiver){
             //跳过Master
@@ -368,7 +310,7 @@ class EzWebSocketServer
         if(!is_resource($socket)){
             return null;
         }
-        return $this->socketKeys[(string)$socket]??null;
+        return $this->socketKeys[(int)$socket]??null;
     }
 
     public function getIp(){

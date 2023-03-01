@@ -21,9 +21,11 @@ class EzTcpServer extends BaseTcpServer
 
     public function setRequestHandler(Closure $requestHandler) {
         $this->requestHandler = $requestHandler;
+        return $this;
     }
 
     public function setResponseHandler(Closure $responseHandler) {
         $this->responseHandler = $responseHandler;
+        return $this;
     }
 }
