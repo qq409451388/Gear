@@ -4,6 +4,7 @@ class EzTcpServer extends BaseTcpServer
 
     private $requestHandler;
     private $responseHandler;
+    private $encodeHandler;
 
     public function __construct(string $ip, $port) {
         parent::_construct($ip, $port);
@@ -27,5 +28,13 @@ class EzTcpServer extends BaseTcpServer
     public function setResponseHandler(Closure $responseHandler) {
         $this->responseHandler = $responseHandler;
         return $this;
+    }
+
+    public function setInterpreter(Interpreter $interpreter) {
+        $this->encodeHandler = $interpreter;
+    }
+
+    public function encodeResponse(IResponse $response): string {
+        return $this->encodeHandler->encode($response);
     }
 }

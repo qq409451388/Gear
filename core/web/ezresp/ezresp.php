@@ -19,8 +19,8 @@ class EzResp
      */
     private $localCache;
 
-    public function __construct(IDispatcher $dispatcher) {
-        $this->dispatcher = $dispatcher;
+    public function __construct() {
+        //$this->dispatcher = $dispatcher;
         $this->respInterpreter = new RespInterpreter();
         $this->localCache = new EzLocalCache();
     }
@@ -30,7 +30,7 @@ class EzResp
         $this->port = $port;
         $this->socket = new EzTcpServer($this->ip, $this->port);
         Config::set(['ip'=>$ip, 'port'=>$port]);
-        $this->dispatcher->initWithTcp();
+        //$this->dispatcher->initWithTcp();
         $this->socket->setRequestHandler(function(string $buf) {
             return $this->respInterpreter->decode($buf);
         });
@@ -38,7 +38,23 @@ class EzResp
         $this->socket->setResponseHandler(function(RespRequest $request){
             try {
                 $result = call_user_func_array([$this->localCache, $request->command], $request->args);
-                $response = $this->respInterpreter->encode($result);
+
+                $response = new RespResponse();
+                if (is_bool($result)) {
+                    $isSuccess = $result;
+                    $response->resultDataType = RespResponse::TYPE_BOOL;
+                } else if (is_array($result)) {
+                    $response->resultDataType = RespResponse::TYPE_ARRAY;
+                    $isSuccess = true;
+                } else if (is_int($result)) {
+                    $response->resultDataType = RespResponse::TYPE_INT;
+                    $isSuccess = true;
+                } else {
+                    $response->resultDataType = RespResponse::TYPE_NORMAL;
+                    $isSuccess = true;
+                }
+                $response->isSuccess = $isSuccess;
+                $response->resultData = $result;
             } catch (Exception $e) {
                 $response = new RespResponse();
                 $response->resultDataType = RespResponse::TYPE_BOOL;
@@ -47,6 +63,8 @@ class EzResp
             }
             return $response;
         });
+
+        $this->socket->setInterpreter($this->respInterpreter);
         $this->socket->start();
     }
 }

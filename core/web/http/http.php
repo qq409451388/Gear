@@ -47,7 +47,7 @@ class HTTP extends BaseHTTP
                     $this->appendRequest($request, socket_read($msgsocket, $contentLenShard));
                 }
                 $response = $this->getResponse($request);
-                $content = $response->toString();
+                $content = BeanFinder::get()->pull(HttpInterpreter::class)->encode($response);
                 @socket_write($msgsocket, $content, strlen($content));
                 @socket_close($msgsocket);
             }

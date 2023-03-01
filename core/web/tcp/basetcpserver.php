@@ -97,7 +97,7 @@ abstract class BaseTcpServer
                     //接收并处理消息体
                     $request = $this->buildRequest($buffer);
                     $response = $this->buildResponse($request);
-                    $content = $response->toString();
+                    $content = $this->encodeResponse($response);
                     @socket_write($readSocket, $content, strlen($content));
                     //$this->disConnect($readSocket);
                 }
@@ -195,4 +195,5 @@ abstract class BaseTcpServer
 
     abstract function buildRequest(string $buf):IRequest;
     abstract function buildResponse(IRequest $request):IResponse;
+    abstract function encodeResponse(IResponse $response):string;
 }

@@ -1,25 +1,39 @@
 <?php
 class RespInterpreter implements Interpreter
 {
-    public function encode($content):IResponse
+    public function encode(IResponse $response):string
     {
-        $response = new RespResponse();
-        if (is_bool($content)) {
-            $isSuccess = $content;
-            $response->resultDataType = RespResponse::TYPE_BOOL;
-        } else if (is_array($content)) {
-            $response->resultDataType = RespResponse::TYPE_ARRAY;
-            $isSuccess = true;
-        } else if (is_int($content)) {
-            $response->resultDataType = RespResponse::TYPE_INT;
-            $isSuccess = true;
-        } else {
-            $response->resultDataType = RespResponse::TYPE_NORMAL;
-            $isSuccess = true;
+        /**
+         * @var RespResponse $response
+         */
+        switch ($response->resultDataType) {
+            case RespResponse::TYPE_BOOL:
+                return $response->isSuccess ? "+OK\r\n" : "-Err ".$response->msg."\r\n";
+            case RespResponse::TYPE_ARRAY:
+                return $this->arrayToString($response);
+            case RespResponse::TYPE_INT:
+                return ":".$response->resultData."\r\n";
+            case RespResponse::TYPE_NORMAL:
+            default:
+                return "$".strlen($response->resultData)."\r\n".$response->resultData."\r\n";
         }
-        $response->isSuccess = $isSuccess;
-        $response->resultData = $content;
-        return $response;
+    }
+
+    /**
+     * @param $response RespResponse
+     * @return string
+     */
+    private function arrayToString($response) {
+        $res = "*".count($response->resultData)."\r\n";
+        foreach ($response->resultData as $data) {
+            if (is_int($data)) {
+                $res .= ":".$data."\r\n";
+            } else {
+                $res .= "$".strlen($data)."\r\n".$data."\r\n";
+            }
+        }
+        $res .= "\r\n";
+        return $res;
     }
 
     public function decode(string $content):IRequest
