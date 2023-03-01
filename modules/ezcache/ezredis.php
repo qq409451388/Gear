@@ -286,7 +286,6 @@ class EzRedis extends EzCache
     {
         $res = $this->exec("LRANGE", $k, $start, $end);
         if (!is_array($res)) {
-            var_dump($res);
             return [];
         }
         return $res;

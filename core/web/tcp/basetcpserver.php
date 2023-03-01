@@ -3,9 +3,25 @@ abstract class BaseTcpServer
 {
     protected $ip;
     protected $port;
-    protected $socket;
+    /**
+     * @var socket|null 主进程
+     */
+    private $master = null;
+    /**
+     * @var int 最大连接数
+     */
+    private $maxConnectNum = 200;
 
-    const SOCKET_READ_LENGTH = 8192;
+    private $timeOut = 3;
+
+    /**
+     * userKey => userSocket
+     * @var array socket连接池
+     */
+    private $connectPool = [];
+
+    const SOCKET_READ_LENGTH = 1024;
+    const MASTER = "EZTCP_MASTER";
 
     public function _construct(string $ip, $port) {
         $this->ip = $ip;
@@ -14,6 +30,82 @@ abstract class BaseTcpServer
     }
 
     private function init() {
+        $this->master = socket_create(AF_INET, SOCK_STREAM, 0);
+        socket_bind($this->master, $this->ip, $this->port);
+        socket_listen($this->master, 511);
+        socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
+        socket_set_nonblock($this->master);
+        $this->addConnectPool($this->master, self::MASTER);
+    }
+
+    private function addConnectPool($clientSocket, $alias) {
+        DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
+        $this->connectPool[$alias] = $clientSocket;
+        if (self::MASTER != $alias) {
+            socket_set_nonblock($clientSocket);
+            Logger::console($clientSocket." CONNECTED!");
+        }
+    }
+
+    private function hasConnect($alias) {
+        return isset($this->connectPool[$alias]);
+    }
+
+    private function newConnect() {
+        //新连接加入
+        $client = socket_accept($this->master);
+        if ($client < 0) {
+            Logger::console("Client Connect Fail!");
+            return;
+        }
+        if (count($this->connectPool) > $this->maxConnectNum) {
+            Logger::console("Over MaxConnectNum!");
+            return;
+        }
+        //刚刚建立连接的socket对象没有别名
+        $this->addConnectPool($client, (string)$client);
+    }
+
+    private function disConnect($clientSocket) {
+        if ($this->master == $clientSocket) {
+            return;
+        }
+        $clientKey = array_search($clientSocket, $this->connectPool);
+        socket_close($clientSocket);
+        Logger::console($clientSocket." CLOSED!");
+        unset($this->connectPool[$clientKey]);
+    }
+
+    public function start() {
+        Logger::console("Start Server Success! tcp://".$this->ip.":".$this->port);
+        while (true) {
+            $readSockets = $this->connectPool;
+            $writeSockets = null;
+            $except = null;
+            $ready = @socket_select($readSockets, $writeSockets, $except, $this->timeOut);
+            $startSucc = false !== $ready;
+            DBC::assertTrue($startSucc, "[EzTcpServer] Srart Fail!".socket_strerror(socket_last_error()));
+            foreach ($readSockets as $readSocket) {
+                if ($this->master == $readSocket) {
+                    $this->newConnect();
+                } else {
+                    $recv = @socket_recv($readSocket, $buffer, self::SOCKET_READ_LENGTH, 0);
+                    if ($recv == 0) {
+                        $this->disConnect($readSocket);
+                        continue;
+                    }
+                    //接收并处理消息体
+                    $request = $this->buildRequest($buffer);
+                    $response = $this->buildResponse($request);
+                    $content = $response->toString();
+                    @socket_write($readSocket, $content, strlen($content));
+                    //$this->disConnect($readSocket);
+                }
+            }
+        }
+    }
+
+    /*private function init() {
         //创建socket套接字
         $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         // set the option to reuse the port
@@ -32,22 +124,74 @@ abstract class BaseTcpServer
             Logger::console("[EzTcpServer]Start Fail! ".$err);
             exit();
         }
+    }*/
+
+/*    private function init() {
+        $add = "tcp://".$this->ip.":".$this->port;
+        $this->socket = stream_socket_server($add, $errno, $errstr);
+        if (0 == $errno) {
+            Logger::console("[EzTcpServer]Start Success ".$add);
+        } else {
+            Logger::console("[EzTcpServer]Start Fail! ".$errstr);
+            exit();
+        }
+        stream_set_blocking($this->socket, 0);
+        $base = event_base_new();
+        $event = event_new();
+        event_set($event, $this->socket, EV_READ | EV_PERSIST, 'ev_accept', $base);
+        event_base_set($event, $base);
+        event_add($event);
+        event_base_loop($base);
+    }*/
+
+    /*private function ev_accept($socket, $flag, $base) {
+        $connection = stream_socket_accept($socket);
+        stream_set_blocking($connection, 0);
+        $buffer = event_buffer_new($connection, 'ev_read', NULL, 'ev_error',  $connection);
+        event_buffer_base_set($buffer, $base);
+        event_buffer_timeout_set($buffer, 30, 30);
+        event_buffer_watermark_set($buffer, EV_READ, 0, 0xffffff);
+        event_buffer_priority_set($buffer, 10);
+        event_buffer_enable($buffer, EV_READ | EV_PERSIST);
     }
 
-    public function start() {
-        while(true)
-        {
-            //接收客户端请求
-            if($msgsocket = socket_accept($this->socket)){
-                //读取请求内容
-                $request = $this->buildRequest(socket_read($msgsocket, self::SOCKET_READ_LENGTH));
-                $response = $this->buildResponse($request);
-                $content = $response->toString();
-                @socket_write($msgsocket, $content, strlen($content));
-                @socket_close($msgsocket);
-            }
-        }
+    private function ev_error($buffer, $error, $connection) {
+        event_buffer_disable($buffer, EV_READ | EV_WRITE);
+        event_buffer_free($buffer);
+        fclose($connection);
     }
+
+    private function ev_read($buffer, $connection) {
+        $read = event_buffer_read($buffer, self::SOCKET_READ_LENGTH);
+        $request = $this->buildRequest($read);
+        $response = $this->buildResponse($request);
+        $content = $response->toString();
+        @socket_write($connection, $content, strlen($content));
+    }*/
+
+    /*public function start() {
+        try {
+            while(true)
+            {
+                //接收客户端请求
+                if($msgsocket = socket_accept($this->socket)){
+                    //读取请求内容
+                    $request = $this->buildRequest(socket_read($msgsocket, self::SOCKET_READ_LENGTH));
+                    $response = $this->buildResponse($request);
+                    $content = $response->toString();
+                    @socket_write($msgsocket, $content, strlen($content));
+                    @socket_close($msgsocket);
+                }
+            }
+        } catch (Exception $e) {
+            $this->init();
+            $this->start();
+        } catch (Throwable $t){
+            $this->init();
+            $this->start();
+        }
+
+    }*/
 
     abstract function buildRequest(string $buf):IRequest;
     abstract function buildResponse(IRequest $request):IResponse;
