@@ -13,6 +13,10 @@ class Gear implements IDispatcher
         $this->initAnno();
     }
 
+    public function initWithTcp() {
+        $this->initAnno();
+    }
+
     private function initObjects($classess){
         if (empty($classess)) {
             return;

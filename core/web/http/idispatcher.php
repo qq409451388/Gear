@@ -20,4 +20,10 @@ interface IDispatcher
      * @return IRouteMapping
      */
     public function matchedRouteMapping(string $path):IRouteMapping;
+
+    /**
+     * 使用Tcp初始化
+     * @return mixed
+     */
+    public function initWithTcp();
 }

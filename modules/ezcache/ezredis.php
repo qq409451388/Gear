@@ -71,7 +71,7 @@ class EzRedis extends EzCache
         if ($this->response[0] == '-') {
             $this->response = ltrim($this->response, '-');
             list($errstr, $this->response) = explode("\r\n", $this->response, 2);
-            DBC::assertTrue($this->isClusterMode(), "[EzRedis Exception] ".$errstr, 500);
+            DBC::assertTrue($this->isClusterMode(), "[EzRedis Exception] \r\nSource Message:".$errstr, 500);
             return $this->whenErr($errstr);
         }
 
@@ -284,7 +284,12 @@ class EzRedis extends EzCache
 
     public function lRange($k, $start, $end): array
     {
-        return $this->exec("LRANGE", $k, $start, $end);
+        $res = $this->exec("LRANGE", $k, $start, $end);
+        if (!is_array($res)) {
+            var_dump($res);
+            return [];
+        }
+        return $res;
     }
 
     public function lLen(string $k): int
