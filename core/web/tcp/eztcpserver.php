@@ -2,8 +2,19 @@
 class EzTcpServer extends BaseTcpServer
 {
 
+    /**
+     * @var Closure Request对象生成器匿名函数
+     */
     private $requestHandler;
+
+    /**
+     * @var Closure Response对象生成器匿名函数
+     */
     private $responseHandler;
+
+    /**
+     * @var Interpreter 协议解释器
+     */
     private $encodeHandler;
 
     public function __construct(string $ip, $port) {

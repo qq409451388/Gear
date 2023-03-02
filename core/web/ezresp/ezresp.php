@@ -5,22 +5,21 @@ class EzResp
 
     private $port;
 
-    private $dispatcher;
-
     protected $socket;
 
     /**
+     * Resp协议解释器
      * @var RespInterpreter
      */
     private $respInterpreter;
 
     /**
+     * 本地缓存服务
      * @var EzLocalCache
      */
     private $localCache;
 
     public function __construct() {
-        //$this->dispatcher = $dispatcher;
         $this->respInterpreter = new RespInterpreter();
         $this->localCache = new EzLocalCache();
     }
@@ -30,7 +29,6 @@ class EzResp
         $this->port = $port;
         $this->socket = new EzTcpServer($this->ip, $this->port);
         Config::set(['ip'=>$ip, 'port'=>$port]);
-        //$this->dispatcher->initWithTcp();
         $this->socket->setRequestHandler(function(string $buf) {
             return $this->respInterpreter->decode($buf);
         });

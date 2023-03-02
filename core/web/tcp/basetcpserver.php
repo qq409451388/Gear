@@ -6,12 +6,15 @@ abstract class BaseTcpServer
     /**
      * @var socket|null 主进程
      */
-    protected $master = null;
+    private $master = null;
     /**
      * @var int 最大连接数
      */
     protected $maxConnectNum = 200;
 
+    /**
+     * @var int 连接超时时间（单位：s）
+     */
     protected $timeOut = 3;
 
     /**
@@ -20,7 +23,14 @@ abstract class BaseTcpServer
      */
     protected $connectPool = [];
 
+    /**
+     * socket read长度
+     */
     const SOCKET_READ_LENGTH = 1024;
+
+    /**
+     * 保留字 MASTER alias
+     */
     const MASTER = "EZTCP_MASTER";
 
     public function _construct(string $ip, $port) {
@@ -38,7 +48,14 @@ abstract class BaseTcpServer
         $this->addConnectPool($this->master, self::MASTER);
     }
 
+    /**
+     * 加入连接池
+     * @param $clientSocket
+     * @param $alias
+     * @return void
+     */
     protected function addConnectPool($clientSocket, $alias) {
+        DBC::assertTrue(self::MASTER != $alias, "[EzWebSocketServer Exception] Cant Set Alias To ".self::MASTER);
         DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         $this->connectPool[$alias] = $clientSocket;
         if (self::MASTER != $alias) {
@@ -47,10 +64,19 @@ abstract class BaseTcpServer
         }
     }
 
+    /**
+     * 是否存在连接
+     * @param $alias
+     * @return bool
+     */
     private function hasConnect($alias) {
         return isset($this->connectPool[$alias]);
     }
 
+    /**
+     * 接入新客户端
+     * @return void
+     */
     private function newConnect() {
         //新连接加入
         $client = socket_accept($this->master);
@@ -66,6 +92,11 @@ abstract class BaseTcpServer
         $this->addConnectPool($client, (string)$client);
     }
 
+    /**
+     * 客户端断联
+     * @param $clientSocket
+     * @return void
+     */
     private function disConnect($clientSocket) {
         if ($this->master == $clientSocket) {
             return;
