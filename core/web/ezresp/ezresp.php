@@ -63,6 +63,7 @@ class EzResp
         });
 
         $this->socket->setInterpreter($this->respInterpreter);
+        $this->socket->setKeepAlive();
         $this->socket->start();
     }
 }

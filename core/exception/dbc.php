@@ -1,9 +1,9 @@
 <?php
 class DBC
 {
-    public static function throwEx($msg, $code = 0, $type = 'Exception')
+    public static function throwEx($msg, $code = 0, $type = Exception::class)
     {
-        throw new $type($msg, $code); 
+        throw new $type($msg, $code);
     }
 
     public static function assertTrue($condition, $msg, $code = 0, $type = 'Exception'){

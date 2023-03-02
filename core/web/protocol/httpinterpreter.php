@@ -24,11 +24,7 @@ class HttpInterpreter implements Interpreter
         $request->setContentLenActual($httpRequestInfos->contentLengthActual);
         $request->setContentType($httpRequestInfos->contentType);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
-        if (HttpContentType::H_X_WWW_FORM_URLENCODE === @$httpRequestInfos->contentType->contentType??null) {
-            $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
-        } else {
-            $request->setIsInit(true);
-        }
+        $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
         if ($request->isInit()) {
             $requestBody = $this->buildHttpRequestBody($httpRequestInfos);
             $this->buildRequestArgs($requestBody, $args, $request);

@@ -3,10 +3,11 @@ abstract class BaseTcpServer
 {
     protected $ip;
     protected $port;
+    private $keepAlive = false;
     /**
      * @var socket|null 主进程
      */
-    private $master = null;
+    protected $master = null;
     /**
      * @var int 最大连接数
      */
@@ -22,6 +23,8 @@ abstract class BaseTcpServer
      * @var array socket连接池
      */
     protected $connectPool = [];
+
+    protected $requestPool = [];
 
     /**
      * socket read长度
@@ -41,11 +44,18 @@ abstract class BaseTcpServer
 
     private function init() {
         $this->master = socket_create(AF_INET, SOCK_STREAM, 0);
-        socket_bind($this->master, $this->ip, $this->port);
-        socket_listen($this->master, 511);
+        @socket_bind($this->master, $this->ip, $this->port);
+        $this->detection();
+        @socket_listen($this->master, 511);
+        $this->detection();
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_set_nonblock($this->master);
         $this->addConnectPool($this->master, self::MASTER);
+    }
+
+    private function detection() {
+        $errCode = socket_last_error();
+        DBC::assertEquals(0, $errCode, socket_strerror($errCode));
     }
 
     /**
@@ -118,25 +128,80 @@ abstract class BaseTcpServer
             $except = null;
             $ready = @socket_select($readSockets, $writeSockets, $except, $this->timeOut);
             $startSucc = false !== $ready;
+            //$this->periodicityCheck();
             DBC::assertTrue($startSucc, "[EzTcpServer] Srart Fail!".socket_strerror(socket_last_error()));
             foreach ($readSockets as $readSocket) {
                 if ($this->master == $readSocket) {
                     $this->newConnect();
                 } else {
-                    $recv = @socket_recv($readSocket, $buffer, self::SOCKET_READ_LENGTH, 0);
+                    $readLength = self::SOCKET_READ_LENGTH;
+                    $lastRequest = $this->getLastRequest($readSocket);
+                    $recv = @socket_recv($readSocket, $buffer, $readLength, 0);
                     if ($recv == 0) {
                         $this->disConnect($readSocket);
                         continue;
                     }
                     //接收并处理消息体
-                    $request = $this->buildRequest($buffer);
-                    $response = $this->buildResponse($request);
-                    $content = $this->encodeResponse($response);
-                    @socket_write($readSocket, $content, strlen($content));
-                    //$this->disConnect($readSocket);
+                    $request = $this->buildRequest($buffer, $lastRequest);
+                    $request->setRequestId((int) $readSocket);
+                    $this->checkAndClearRequest($request);
+                    if ($request->isInit()) {
+                        $response = $this->buildResponse($request);
+                        $content = $this->encodeResponse($response);
+                        @socket_write($readSocket, $content, strlen($content));
+                        if (!$this->keepAlive) {
+                            $this->disConnect($readSocket);
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private function getLastRequest($clientSocket) {
+        return $this->requestPool[(int) $clientSocket]??null;
+    }
+
+    private function checkAndClearRequest(IRequest $request) {
+        if ($request->isInit()) {
+            unset($this->requestPool[$request->getRequestId()]);
+        } else {
+            $this->requestPool[$request->getRequestId()] = $request;
+        }
+    }
+
+    /**
+     * 状态检查 stop the world
+     * @return void
+     */
+    private function periodicityCheck(){
+        if(time() % 2 != 0){
+            return;
+        }
+        foreach ($this->connectPool as $alias => $connection) {
+            if (self::MASTER == $alias) {
+                continue;
+            }
+            if (!$this->checkClientAlive($connection)) {
+                //$this->disConnect($connection);
+            }
+        }
+    }
+
+    private function checkClientAlive($connection) {
+        if (!is_resource($connection)) {
+            Logger::console((int) $connection);
+            return false;
+        }
+        return socket_read($connection, 0);
+    }
+
+    public function setKeepAlive() {
+        $this->keepAlive = true;
+    }
+
+    public function setNoKeepAlive() {
+        $this->keepAlive = false;
     }
 
     /*private function init() {
@@ -227,7 +292,7 @@ abstract class BaseTcpServer
 
     }*/
 
-    abstract function buildRequest(string $buf):IRequest;
+    abstract function buildRequest(string $buf, IRequest $request = null):IRequest;
     abstract function buildResponse(IRequest $request):IResponse;
     abstract function encodeResponse(IResponse $response):string;
 }

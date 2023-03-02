@@ -82,6 +82,7 @@ abstract class BaseHTTPLite implements IHttp
     protected function appendRequest(IRequest $request, string $buf) {
         $requestSource = $request->getRequestSource();
         $requestSource->bodyContent .= $buf;
+        $request->
         $requestSource->contentLengthActual = strlen($requestSource->bodyContent);
         if ($requestSource->contentLengthActual === $requestSource->contentLength) {
             $bodyArr = $this->getInterpreter()->buildHttpRequestBody($requestSource);

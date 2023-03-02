@@ -97,4 +97,21 @@ abstract class BaseEzHttp implements IHttp
             return $request->getNetErrorResponse($e->getMessage());
         }
     }
+
+    protected function appendRequest(IRequest $request, string $buf) {
+        if ($request->isInit()) {
+            return;
+        }
+        /**
+         * @var $request Request
+         */
+        $requestSource = $request->getRequestSource();
+        $requestSource->bodyContent .= $buf;
+        $request->setContentLenActual(strlen($requestSource->bodyContent));
+        $request->setIsInit($requestSource->contentLengthActual === $requestSource->contentLength);
+        if ($request->isInit()) {
+            $bodyArr = $this->interpreter->buildHttpRequestBody($requestSource);
+            $this->interpreter->buildRequestArgs($bodyArr, [], $request);
+        }
+    }
 }

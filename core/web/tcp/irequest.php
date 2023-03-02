@@ -11,6 +11,11 @@ interface IRequest
      */
     public function check();
 
+    public function getRequestId():string;
+    public function setRequestId(string $id);
+
+    public function isInit():bool;
+
     /**
      * @return IResponse
      */

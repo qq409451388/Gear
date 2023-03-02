@@ -21,9 +21,9 @@ class EzTcpServer extends BaseTcpServer
         parent::_construct($ip, $port);
     }
 
-    public function buildRequest(string $buf): IRequest
+    public function buildRequest(string $buf, IRequest $request = null): IRequest
     {
-        return ($this->requestHandler)($buf);
+        return ($this->requestHandler)($buf, $request);
     }
 
     public function buildResponse(IRequest $request): IResponse

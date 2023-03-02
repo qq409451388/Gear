@@ -26,6 +26,8 @@ class Request implements IRequest
      */
     private $requestSource = null;
 
+    private $requestId;
+
     public function setQuery($key, $value){
         $this->query[$key] = $value;
     }
@@ -86,12 +88,15 @@ class Request implements IRequest
 
     public function setContentLenActual($contentLen){
         $this->contentLenActual = $contentLen;
+        if ($this->requestSource instanceof RequestSource) {
+            $this->requestSource->contentLengthActual = $contentLen;
+        }
     }
 
     public function check() {
         if(!is_null($this->contentLen) && !is_null($this->contentLenActual)
             && $this->contentLen != $this->contentLenActual){
-            return Http::TYPE_MULTIPART_FORMDATA == $this->contentType->contentType ?
+            return HttpContentType::H_MULTIPART_FORMDATA == $this->contentType->contentType ?
                 HttpStatus::CONTINUE() : HttpStatus::EXPECTATION_FAIL();
         }
         return true;
@@ -134,7 +139,6 @@ class Request implements IRequest
      */
     public function setIsInit(bool $isInit): void
     {
-        $this->contentLenActual = $this->contentLen;
         $this->isInit = $isInit;
     }
 
@@ -148,5 +152,15 @@ class Request implements IRequest
 
     public function getRequestSource():RequestSource {
         return $this->requestSource;
+    }
+
+    public function getRequestId(): string
+    {
+        return $this->requestId;
+    }
+
+    public function setRequestId(string $id)
+    {
+        $this->requestId = $id;
     }
 }
