@@ -55,7 +55,8 @@ abstract class BaseTcpServer
      * @return void
      */
     protected function addConnectPool($clientSocket, $alias) {
-        DBC::assertTrue(self::MASTER != $alias, "[EzWebSocketServer Exception] Cant Set Alias To ".self::MASTER);
+        DBC::assertTrue(self::MASTER != $alias || $this->master == $clientSocket,
+            "[EzWebSocketServer Exception] Cant Set Alias To ".self::MASTER);
         DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         $this->connectPool[$alias] = $clientSocket;
         if (self::MASTER != $alias) {
@@ -107,8 +108,10 @@ abstract class BaseTcpServer
         unset($this->connectPool[$clientKey]);
     }
 
+    abstract protected function getInterpreter();
+
     public function start() {
-        Logger::console("Start Server Success! tcp://".$this->ip.":".$this->port);
+        Logger::console("Start Server Success! ".$this->getInterpreter()->getShema()."://".$this->ip.":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;
             $writeSockets = null;

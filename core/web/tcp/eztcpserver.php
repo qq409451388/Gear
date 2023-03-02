@@ -45,6 +45,10 @@ class EzTcpServer extends BaseTcpServer
         $this->encodeHandler = $interpreter;
     }
 
+    protected function getInterpreter():Interpreter {
+        return $this->encodeHandler;
+    }
+
     public function encodeResponse(IResponse $response): string {
         return $this->encodeHandler->encode($response);
     }

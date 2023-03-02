@@ -1,6 +1,8 @@
 <?php
-class HTTP extends BaseHTTP
+class HTTP extends BaseHTTPLite
 {
+    private $socket;
+
     /**
      * 启动http服务
      */
@@ -18,22 +20,25 @@ class HTTP extends BaseHTTP
     }
 
     private function s() {
-        //创建socket套接字
-        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        // set the option to reuse the port
-        socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1);
-        //为套接字绑定ip和端口
-        @socket_bind($this->socket,$this->host,$this->port);
-        //监听socket
-        socket_listen($this->socket,4);
-        //设置阻塞模式
-        socket_set_block($this->socket);
-        $isSucc = socket_last_error();
-        if(0 == $isSucc){
+        try {
+            //创建socket套接字
+            $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+            $this->detection();
+            // set the option to reuse the port
+            socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1);
+            $this->detection();
+            //为套接字绑定ip和端口
+            socket_bind($this->socket,$this->host,$this->port);
+            $this->detection();
+            //监听socket
+            socket_listen($this->socket,4);
+            $this->detection();
+            //设置阻塞模式
+            socket_set_block($this->socket);
+            $this->detection();
             Logger::console("[HTTP]Start Success http://".$this->host.":".$this->port);
-        }else{
-            $err = socket_strerror($isSucc);
-            Logger::console("[HTTP]Start Fail! ".$err);
+        } catch (Exception $e) {
+            Logger::console("[HTTP]Start Fail! ".$e->getMessage());
             exit();
         }
         while(true)
@@ -52,5 +57,10 @@ class HTTP extends BaseHTTP
                 @socket_close($msgsocket);
             }
         }
+    }
+
+    private function detection() {
+        $errCode = socket_last_error();
+        DBC::assertEquals(0, $errCode, socket_strerror($errCode));
     }
 }

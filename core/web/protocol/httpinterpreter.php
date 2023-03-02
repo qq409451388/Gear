@@ -1,10 +1,9 @@
 <?php
 class HttpInterpreter implements Interpreter
 {
-    //contentType
-    public const TYPE_X_WWW_FORM_URLENCODE = "application/x-www-form-urlencoded";
-    public const TYPE_JSON = "application/json";
-    public const TYPE_MULTIPART_FORMDATA = "multipart/form-data";
+    public function getShema():string {
+        return "http";
+    }
 
     public function encode(IResponse $response): string
     {
@@ -25,7 +24,7 @@ class HttpInterpreter implements Interpreter
         $request->setContentLenActual($httpRequestInfos->contentLengthActual);
         $request->setContentType($httpRequestInfos->contentType);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
-        if (self::TYPE_MULTIPART_FORMDATA === @$httpRequestInfos->contentType->contentType??null) {
+        if (HttpContentType::H_X_WWW_FORM_URLENCODE === @$httpRequestInfos->contentType->contentType??null) {
             $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
         } else {
             $request->setIsInit(true);
@@ -102,13 +101,13 @@ class HttpInterpreter implements Interpreter
         $contentType = @$requestSource->contentType->contentType??null;
         $requestBody = $requestSource->bodyContent;
         switch ($contentType){
-            case self::TYPE_X_WWW_FORM_URLENCODE:
+            case HttpContentType::H_X_WWW_FORM_URLENCODE:
                 parse_str($requestBody, $requestBodyArr);
                 break;
-            case self::TYPE_JSON:
+            case HttpContentType::H_JSON:
                 $requestBodyArr = EzCollection::decodeJson($requestBody);
                 break;
-            case self::TYPE_MULTIPART_FORMDATA:
+            case HttpContentType::H_MULTIPART_FORMDATA:
                 $requestBodyArr = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);
                 break;
             default:

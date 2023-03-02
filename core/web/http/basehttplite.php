@@ -1,9 +1,8 @@
 <?php
-abstract class BaseHTTP implements IHttp
+abstract class BaseHTTPLite implements IHttp
 {
     protected $host;
     protected $port;
-    protected $socket;
     protected $dispatcher;
     protected $_root;
     protected $staticCache = [];
@@ -103,7 +102,6 @@ abstract class BaseHTTP implements IHttp
            return (new Response($httpStatus));
         }
         $judged = $this->judgePath($path);
-        var_dump($path);die;
         if(!$judged){
             if(empty($this->_root)){
                 return (new Response(HttpStatus::NOT_FOUND()));
@@ -153,7 +151,7 @@ abstract class BaseHTTP implements IHttp
      */
     public function getMime($path){
         $type = explode(".",$path);
-        return self::MIME_TYPE_LIST[end($type)] ?? self::MIME_TEXT;
+        return HttpMimeType::MIME_TYPE_LIST[end($type)] ?? HttpMimeType::MIME_HTML;
     }
 
     /**

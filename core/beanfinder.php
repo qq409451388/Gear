@@ -42,6 +42,7 @@ class BeanFinder
     public function import($className){
         $o = new $className;
         $this->save($className, $o);
+        Logger::console("[Gear]Create Bean {$className}");
         return get_class($o);
     }
 }

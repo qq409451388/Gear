@@ -1,6 +1,10 @@
 <?php
 class RespInterpreter implements Interpreter
 {
+    public function getShema(): string {
+        return "resp";
+    }
+
     public function encode(IResponse $response):string
     {
         /**

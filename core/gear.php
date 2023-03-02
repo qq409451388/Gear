@@ -252,8 +252,7 @@ class Gear implements IDispatcher
             if (is_subclass_of($class, EzComponent::class) || !is_subclass_of($class, EzBean::class)) {
                 return;
             }
-            $className = BeanFinder::get()->import($class);
-            Logger::console("[Gear]Create Bean {$className}");
+            BeanFinder::get()->import($class);
         } catch (Exception $e) {
             DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}");
         }
