@@ -10,8 +10,7 @@ class HttpInterpreter implements Interpreter
         return $response->toString();
     }
 
-    public function decode(string $buf): IRequest
-    {
+    public function decode(string $buf): IRequest {
         $httpRequestInfos = $this->buildHttpRequestSource($buf);
         //检查请求类型
         $this->check($httpRequestInfos->accept);
@@ -41,6 +40,7 @@ class HttpInterpreter implements Interpreter
         $requestSource->path = $firstLine[1]??"";
         $requestSource->httpVer = $firstLine[2]??"";
         $requestSource->contentLengthActual = 0;
+        $requestSource->contentLength = 0;
         $whenBody = false;
         $body = "";
         while(true){

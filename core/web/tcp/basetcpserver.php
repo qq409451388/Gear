@@ -175,7 +175,7 @@ abstract class BaseTcpServer
      * @return void
      */
     private function periodicityCheck(){
-        if(time() % 2 != 0){
+        if(time() % 10000 != 0){
             return;
         }
         foreach ($this->connectPool as $alias => $connection) {
@@ -183,7 +183,7 @@ abstract class BaseTcpServer
                 continue;
             }
             if (!$this->checkClientAlive($connection)) {
-                //$this->disConnect($connection);
+                $this->disConnect($connection);
             }
         }
     }

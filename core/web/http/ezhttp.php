@@ -32,7 +32,6 @@ class EzHttp extends BaseEzHttp
             $this->s();
         } catch (Error $t){
             Logger::error("[HTTP] Cause By {}, At {}", $t->getMessage(), $t->getTraceAsString());
-            var_dump($t);
             $this->s();
         }
     }
