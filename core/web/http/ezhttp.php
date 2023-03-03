@@ -1,6 +1,10 @@
 <?php
 class EzHttp extends BaseEzHttp
 {
+    public static function create($ip, $port) {
+        (new EzHttp(new Gear()))->init($ip, $port)->start();
+    }
+
     public function __construct(IDispatcher $dispatcher, Interpreter $interpreter = NULL) {
         parent::__construct($dispatcher, $interpreter);
     }
