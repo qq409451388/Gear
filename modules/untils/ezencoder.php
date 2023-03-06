@@ -78,4 +78,21 @@ class EzEncoder{
         openssl_free_key($key);
         return base64_encode($signature);
     }
+    const OPENSSL_CIPHER = "AES-128-CBC";
+    const OPENSSL_CBC_KEY = "0123456789abcdef";
+    const OPENSSL_CBC_IV = "abcdef0123456789";
+
+    public static function encrypt($word) {
+        if (is_null($word)) {
+            return null;
+        }
+        return openssl_encrypt($word, self::OPENSSL_CIPHER, self::OPENSSL_CBC_KEY, 0, self::OPENSSL_CBC_IV);
+    }
+
+    public static function decrypt($wordEncryped) {
+        if (is_null($wordEncryped)) {
+            return null;
+        }
+        return openssl_decrypt($wordEncryped, self::OPENSSL_CIPHER, self::OPENSSL_CBC_KEY, 0, self::OPENSSL_CBC_IV);
+    }
 }

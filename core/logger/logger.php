@@ -52,7 +52,10 @@ class Logger
         self::write($msg, self::TYPE_DATA, $name);
     }
 
-    public static function get($name) {
+    public static function get($name, $force = false) {
+        if ($force && !is_file(self::generateFilePath(self::TYPE_DATA, $name))) {
+            fopen(self::generateFilePath(self::TYPE_DATA, $name), "a+");
+        }
         return self::read(self::TYPE_DATA, $name);
     }
 
