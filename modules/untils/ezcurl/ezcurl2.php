@@ -51,7 +51,7 @@ class EzCurl2
      */
     private $query;
     /**
-     * @var EzCurlBody 请求体对象
+     * @var EzCurlBody|array<string, CURLFile> 请求体对象
      */
     private $body;
 
@@ -167,30 +167,23 @@ class EzCurl2
 
 
     public function setBody(EzCurlBody $body) {
-        $bodySource = $this->buildRequestBody($body);
-        if(!empty($this->body)){
-            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $this->body);
-        }
+        $this->body = $body;
         return $this;
     }
 
-    /**
-     * @param EzCurlBody|array<string, CURLFile> $bodyObj
-     * @return false|mixed|string
-     */
-    private function buildRequestBody($bodyObj){
-        switch (get_class($bodyObj)){
+    private function buildRequestBody(){
+        switch (get_class($this->body)){
             case EzCurlBodyFormData::class:
             case EzCurlBodyJson::class:
             case EzCurlBodyNdJson::class:
             case EzCurlBodyXForm::class:
-                $body = $bodyObj->toString();
-                $this->requestHeader->setContentType($bodyObj->getContentType());
+                $body = $this->body->toString();
+                $this->requestHeader->setContentType($this->body->getContentType());
                 break;
             case self::BODY_FILE:
-                DBC::assertTrue(current($bodyObj) instanceof CURLFile,
+                DBC::assertTrue(is_array($this->body) && current($this->body) instanceof CURLFile,
                     "[EzCurl Exception] Upload File Fail! Data Must Be Instance of CurlFile");
-                return $bodyObj;
+                return $this->body;
             default:
                 $body = "";
                 $this->setHeader(["Except:"]);
@@ -284,6 +277,10 @@ class EzCurl2
     public function post($body = null):EzCurlResponse {
         if (!is_null($body)) {
             $this->setBody($body);
+        }
+        $bodySource = $this->buildRequestBody();
+        if (!empty($bodySource)) {
+            curl_setopt($this->ch, CURLOPT_POSTFIELDS, $bodySource);
         }
         return $this->exec(self::HTTP_METHOD_POST);
     }
