@@ -107,7 +107,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
                 $value = "1970-00-00 00:00:00";
             }
             if ($value instanceof EzDate) {
-                $value = $value->formatDate();
+                $value = $value->datetimeString();
             }
             $value = htmlentities($value);
         }

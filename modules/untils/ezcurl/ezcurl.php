@@ -153,8 +153,7 @@ class EzCurl
         return $this;
     }
 
-    public function setReferer($referer = "")
-    {
+    public function setReferer($referer) {
         if(!empty($referer)){
             curl_setopt($this->ch, CURLOPT_REFERER , $referer);
         }

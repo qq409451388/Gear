@@ -16,15 +16,23 @@ class EzDate{
         self::FORMAT_TIME
     ];
 
-    private function __construct(){
-        $this->timeStamp = time();
+    private function __construct($timeStamp = null){
+        $this->timeStamp = is_null($timeStamp) ? time() : $timeStamp;
     }
 
     public static function now(){
         return new EzDate();
     }
 
-    public function formatDate($format = self::FORMAT_DATETIME){
+    public static function new($timeStamp) {
+        return new EzDate($timeStamp);
+    }
+
+    public static function newFromString($dateString) {
+        return new EzDate(strtotime($dateString));
+    }
+
+    public function formatDate($format){
         return date($format, $this->timeStamp);
     }
 
@@ -32,6 +40,14 @@ class EzDate{
         return $this->formatDate(self::FORMAT_DATE);
     }
 
+    public function datetimeString() {
+        return $this->formatDate(self::FORMAT_DATETIME);
+    }
+
+    /**
+     * @deprecated
+     * @return false|string
+     */
     public function toString(){
         return $this->formatDate(self::FORMAT_DATETIME);
     }
