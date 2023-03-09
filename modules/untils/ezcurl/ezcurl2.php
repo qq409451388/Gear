@@ -32,6 +32,11 @@ class EzCurl2
     private $host;
 
     /**
+     * @var int 端口
+     */
+    private $port;
+
+    /**
      * @var string 资源路径
      */
     private $path;
@@ -153,41 +158,39 @@ class EzCurl2
         $this->url = $this->scheme.$premix.$this->url;
         $arr = parse_url($this->url);
         $this->host = $arr['host']??null;
+        $this->port = $arr['port']??80;
         $this->path = $arr['path']??"";
         $this->query = $arr['query']??null;
         $this->reBuildUrl();
         return !empty($arr['query']);
     }
     private function reBuildUrl() {
-        $this->url = $this->scheme."://".$this->host.$this->path;
+        $this->url = $this->scheme."://".$this->host.":".$this->port.$this->path;
         if (!empty($this->query)) {
             $this->url .= "?".$this->query;
         }
     }
 
 
-    public function setBody(EzCurlBody $body) {
+    /**
+     * 填充请求体
+     * @param EzCurlBody|array<string, CURLFile> $body
+     * @return $this
+     */
+    public function setBody($body) {
         $this->body = $body;
         return $this;
     }
 
     private function buildRequestBody(){
-        switch (get_class($this->body)){
-            case EzCurlBodyFormData::class:
-            case EzCurlBodyJson::class:
-            case EzCurlBodyNdJson::class:
-            case EzCurlBodyXForm::class:
-                $body = $this->body->toString();
-                $this->requestHeader->setContentType($this->body->getContentType());
-                break;
-            case self::BODY_FILE:
-                DBC::assertTrue(is_array($this->body) && current($this->body) instanceof CURLFile,
-                    "[EzCurl Exception] Upload File Fail! Data Must Be Instance of CurlFile");
-                return $this->body;
-            default:
-                $body = "";
-                $this->setHeader(["Except:"]);
-                break;
+        if ($this->body instanceof EzCurlBody) {
+            $body = $this->body->toString();
+            $this->requestHeader->setContentType($this->body->getContentType());
+        } else if (is_array($this->body) && current($this->body) instanceof CURLFile) {
+            return $this->body;
+        } else {
+            $body = "";
+            $this->requestHeader->setCustomHeader("Except:");
         }
         $this->requestHeader->setContentLength(strlen($body));
         return $body;

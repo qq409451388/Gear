@@ -2,7 +2,11 @@
 class RouterAspect extends Aspect implements BuildAspect
 {
     public function getHttpMethodLimit(){
-        return HttpMethod::get(str_replace("Mapping", "", $this->getAnnoName()));
+        if ($this->getValue() instanceof RequestMapping) {
+            return null;
+        }
+        $httpMethod = str_replace("Mapping", "", $this->getAnnoName());
+        return HttpMethod::get($httpMethod);
     }
 
     public function check(): bool
