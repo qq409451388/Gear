@@ -17,7 +17,7 @@ class Request implements IRequest
     private $path;
 
     private $query = [];
-    private $body = [];
+    private $body;
     //request build succ
     private $isInit = false;
 
@@ -40,7 +40,7 @@ class Request implements IRequest
         return $this->query;
     }
 
-    public function setBody(array $body){
+    public function setBody($body){
         $this->body = $body;
     }
 
@@ -49,8 +49,16 @@ class Request implements IRequest
      * @param $key
      * @return RequestBody
      */
-    public function getBody($key){
+    public function getStructBody($key){
+        if (is_null($this->body)) {
+            return null;
+        }
+        DBC::assertTrue(is_array($this->body), "[Request] Body is not a struct data, may be you need call getBody!");
         return $this->body[$key]??new RequestNullBody();
+    }
+
+    public function getBody() {
+        return $this->body;
     }
 
     public function filter(){

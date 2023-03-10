@@ -15,7 +15,7 @@ class EzCurlBodyFormData extends EzCurlBody
     /**
      * HTTP BODY FORM DATA
      */
-    const BODY_FORM_DATA = "multipart/form-data;boundary=";
+    const BODY_FORM_DATA = "Content-Type: multipart/form-data;boundary=";
 
     public function __construct() {
         parent::__construct();
@@ -54,7 +54,7 @@ class EzCurlBodyFormData extends EzCurlBody
             if ($v instanceof EzCurlBodyFile) {
                 $v->analyse();
                 $body .= $this->boundary."\r\n".'Content-Disposition: form-data; name="'.$k.'"; filename="'.$v->getFileName().'"'."\r\n";
-                $body .= "Content-Type: ".$v->getContentType()."\r\n\r\n";
+                $body .= $v->getContentType()."\r\n\r\n";
                 $body .= file_get_contents($v->getFilePath())."\r\n";
             } else if (is_numeric($v) || is_string($v)) {
                 $body .= $this->boundary."\r\n".'Content-Disposition: form-data; name="'.$k.'"';

@@ -107,8 +107,11 @@ class HttpInterpreter implements Interpreter
                 $requestBodyArr = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);
                 break;
             default:
-                $requestBodyArr = [];
-                break;
+                $baseRequestBody = new RequestBaseBody();
+                $baseRequestBody->contentType = $contentType;
+                $baseRequestBody->content = $requestBody;
+                $baseRequestBody->contentDispostion = "DEFAULT";
+                return $baseRequestBody;
         }
         return $requestBodyArr;
     }
