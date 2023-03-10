@@ -68,6 +68,9 @@ class Response implements IResponse
         $header .= "Date: ".gmdate('D, d M Y H:i:s T')."\r\n";
         $header .= "Content-Type: {$this->getContentType()}\r\n";
         $header .= "Content-Length: ".strlen($this->getContent());
+        if ($this->getHeader()->getCode() != 200) {
+            $header .= "\r\n\r\n";
+        }
         if (!empty($this->getContent())) {
             $header .= "\r\n\r\n";
             $header .= $this->getContent();
