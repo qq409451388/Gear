@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * @deprecated
+ */
 class HttpContentType
 {
     public const H_JSON = "application/json";

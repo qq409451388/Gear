@@ -33,7 +33,7 @@ class Request implements IRequest
     }
 
     public function get($key, $default=null){
-        return isset($this->request[$key]) ? $this->request[$key] : $default;
+        return isset($this->query[$key]) ? $this->query[$key] : $default;
     }
 
     public function getAll(){

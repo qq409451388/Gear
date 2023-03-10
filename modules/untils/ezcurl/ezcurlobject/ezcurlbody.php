@@ -3,15 +3,15 @@ abstract class EzCurlBody
 {
     /**
      * @see {
-     *  @link EzCurl2::BODY_X_WWW_FORM
+     *  @link EzCurlBodyXForm::BODY_X_WWW_FORM
      *  @link EzCurlBodyFormData::BODY_FORM_DATA
      *  @link EzCurlBodyJson::BODY_JSON
      *  @link EzCurlBodyNdJson::BODY_NDJSON
-     *  @link EzCurl2::BODY_FILE
+     *  @link EzCurlBodyFile::BODY_FILE=> { @link HttpMimeType }
      * }
      * @param string $contentType
      */
-    public $contentType;
+    protected $contentType;
 
     public function __construct() {
         $this->setContentType();

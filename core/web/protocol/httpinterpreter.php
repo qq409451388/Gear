@@ -126,18 +126,25 @@ class HttpInterpreter implements Interpreter
                 //是否完成body行参数取值
                 $flag = true;
             } else if (($flag && !empty($requestBodyLine))) {
-                preg_match('/Content-Disposition: (?<contentDispostion>\S+);.*/', $requestBodyLine, $matches);
                 if (is_null($requestBodyObj->contentDispostion)) {
+                    preg_match('/Content-Disposition: (?<contentDispostion>\S+);.*/', $requestBodyLine, $matches);
                     $requestBodyObj->contentDispostion = $matches['contentDispostion']??null;
                 }
-                preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
                 if (is_null($requestBodyObj->requestName)) {
+                    preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
                     $requestBodyObj->requestName = $matches['requestName']??null;
                     //初始化
                     $requestBodyArr[$requestBodyObj->requestName] = $requestBodyObj;
                 }
+                if (is_null($requestBodyObj->fileName)) {
+                    preg_match('/filename="(?<fileName>(.*))"/', $requestBodyLine, $matches);
+                    $requestBodyObj->fileName = $matches['fileName']??null;
+                }
                 preg_match('/Content-Type: (?<contentType>[\/a-zA-Z0-9]+)(.*)/', $requestBodyLine, $matches);
-                if (is_null($requestBodyObj->contentType)) {
+                if (is_null($requestBodyObj->contentType) || !empty($matches['contentType'])) {
+                    if (!in_array($matches['contentType'], HttpMimeType::MIME_TYPE_LIST)) {
+                        Logger::warn("[EzServer] Unknow Content-Type : ".$matches['contentType']);
+                    }
                     $requestBodyObj->contentType = $matches['contentType']??null;
                 }
             } elseif (empty($requestBodyLine)) {

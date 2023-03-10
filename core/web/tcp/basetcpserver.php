@@ -29,7 +29,7 @@ abstract class BaseTcpServer
     /**
      * socket read长度
      */
-    const SOCKET_READ_LENGTH = 1024;
+    const SOCKET_READ_LENGTH = 1024000;
 
     /**
      * 保留字 MASTER alias

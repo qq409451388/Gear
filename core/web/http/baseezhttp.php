@@ -3,6 +3,10 @@ abstract class BaseEzHttp implements IHttp
 {
     protected $host;
     protected $port;
+
+    /**
+     * @var EzTcpServer $socket
+     */
     protected $socket;
     protected $dispatcher;
 

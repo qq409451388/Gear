@@ -25,6 +25,10 @@ abstract class EzCurlHeader
         $this->contentLength = $contentLength;
     }
 
+    protected function contentTypeToString() {
+        return "Content-Type: ".$this->contentType;
+    }
+
     protected function cookieToString() {
         if (empty($this->cookie)) {
             return "";
@@ -36,9 +40,7 @@ abstract class EzCurlHeader
      * 构建http头原始信息
      * @return array<string>
      */
-    public function buildSource():array {
-        return [];
-    }
+    abstract public function buildSource():array;
 
     abstract function toString():string;
 }

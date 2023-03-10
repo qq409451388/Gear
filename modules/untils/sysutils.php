@@ -53,7 +53,7 @@ class SysUtils
             return $result;
         }
         foreach ($objs as $obj) {
-            $tmpPath = $path."/".$obj;
+            $tmpPath = $path.DIRECTORY_SEPARATOR.$obj;
             if (is_dir($tmpPath)) {
                 if ("." == $obj || ".." == $obj) {
                     continue;

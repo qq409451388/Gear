@@ -43,4 +43,22 @@ class EzCurlRequestHeader extends EzCurlHeader
         }
         return $s;
     }
+
+    public function buildSource(): array {
+        $vars = get_object_vars($this);
+        $s = [];
+        foreach ($vars as $varName => $var) {
+            $varToStringMethodName = $varName."ToString";
+            if (method_exists($this, $varToStringMethodName)) {
+                $h = $this->$varToStringMethodName();
+                if (empty($h)) {
+                    continue;
+                }
+                $s[] = $h;
+            } else {
+                Logger::warn(__CLASS__." Unset Method {} for property {}!", $varToStringMethodName, $varName);
+            }
+        }
+        return $s;
+    }
 }

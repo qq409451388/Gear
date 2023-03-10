@@ -13,6 +13,7 @@ class EzHttp extends BaseEzHttp
         $this->socket = new EzTcpServer($this->host, $this->port);
         $this->socket->setInterpreter($this->interpreter);
         $this->socket->setRequestHandler(function (string $buf, $request = null):IRequest {
+            print_r($buf);
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);
             } else {

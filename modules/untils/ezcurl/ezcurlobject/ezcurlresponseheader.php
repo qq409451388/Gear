@@ -20,4 +20,8 @@ class EzCurlResponseHeader extends EzCurlHeader
         }
         return $s;
     }
+
+    public function buildSource(): array {
+        // TODO: Implement buildSource() method.
+    }
 }

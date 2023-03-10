@@ -59,8 +59,9 @@ class HttpMimeType
 
     public const EXT_ZIP = "zip";
     public const MIME_ZIP = "application/zip";
+    public const MIME_STREAM = "application/stream";
 
-    public const MIME_TYPE_LIST = array(
+    public const MIME_TYPE_LIST = [
         self::EXT_AVI => self::MIME_AVI,
         self::EXT_MPEG => self::MIME_MPEG,
         self::EXT_WAV => self::MIME_WAV,
@@ -82,5 +83,18 @@ class HttpMimeType
         self::EXT_JS => self::MIME_JS,
         self::EXT_SWF => self::MIME_SWF,
         self::EXT_ZIP => self::MIME_ZIP
-    );
+    ];
+
+    /**
+     * 图像类型的mime
+     */
+    public const MIME_IMAGE_LIST = [
+        self::MIME_JPEG,
+        self::MIME_BMP,
+        self::MIME_PNG,
+        self::MIME_GIF,
+        self::MIME_AVIF,
+        self::MIME_ICO,
+        self::MIME_WBMP
+    ];
 }

@@ -8,7 +8,7 @@ class EzCurlBodyFormData extends EzCurlBody
 
     /**
      * 请求体
-     * @var array<string, EzCurlBody> <子请求体name => 子请求体>
+     * @var array<string, EzCurlBodyFile|string> <子请求体name => 子请求体>
      */
     public $data;
 
@@ -34,9 +34,17 @@ class EzCurlBodyFormData extends EzCurlBody
         $dataList = $this->data;
         $body = "";
         foreach($dataList as $k => $v){
-            $body.= $this->boundary."\r\n".'Content-Disposition: form-data; name="'.$k.'"';
-            $body .= "\r\n\r\n".$v->toString()."\r\n";
+            if ($v instanceof EzCurlBodyFile) {
+                $v->analyse();
+                $body .= $this->boundary."\r\n".'Content-Disposition: form-data; name="'.$k.'"; filename="'.$v->getFileName().'"';
+                $body .= "\r\nContent-Type: ".$v->getContentType()."\r\n\r\n";
+                $body .= file_get_contents($v->getFilePath())."\r\n";
+            } else if (is_numeric($v) || is_string($v)) {
+                $body .= $this->boundary."\r\n".'Content-Disposition: form-data; name="'.$k.'"';
+                $body .= "\r\n\r\n".$v."\r\n";
+            }
         }
+        $body .= $this->boundary."\r\n";
         return $body;
     }
 }
