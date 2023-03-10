@@ -58,11 +58,11 @@ abstract class BaseEzHttp implements IHttp
             if(empty($this->_root)){
                 return (new Response(HttpStatus::NOT_FOUND()));
             }
-            $fullPath = Env::staticPath()."/".$path;
-            if(empty($path) || !is_file($fullPath)){
+            $fullPath = Env::staticPath().DIRECTORY_SEPARATOR.$path;
+            if(empty($path) || !is_file($fullPath)) {
                 return (new Response(HttpStatus::NOT_FOUND()));
             }
-            if(!isset($this->staticCache[$path])){
+            if(!isset($this->staticCache[$path])) {
                 $this->staticCache[$path] = file_get_contents($fullPath);
             }
             return new Response(HttpStatus::OK(), $this->staticCache[$path], $this->getMime($path));

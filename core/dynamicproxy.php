@@ -46,32 +46,32 @@ class DynamicProxy
     }
 
     private function hasBefore($funcName){
-        return array_key_exists($funcName, $this->callBefore) && $this->callBefore[$funcName] instanceof Closure;
+        return array_key_exists($funcName, $this->callBefore);
     }
 
     private function hasAfter($funcName){
-        return array_key_exists($funcName, $this->callAfter) && $this->callAfter[$funcName] instanceof Closure;
+        return array_key_exists($funcName, $this->callAfter);
     }
 
-    public function registeBefore($targetFunc, $anony){
+    public function registeBefore($targetFunc, Closure $anony){
         $this->callBefore[$targetFunc][] = $anony;
     }
 
-    public function registeAfter($targetFunc, $anony){
+    public function registeAfter($targetFunc, Closure $anony){
         $this->callAfter[$targetFunc][] = $anony;
     }
 
-    public function registeBeforeAll($anony){
+    public function registeBeforeAll(Closure $anony){
         $this->callBefore["*"][] = $anony;
     }
 
-    public function registeAfterAll($anony){
+    public function registeAfterAll(Closure $anony){
         $this->callAfter["*"][] = $anony;
     }
 
     private function callBefore(RunTimeProcessPoint $rpp){
         $calls = $this->callBefore[$rpp->getFunctionName()];
-        if($this->callBefore['*']){
+        if(isset($this->callBefore['*'])){
             $calls[] += $this->callBefore["*"];
         }
         foreach($calls as $call){
@@ -81,7 +81,7 @@ class DynamicProxy
 
     private function callAfter(RunTimeProcessPoint $rpp){
         $calls = $this->callAfter[$rpp->getFunctionName()];
-        if($this->callAfter['*'] instanceof Closure){
+        if(isset($this->callAfter['*'])){
             $calls[] = $this->callAfter["*"];
         }
         foreach ($calls as $call){

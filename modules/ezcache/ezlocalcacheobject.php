@@ -34,7 +34,9 @@ class EzLocalCacheObject
         $o = new EzLocalCacheObject();
         $o->dataSource = $dataSource;
         $o->dataType = $dataType;
-        $o->expire = $expire;
+        if (is_numeric($expire)) {
+            $o->expire = time()+$expire;
+        }
         return $o;
     }
 

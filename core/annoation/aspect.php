@@ -223,7 +223,6 @@ abstract class Aspect
         }else{
             $dynamic = $object;
         }
-
         if(!is_null($this->getAtMethod())){
             $dynamic->registeBefore($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
                 /**
