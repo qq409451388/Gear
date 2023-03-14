@@ -38,4 +38,14 @@ class EzDataUtils
             return "null";
         }
     }
+
+    public static function isList($array) {
+        $i = 0;
+        foreach ($array as $k => $v) {
+            if ($k !== $i++) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
