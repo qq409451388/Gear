@@ -170,6 +170,10 @@ class EzRedis extends EzCache
         return $this;
     }
 
+    public function hello($version) {
+        return $this->exec("HELLO", $version);
+    }
+
     public function exists(string $k): bool
     {
         return $this->exec("EXISTS", $k);

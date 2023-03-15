@@ -41,4 +41,19 @@ class RespRequest implements IRequest
     {
         // TODO: Implement isEmpty() method.
     }
+
+    public function getRequestId(): string
+    {
+        return $this->requestId;
+    }
+
+    public function setRequestId(string $id)
+    {
+        $this->requestId = $id;
+    }
+
+    public function isInit(): bool
+    {
+        return true;
+    }
 }

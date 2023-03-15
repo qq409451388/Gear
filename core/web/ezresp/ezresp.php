@@ -7,6 +7,8 @@ class EzResp
 
     protected $socket;
 
+    private $commandCnt = 0;
+
     /**
      * Resp协议解释器
      * @var RespInterpreter
@@ -36,7 +38,8 @@ class EzResp
         $this->socket->setResponseHandler(function(RespRequest $request){
             try {
                 $result = call_user_func_array([$this->localCache, $request->command], $request->args);
-
+                $this->commandCnt++;
+                echo $this->commandCnt.PHP_EOL;
                 $response = new RespResponse();
                 if (is_bool($result)) {
                     $isSuccess = $result;

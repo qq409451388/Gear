@@ -4,7 +4,7 @@
  * 双向链表
  * @author guohan
  */
-class EzLinkedList
+class EzDoublyLinkedList
 {
     private $curNode;
     private $size;

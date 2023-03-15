@@ -488,4 +488,9 @@ class EzLocalCache extends EzCache
         $map = $this->_concurrentHashMap[$k]->dataSource??[];
         return count($map);
     }
+
+    public function hello($version)
+    {
+        return true;
+    }
 }
