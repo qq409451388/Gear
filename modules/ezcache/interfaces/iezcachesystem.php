@@ -7,4 +7,6 @@ interface IEzCacheSystem
      * @return mixed
      */
     public function hello($version);
+
+    public function quit();
 }

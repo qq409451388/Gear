@@ -489,8 +489,11 @@ class EzLocalCache extends EzCache
         return count($map);
     }
 
-    public function hello($version)
-    {
+    public function hello($version) {
+        return true;
+    }
+
+    public function quit() {
         return true;
     }
 }
