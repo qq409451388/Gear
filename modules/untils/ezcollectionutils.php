@@ -1,5 +1,5 @@
 <?php
-class EzCollection
+class EzCollectionUtils
 {
     const EMPTY_LIST = [];
 

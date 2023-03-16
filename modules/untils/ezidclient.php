@@ -34,7 +34,7 @@ class EzIdClient
             $lockKey = "locker_".$redisKey;
             $ezLocker->lock($lockKey);
 
-            $idValue = EzCollection::decodeJson($this->getCacheClient()->get($redisKey));
+            $idValue = EzCollectionUtils::decodeJson($this->getCacheClient()->get($redisKey));
             if(empty($idValue)){
                 $idValue = $this->nextDbId($objName);
             }

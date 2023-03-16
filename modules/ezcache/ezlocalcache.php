@@ -406,7 +406,7 @@ class EzLocalCache extends EzCache
     public function hMGet(string $k, string ...$fields): array
     {
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        return EzCollection::matchKeys($fields, $this->fetch($k)->dataSource??[]);
+        return EzCollectionUtils::matchKeys($fields, $this->fetch($k)->dataSource??[]);
     }
 
     public function hGetAll(string $k): array

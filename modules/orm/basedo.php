@@ -22,7 +22,7 @@ abstract class BaseDO
         if(empty($json)){
             return $defaultValue;
         }
-        $jsonObj = EzCollection::decodeJson($json);
+        $jsonObj = EzCollectionUtils::decodeJson($json);
         $t = new static();
         self::fillDTO($jsonObj, $t);
         return $t;

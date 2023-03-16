@@ -21,7 +21,7 @@ class GearMessageProtocol
     public function init(string $host = '127.0.0.1', $port = null):GearMessageProtocol {
         DBC::assertNotEmpty($host, "[GMP Exception] Args host is empty!");
         DBC::assertNotEmpty($port, "[GMP Exception] Args port is empty!");
-        $this->server = (new EzWebSocketServer())->init($host, $port);
+        $this->server = (new EzWebSocketServer($host, $port))->start();
         Config::set(["host"=>$host, "port"=>$port]);
         return $this;
     }
@@ -89,7 +89,7 @@ class GearMessageProtocol
         foreach($body as &$b){
             switch ($headers[GmpConst::HEADER_ENCODER]??""){
                 case GmpConst::HEADER_ENCODE_JSON:
-                    $b = EzCollection::decodeJson($b);
+                    $b = EzCollectionUtils::decodeJson($b);
                     break;
                 default:
                     break;

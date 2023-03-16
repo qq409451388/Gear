@@ -3,7 +3,7 @@ class Gear implements IDispatcher
 {
     public function __construct(){
         $classess = CacheFactory::getInstance(CacheFactory::TYPE_MEM)->get("GLOBAL_USER_CLASS");
-        $classess = EzCollection::decodeJson($classess);
+        $classess = EzCollectionUtils::decodeJson($classess);
         //初始化对象
         $this->initObjects($classess);
     }

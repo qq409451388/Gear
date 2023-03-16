@@ -42,7 +42,7 @@ class AnnoItem
         if($this->isNormal()){
             $anno->combine($this->value);
         }else{
-            $anno->combine(EzCollection::decodeJson($this->value));
+            $anno->combine(EzCollectionUtils::decodeJson($this->value));
         }
         return $anno;
     }

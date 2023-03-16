@@ -101,7 +101,7 @@ class HttpInterpreter implements Interpreter
                 parse_str($requestBody, $requestBodyArr);
                 break;
             case HttpContentType::H_JSON:
-                $requestBodyArr = EzCollection::decodeJson($requestBody);
+                $requestBodyArr = EzCollectionUtils::decodeJson($requestBody);
                 break;
             case HttpContentType::H_MULTIPART_FORMDATA:
                 $requestBodyArr = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);

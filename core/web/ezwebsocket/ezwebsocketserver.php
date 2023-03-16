@@ -117,7 +117,7 @@ class EzWebSocketServer extends EzTcpServer
             }
         } else {
             $clientMsg = $this->decode($buffer);
-            $obj = EzCollection::decodeJson($clientMsg);
+            $obj = EzCollectionUtils::decodeJson($clientMsg);
             if(!is_null($obj) && isset($obj['toMaster']) && $obj['toMaster']){
                 DBC::assertTrue(!empty($obj['userName']), "[EzWebSocketServer] Unknow UserName!");
                 if(method_exists($this, $obj['systemFunc'])){
@@ -272,7 +272,7 @@ class EzWebSocketServer extends EzTcpServer
      */
     public function sendToAllUsers(string $content, $exclude = []){
         $content = $this->frame($content);
-        $excludeConnectList = EzCollection::matchKeys($exclude, $this->connectPool);
+        $excludeConnectList = EzCollectionUtils::matchKeys($exclude, $this->connectPool);
         foreach($this->connectPool as $receiver){
             //跳过Master和排除项
             if($this->master == $receiver || in_array($receiver, $excludeConnectList)){

@@ -13,7 +13,7 @@ class Config
             $pj = $from.self::PATH_CONFIG.$key.self::EXT_JSON;
             $content = @file_get_contents($pj);
             if(false !== $content){
-                self::set([$key=>EzCollection::decodeJson($content)]);
+                self::set([$key=>EzCollectionUtils::decodeJson($content)]);
             }
         }
         return self::$config[$key]??null;
@@ -23,7 +23,7 @@ class Config
         $pj = CORE_PATH.self::PATH_CONFIG.$p.self::EXT_JSON;
         $content = @file_get_contents($pj);
         if(false !== $content){
-            self::set([$p=>EzCollection::decodeJson($content)]);
+            self::set([$p=>EzCollectionUtils::decodeJson($content)]);
         }
         return self::get($p);
     }

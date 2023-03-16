@@ -9,7 +9,7 @@ class LogFinder{
      */
     public function query(EsLogQuery $esLogQuery){
         if($esLogQuery->certainlyEmpty()){
-            return EzCollection::EMPTY_LIST;
+            return EzCollectionUtils::EMPTY_LIST;
         }
         $ezCurl = new EzCurl();
         $ezCurl->setTimeOut(120);
@@ -20,7 +20,7 @@ class LogFinder{
         ]);
         $payLoad = $this->getPayLoad($esLogQuery);
         $res = $ezCurl->post($payLoad, EzCurl::POSTTYPE_NDJSON);
-        $res = EzCollection::decodeJson($res);
+        $res = EzCollectionUtils::decodeJson($res);
         DBC::assertTrue(!isset($res['statusCode']) || !in_array( $res['statusCode'], self::ERROR_CODE),
             "[LogFinder] Server Error ".($res['message']??""));
         return $res;
