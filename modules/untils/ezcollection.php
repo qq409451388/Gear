@@ -49,4 +49,36 @@ class EzCollection
         }
         return $res;
     }
+
+    /**
+     * 为原始list对象的item追加字段
+     * @param array<array> $sourceList
+     * @param array<string, array|int|string> $waitMatchMap
+     * @param string $matchKeyName 根据sourceList中item的哪个字段与waitMatchMap的key进行匹配
+     * @param string|null $mapColumn 要将waitMatchMap中的哪个字段追加到sourceList中，默认值为null
+     *                              传null则整体追加过去，且需要填写$mapAppendName字段为其命名
+     * @param string|null $mapAppendName 如果mapColumn值为null，需要填写为其命名
+     * @return array<array> 追加字段后的sourceList数据
+     */
+    public static function appendListObject($sourceList, $waitMatchMap, $matchKeyName, $mapColumn = null, $mapAppendName = null) {
+        if (empty($sourceList)) {
+            return [];
+        }
+        if (is_null($mapColumn) && is_null($mapAppendName)) {
+            return $sourceList;
+        }
+        foreach ($sourceList as &$sourceItem) {
+            if (!isset($sourceItem[$matchKeyName])) {
+                continue;
+            }
+            $mapValue = $waitMatchMap[$sourceItem[$matchKeyName]];
+            if (is_null($mapColumn)) {
+                $sourceItem[$mapAppendName] = $mapValue;
+            } else {
+                $sourceItem[$mapColumn] = $mapValue[$mapColumn]??null;
+            }
+        }
+        return $sourceList;
+    }
+
 }
