@@ -12,44 +12,38 @@ class EzTcpServer extends BaseTcpServer
      */
     private $responseHandler;
 
-    /**
-     * @var Interpreter 协议解释器
-     */
-    private $encodeHandler;
-
-    public function __construct(string $ip, $port) {
-        parent::_construct($ip, $port);
+    public function __construct(string $ip, $port, $schema = "") {
+        parent::_construct($ip, $port, $schema);
     }
 
-    public function buildRequest(string $buf, IRequest $request = null): IRequest
+    protected function buildRequest(string $buf, IRequest $request = null): IRequest
     {
         return ($this->requestHandler)($buf, $request);
     }
 
-    public function buildResponse(IRequest $request): IResponse
+    protected function buildResponse(IRequest $request): IResponse
     {
         return ($this->responseHandler)($request);
     }
 
+    /**
+     * 请求对象构建函数
+     * @param Closure $requestHandler {@see EzTcpServer::buildRequest()}
+     * @return $this
+     */
     public function setRequestHandler(Closure $requestHandler) {
         $this->requestHandler = $requestHandler;
         return $this;
     }
 
+    /**
+     * 响应对象构建函数
+     * @param Closure $responseHandler {@see EzTcpServer::buildResponse($request)}
+     * @return $this
+     */
     public function setResponseHandler(Closure $responseHandler) {
         $this->responseHandler = $responseHandler;
         return $this;
     }
 
-    public function setInterpreter(Interpreter $interpreter) {
-        $this->encodeHandler = $interpreter;
-    }
-
-    protected function getInterpreter():Interpreter {
-        return $this->encodeHandler;
-    }
-
-    public function encodeResponse(IResponse $response): string {
-        return $this->encodeHandler->encode($response);
-    }
 }

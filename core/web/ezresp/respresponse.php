@@ -14,8 +14,7 @@ class RespResponse implements IResponse
 
     public $isSuccess;
 
-    public function toString(): string
-    {
-        // TODO: Implement toString() method.
+    public function toString(): string {
+        return (new RespInterpreter())->encode($this);
     }
 }

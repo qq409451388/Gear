@@ -5,15 +5,15 @@ class EzResp
 
     private $port;
 
+    /**
+     * @var EzTcpServer
+     */
     protected $socket;
 
-    private $commandCnt = 0;
-
     /**
-     * Resp协议解释器
-     * @var RespInterpreter
+     * @var Interpreter 协议解释器
      */
-    private $respInterpreter;
+    private $interpreter;
 
     /**
      * 本地缓存服务
@@ -22,24 +22,24 @@ class EzResp
     private $localCache;
 
     public function __construct() {
-        $this->respInterpreter = new RespInterpreter();
         $this->localCache = new EzLocalCache();
+        $this->interpreter = new RespInterpreter();
     }
 
     public function start(string $ip, $port) {
         $this->ip = $ip;
         $this->port = $port;
-        $this->socket = new EzTcpServer($this->ip, $this->port);
+        $this->socket = new EzTcpServer($this->ip, $this->port, $this->interpreter->getSchema());
         Config::set(['ip'=>$ip, 'port'=>$port]);
         $this->socket->setRequestHandler(function(string $buf) {
-            return $this->respInterpreter->decode($buf);
+            return $this->interpreter->decode($buf);
         });
 
-        $this->socket->setResponseHandler(function(RespRequest $request){
+        $this->socket->setResponseHandler(function(RespRequest $request) {
             try {
+                DBC::assertTrue(method_exists($this->localCache, $request->command),
+                    "[EzResp Exception] Unknow Command $request->command!");
                 $result = call_user_func_array([$this->localCache, $request->command], $request->args);
-                $this->commandCnt++;
-                echo $this->commandCnt.PHP_EOL;
                 $response = new RespResponse();
                 if (is_bool($result)) {
                     $isSuccess = $result;
@@ -65,7 +65,6 @@ class EzResp
             return $response;
         });
 
-        $this->socket->setInterpreter($this->respInterpreter);
         $this->socket->setKeepAlive();
         $this->socket->start();
     }

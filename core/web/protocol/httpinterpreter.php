@@ -1,13 +1,28 @@
 <?php
 class HttpInterpreter implements Interpreter
 {
-    public function getShema():string {
+    public function getSchema():string {
         return "http";
     }
 
-    public function encode(IResponse $response): string
-    {
-        return $response->toString();
+    /**
+     * @param Response $response
+     * @return string
+     */
+    public function encode(IResponse $response): string {
+        $header = "HTTP/1.1 {$response->getHeader()->getCode()} {$response->getHeader()->getStatus()}\r\n";
+        $header .= "Server: Gear2\r\n";
+        $header .= "Date: ".gmdate('D, d M Y H:i:s T')."\r\n";
+        $header .= "Content-Type: {$response->getContentType()}\r\n";
+        $header .= "Content-Length: ".strlen($response->getContent());
+        if ($response->getHeader()->getCode() != 200) {
+            $header .= "\r\n\r\n";
+        }
+        if (!empty($response->getContent())) {
+            $header .= "\r\n\r\n";
+            $header .= $response->getContent();
+        }
+        return $header;
     }
 
     public function decode(string $buf): IRequest {

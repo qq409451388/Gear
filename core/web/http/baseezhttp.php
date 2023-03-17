@@ -8,12 +8,13 @@ abstract class BaseEzHttp implements IHttp
      * @var EzTcpServer $socket
      */
     protected $socket;
-    protected $dispatcher;
 
     /**
-     * @var Interpreter 协议解释器
+     * @var Interpreter Http协议解释器
      */
     protected $interpreter;
+
+    protected $dispatcher;
     protected $_root;
     protected $staticCache = [];
 
@@ -22,13 +23,9 @@ abstract class BaseEzHttp implements IHttp
      */
     protected const SOCKET_READ_LENGTH = 8192;
 
-    public function __construct(IDispatcher $dispatcher, Interpreter $interpreter = null){
+    public function __construct(IDispatcher $dispatcher, $interpreter = null){
         $this->dispatcher = $dispatcher;
-        if (null == $interpreter) {
-            $this->interpreter = new HttpInterpreter();
-        } else {
-            $this->interpreter = $interpreter;
-        }
+        $this->interpreter = new HttpInterpreter();
     }
 
     public function init(string $host, $port, $root = './'){
@@ -41,7 +38,7 @@ abstract class BaseEzHttp implements IHttp
     }
 
     protected function buildRequest($buf):IRequest{
-        return $this->interpreter->decode($buf);
+        return $this->socket->getInterpreter()->decode($buf);
     }
 
     protected function getResponse(IRequest $request):IResponse{
@@ -114,8 +111,8 @@ abstract class BaseEzHttp implements IHttp
         $request->setContentLenActual(strlen($requestSource->bodyContent));
         $request->setIsInit($requestSource->contentLengthActual === $requestSource->contentLength);
         if ($request->isInit()) {
-            $bodyArr = $this->interpreter->buildHttpRequestBody($requestSource);
-            $this->interpreter->buildRequestArgs($bodyArr, [], $request);
+            $bodyArr = $this->socket->getInterpreter()->buildHttpRequestBody($requestSource);
+            $this->socket->getInterpreter()->buildRequestArgs($bodyArr, [], $request);
         }
     }
 }

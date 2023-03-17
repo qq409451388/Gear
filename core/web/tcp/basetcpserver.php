@@ -36,9 +36,10 @@ abstract class BaseTcpServer
      */
     const MASTER = "EZTCP_MASTER";
 
-    public function _construct(string $ip, $port) {
+    public function _construct(string $ip, $port, string $schema = "") {
         $this->ip = $ip;
         $this->port = $port;
+        $this->schema = $schema;
         $this->init();
     }
 
@@ -118,10 +119,8 @@ abstract class BaseTcpServer
         unset($this->connectPool[$clientKey]);
     }
 
-    abstract protected function getInterpreter();
-
     public function start() {
-        Logger::console("Start Server Success! ".$this->getInterpreter()->getShema()."://".$this->ip.":".$this->port);
+        Logger::console("Start Server Success! ".$this->schema."://".$this->ip.":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;
             $writeSockets = null;
@@ -147,7 +146,7 @@ abstract class BaseTcpServer
                     $this->checkAndClearRequest($request);
                     if ($request->isInit()) {
                         $response = $this->buildResponse($request);
-                        $content = $this->encodeResponse($response);
+                        $content = $response->toString();
                         @socket_write($readSocket, $content, strlen($content));
                         if (!$this->keepAlive) {
                             $this->disConnect($readSocket);
@@ -292,7 +291,19 @@ abstract class BaseTcpServer
 
     }*/
 
-    abstract function buildRequest(string $buf, IRequest $request = null):IRequest;
-    abstract function buildResponse(IRequest $request):IResponse;
-    abstract function encodeResponse(IResponse $response):string;
+    /**
+     * 将请求报文转为IRequest接口实例对象
+     * @param string $buf
+     * @param IRequest|NULL $request
+     * @return IRequest
+     */
+    protected abstract function buildRequest(string $buf, IRequest $request = null):IRequest;
+
+    /**
+     * 将IRequest接口实例对象转换为IResponse接口实例对象
+     * @param IRequest $request
+     * @return IResponse
+     */
+    protected abstract function buildResponse(IRequest $request):IResponse;
+
 }

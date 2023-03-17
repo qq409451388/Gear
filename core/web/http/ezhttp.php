@@ -5,13 +5,12 @@ class EzHttp extends BaseEzHttp
         (new EzHttp(new Gear()))->init($ip, $port)->start();
     }
 
-    public function __construct(IDispatcher $dispatcher, Interpreter $interpreter = NULL) {
-        parent::__construct($dispatcher, $interpreter);
+    public function __construct(IDispatcher $dispatcher) {
+        parent::__construct($dispatcher, new HttpInterpreter());
     }
 
     private function initSocket() {
         $this->socket = new EzTcpServer($this->host, $this->port);
-        $this->socket->setInterpreter($this->interpreter);
         $this->socket->setRequestHandler(function (string $buf, $request = null):IRequest {
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);

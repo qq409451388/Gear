@@ -1,7 +1,7 @@
 <?php
 class RespInterpreter implements Interpreter
 {
-    public function getShema(): string {
+    public function getSchema(): string {
         return "resp";
     }
 
