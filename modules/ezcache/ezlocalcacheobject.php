@@ -16,6 +16,11 @@ class EzLocalCacheObject
      */
     public $expire;
 
+    /**
+     * @var int $calledTime 数据访问次数
+     */
+    private $calledTime = 0;
+
     public const T_STRING = 1;
     public const T_INT = 2;
     public const T_FLOAT = 3;
@@ -76,5 +81,14 @@ class EzLocalCacheObject
         $ttl = $this->expire - time();
         DBC::assertTrue($ttl < 0, "[EzLocalCache Exception] data has been expired!");
         return $ttl;
+    }
+
+    public function getData() {
+        $this->calledTime++;
+        return $this->dataSource;
+    }
+
+    public function isCalledFrequently($midCalledTime) {
+        return $this->calledTime > $midCalledTime;
     }
 }

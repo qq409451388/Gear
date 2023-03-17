@@ -104,4 +104,12 @@ class Env
         }
     }
 
+    /**
+     * 设置内存大小限制
+     * @param int $byte
+     * @return void
+     */
+    public static function setMemoryLimit(int $byte) {
+        ini_set('memory_limit', $byte);
+    }
 }

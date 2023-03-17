@@ -14,6 +14,8 @@ class EzLocalCache extends EzCache
 
     private $transactionSwitch = false;
 
+    private $calledTimeThresold = 10;
+
     private function has(string $k)
     {
         return isset($this->_concurrentHashMap[$k]);
@@ -26,6 +28,25 @@ class EzLocalCache extends EzCache
     private function fetch(string $k)
     {
         return $this->_concurrentHashMap[$k]??null;
+    }
+
+    /**
+     * 当空间占用超限时调用，以释放内存
+     * @return void
+     */
+    public function cleanUpTheRoom() {
+        Logger::console("Normal Cleanup is Running!");
+        foreach ($this->_concurrentHashMap as $k => $cacheObject) {
+            if ($cacheObject->isExpire()
+                || $cacheObject->isCalledFrequently($this->calledTimeThresold)) {
+                unset($this->_concurrentHashMap[$k]);
+            }
+        }
+    }
+
+    public function cleanUpTheRoomForce() {
+        Logger::console("Force Cleanup is Running!");
+        $this->_concurrentHashMap = array_slice($this->_concurrentHashMap, 0, count($this->_concurrentHashMap)/2);
     }
 
     private function unsupportException($k, $operateDataType, $funcName){
@@ -135,7 +156,7 @@ class EzLocalCache extends EzCache
         if (!$this->exists($k)) {
             return "";
         }
-        return $this->_concurrentHashMap[$k]->dataSource;
+        return $this->_concurrentHashMap[$k]->getData();
     }
 
     public function incr(string $k):int
@@ -207,7 +228,7 @@ class EzLocalCache extends EzCache
      * @return EzLocalCacheObject[]
      */
     public function getAll() {
-        return $this->_concurrentHashMap;
+        return Env::isDev() ? $this->_concurrentHashMap : [];
     }
 
     public function lPop(string $k): string
@@ -270,7 +291,7 @@ class EzLocalCache extends EzCache
     {
         DBC::assertTrue($this->exists($k), "[EzLocalCache Exception] Unset $k!");
         $this->unsupportException($k, EzLocalCacheObject::T_LIST, __FUNCTION__);
-        return array_slice($this->fetch($k)->dataSource, $start, $end);
+        return array_slice($this->fetch($k)->getData(), $start, $end);
     }
 
     public function lLen(string $k): int
@@ -279,7 +300,7 @@ class EzLocalCache extends EzCache
             return 0;
         }
         $this->unsupportException($k, EzLocalCacheObject::T_LIST, __FUNCTION__);
-        return count($this->fetch($k)->dataSource);
+        return count($this->fetch($k)->getData());
     }
 
     public function lPos(string $k, string $elementValue, int $rank = null): int
@@ -400,19 +421,19 @@ class EzLocalCache extends EzCache
             return "";
         }
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        return $this->fetch($k)->dataSource[$field];
+        return $this->fetch($k)->getData()[$field];
     }
 
     public function hMGet(string $k, string ...$fields): array
     {
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        return EzCollectionUtils::matchKeys($fields, $this->fetch($k)->dataSource??[]);
+        return EzCollectionUtils::matchKeys($fields, $this->fetch($k)->getData()??[]);
     }
 
     public function hGetAll(string $k): array
     {
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        return $this->_concurrentHashMap[$k]->dataSource??[];
+        return $this->_concurrentHashMap[$k]->getData()??[];
     }
 
     public function hIncrBy(string $k, string $field, int $by): int
@@ -471,21 +492,21 @@ class EzLocalCache extends EzCache
     public function hKeys(string $k): array
     {
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        $map = $this->_concurrentHashMap[$k]->dataSource??[];
+        $map = $this->_concurrentHashMap[$k]->getData()??[];
         return array_keys($map);
     }
 
     public function hVals(string $k): array
     {
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        $map = $this->_concurrentHashMap[$k]->dataSource??[];
+        $map = $this->_concurrentHashMap[$k]->getData()??[];
         return array_values($map);
     }
 
     public function hLen(string $k): int
     {
         $this->unsupportException($k, EzLocalCacheObject::T_HASH, __FUNCTION__);
-        $map = $this->_concurrentHashMap[$k]->dataSource??[];
+        $map = $this->_concurrentHashMap[$k]->getData()??[];
         return count($map);
     }
 
