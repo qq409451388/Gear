@@ -38,7 +38,7 @@ abstract class BaseEzHttp implements IHttp
     }
 
     protected function buildRequest($buf):IRequest{
-        return $this->socket->getInterpreter()->decode($buf);
+        return $this->interpreter->decode($buf);
     }
 
     protected function getResponse(IRequest $request):IResponse{
@@ -111,8 +111,8 @@ abstract class BaseEzHttp implements IHttp
         $request->setContentLenActual(strlen($requestSource->bodyContent));
         $request->setIsInit($requestSource->contentLengthActual === $requestSource->contentLength);
         if ($request->isInit()) {
-            $bodyArr = $this->socket->getInterpreter()->buildHttpRequestBody($requestSource);
-            $this->socket->getInterpreter()->buildRequestArgs($bodyArr, [], $request);
+            $bodyArr = $this->interpreter->buildHttpRequestBody($requestSource);
+            $this->interpreter->buildRequestArgs($bodyArr, [], $request);
         }
     }
 }
