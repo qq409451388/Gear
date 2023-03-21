@@ -57,6 +57,9 @@ class Request implements IRequest
         return $this->body[$key]??new RequestNullBody();
     }
 
+    /**
+     * @return array<string, RequestBody>
+     */
     public function getBody() {
         return $this->body;
     }

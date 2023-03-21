@@ -112,4 +112,8 @@ class Env
     public static function setMemoryLimit(int $byte) {
         ini_set('memory_limit', $byte);
     }
+
+    public static function useFuzzyRouter() {
+        return Config::get("fuzzyrouter")??true;
+    }
 }

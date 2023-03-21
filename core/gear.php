@@ -173,7 +173,7 @@ class Gear implements IDispatcher
          * 注解第一种类型，参数为普通字符串
          * @example: @XXX("qqq") 或 @YYY('qqq')
          */
-        $s= "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\'?\"?(?<content>[\/a-zA-Z0-9]+)\'?\"?\)/";
+        $s= "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*]+)\'?\"?\)/";
         preg_match_all($s, $comment, $matches, 2);
         foreach($matches as $matched){
             $annoName = $matched['annoName']??null;
