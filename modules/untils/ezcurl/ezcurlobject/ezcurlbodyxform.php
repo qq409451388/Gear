@@ -1,6 +1,8 @@
 <?php
 class EzCurlBodyXForm extends EzCurlBody
 {
+    public $data;
+
     /**
      * HTTP BODY X-WWW-FORM
      */
@@ -12,6 +14,6 @@ class EzCurlBodyXForm extends EzCurlBody
 
     public function toString()
     {
-        // TODO: Implement toString() method.
+        return http_build_query($this->data);
     }
 }

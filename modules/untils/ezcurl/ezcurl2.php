@@ -286,7 +286,6 @@ class EzCurl2
         if (!empty($bodySource)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $bodySource);
         }
-        var_dump($this);
         return $this->exec(self::HTTP_METHOD_POST);
     }
 

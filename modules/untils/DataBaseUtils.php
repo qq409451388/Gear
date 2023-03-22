@@ -145,4 +145,33 @@ class DataBaseUtils
         preg_match_all($template, $sql, $matched);
         return $matched;
     }
+
+    public static function generateUml($database, $tableName, $type = self::NAMED_SOURCE) {
+        $targetClassName = empty($targetClassName) ? self::convertName($tableName, self::NAMED_CAMELCASE) : $targetClassName;
+        $information = DB::get($database)
+            ->query("select * from information_schema.`COLUMNS` where TABLE_SCHEMA = '$database' and TABLE_NAME = '$tableName'");
+
+        $hash = [
+            "varchar" => "string",
+            "tinyint" => "integer",
+            "smallint" => "integer",
+            "mediumint" => "integer",
+            "int" => "integer",
+            "bigint" => "integer",
+            "float" => "float",
+            "decimal" => "string",
+            "datetime" => "string",
+            "mediumtext" => "string",
+            "text" => "string",
+            "timestamp" => "string",
+            "date" => "string",
+        ];
+        $str = "";
+        foreach ($information as $item) {
+            $column = self::convertName($item['COLUMN_NAME'], $type);
+
+            $str .= $column.":".$hash[$item['DATA_TYPE']]." ".$item['COLUMN_COMMENT'].PHP_EOL;
+        }
+        return $str;
+    }
 }
