@@ -143,11 +143,12 @@ class EzCurl2
     private function explicitUrl() {
         preg_match("/(?<scheme>http|https)(?<m>:)(?<x>\/\/)(.*)/", $this->url, $match);
         $scheme = $match['scheme']??null;
-        $m = $match['scheme']??null;
-        $x = $match['scheme']??null;
+        $m = $match['m']??null;
+        $x = $match['x']??null;
         if (is_null($scheme)) {
-            $this->scheme = "http";
+            $scheme = "http";
         }
+        $this->scheme = $scheme;
         $premix = "";
         if (is_null($m)) {
             $premix .= ":";
@@ -285,6 +286,7 @@ class EzCurl2
         if (!empty($bodySource)) {
             curl_setopt($this->ch, CURLOPT_POSTFIELDS, $bodySource);
         }
+        var_dump($this);
         return $this->exec(self::HTTP_METHOD_POST);
     }
 
