@@ -17,6 +17,8 @@ class GetMapping implements Anno {
 
     public function combine($values)
     {
+        $this->path = $values;
+        return;
         preg_match_all("/(?<path>[\/a-zA-Z0-9]+)(?<args>[#{a-zA-z}]+)/", $values, $matched);
         $newPath = $values;
         $argMatcher = $values;
