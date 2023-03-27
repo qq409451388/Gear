@@ -105,6 +105,7 @@ class EzCurl2
         $this->options = new EzCurlOptions();
         $this->requestHeader = new EzCurlRequestHeader();
         $this->isDebug = Env::isDev();
+        $this->headers = [];
     }
 
     /**
