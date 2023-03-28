@@ -37,7 +37,6 @@ class Env
             if (preg_match('/inet\s+([0-9\.]+)/', $ifconfigInfo, $matches)) {
                 $ipAddress = $matches[1];
             }
-            return $ipAddress;
         } else if (self::isWin()) {
             exec("ipconfig", $output);
             foreach ($output as $line) {
