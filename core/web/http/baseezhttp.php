@@ -38,7 +38,12 @@ abstract class BaseEzHttp implements IHttp
     }
 
     protected function buildRequest($buf):IRequest{
-        return $this->interpreter->decode($buf);
+        /**
+         * @var Request $request
+         */
+        $request = $this->interpreter->decode($buf);
+        $request->setDispatcher($this->dispatcher);
+        return $request;
     }
 
     protected function getResponse(IRequest $request):IResponse{
@@ -84,12 +89,7 @@ abstract class BaseEzHttp implements IHttp
 
     public function getDynamicResponse(IRequest $request):IResponse{
         try {
-            $router = $this->dispatcher->matchedRouteMapping($request->getPath());
-            if ($router instanceof NullMapping) {
-                return $this->interpreter->getNotFoundResourceResponse($request);
-            } else {
-                return $this->interpreter->getDynamicResponse($request, $router);
-            }
+            return $this->interpreter->getDynamicResponse($request);
         }catch (GearRunTimeException $e) {
             Logger::error($e->getMessage().$e->getFile().":".$e->getLine());
             $premix = Env::isDev() ? "[".get_class($e)."]" : "";

@@ -9,17 +9,12 @@ class RespRequest implements IRequest
 
     public function getPath(): string
     {
-        // TODO: Implement getPath() method.
+        return $this->command;
     }
 
     public function check()
     {
         // TODO: Implement check() method.
-    }
-
-    public function getDynamicResponse(IRouteMapping $router): IResponse
-    {
-        // TODO: Implement getDynamicResponse() method.
     }
 
     public function filter()
@@ -29,7 +24,7 @@ class RespRequest implements IRequest
 
     public function isEmpty(): bool
     {
-        // TODO: Implement isEmpty() method.
+        return empty($this->command);
     }
 
     public function getRequestId(): string

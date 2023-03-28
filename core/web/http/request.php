@@ -28,6 +28,11 @@ class Request implements IRequest
 
     private $requestId;
 
+    /**
+     * @var IDispatcher $dispatcher 分发器
+     */
+    private $dispatcher;
+
     public function setQuery($key, $value){
         $this->query[$key] = $value;
     }
@@ -165,5 +170,21 @@ class Request implements IRequest
     public function setRequestId(string $id)
     {
         $this->requestId = $id;
+    }
+
+    /**
+     * @return IDispatcher
+     */
+    public function getDispatcher(): IDispatcher
+    {
+        return $this->dispatcher;
+    }
+
+    /**
+     * @param IDispatcher $dispatcher
+     */
+    public function setDispatcher(IDispatcher $dispatcher): void
+    {
+        $this->dispatcher = $dispatcher;
     }
 }

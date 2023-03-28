@@ -23,22 +23,24 @@ interface Interpreter
 
     /**
      * 获取资源未找到响应
+     * @param IRequest $request
      * @return IResponse
      */
     public function getNotFoundResourceResponse(IRequest $request):IResponse;
 
     /**
      * 获取网络错误响应
+     * @param IRequest $request
+     * @param string $errorMessage
      * @return IResponse
      */
     public function getNetErrorResponse(IRequest $request, string $errorMessage = ""):IResponse;
 
     /**
-     * @author guohan
-     * @date 2022-09-08
-     * @throws GearRunTimeException
-     * @param IRouteMapping $router
+     * 依据逻辑动态获取响应
+     * @param IRequest $request
      * @return IResponse
+     * @throws GearRunTimeException
      */
-    public function getDynamicResponse(IRequest $request, IRouteMapping $routeMapping):IResponse;
+    public function getDynamicResponse(IRequest $request):IResponse;
 }

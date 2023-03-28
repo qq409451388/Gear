@@ -16,6 +16,16 @@ class EzLocalCache extends EzCache
 
     private $calledTimeThresold = 10;
 
+    /**
+     * @var int 内存空间限制
+     */
+    public $memoryLimit;
+
+    /**
+     * @var int 实际耗费的内存
+     */
+    public $memoryCost;
+
     private function has(string $k)
     {
         return isset($this->_concurrentHashMap[$k]);
@@ -47,6 +57,21 @@ class EzLocalCache extends EzCache
     public function cleanUpTheRoomForce() {
         Logger::console("Force Cleanup is Running!");
         $this->_concurrentHashMap = array_slice($this->_concurrentHashMap, 0, count($this->_concurrentHashMap)/2);
+    }
+
+    public function tryRelease() {
+        $this->memoryCost = memory_get_usage();
+        if ($this->memoryCost > $this->memoryLimit) {
+            $this->cleanUpTheRoom();
+        }
+        $this->memoryCost = memory_get_usage();
+        if ($this->memoryCost > $this->memoryLimit) {
+            $this->cleanUpTheRoomForce();
+        }
+        $this->memoryCost = memory_get_usage();
+        if ($this->memoryCost > $this->memoryLimit) {
+            $this->flushAll();
+        }
     }
 
     private function unsupportException($k, $operateDataType, $funcName){

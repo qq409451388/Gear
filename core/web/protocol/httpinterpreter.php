@@ -197,15 +197,23 @@ class HttpInterpreter implements Interpreter
         return new Response(HttpStatus::INTERNAL_SERVER_ERROR(), $errorMessage);
     }
 
-    public function getDynamicResponse(IRequest $request, IRouteMapping $router): IResponse {
-        $response = $router->disPatch($request);
-        if ($response instanceof IResponse) {
-            return $response;
-        } elseif ($response instanceof EzRpcResponse) {
-            $response = $response->toJson();
-        } elseif (is_array($response) || is_object($response)) {
-            $response = EzString::encodeJson($response);
+    public function getDynamicResponse(IRequest $request): IResponse {
+        /**
+         * @var Request $request
+         */
+        $router = $request->getDispatcher()->matchedRouteMapping($request->getPath());
+        if ($router instanceof NullMapping) {
+            return $this->getNotFoundResourceResponse($request);
+        } else {
+            $response = $router->disPatch($request);
+            if ($response instanceof IResponse) {
+                return $response;
+            } elseif ($response instanceof EzRpcResponse) {
+                $response = $response->toJson();
+            } elseif (is_array($response) || is_object($response)) {
+                $response = EzString::encodeJson($response);
+            }
+            return new Response(HttpStatus::OK(), $response);
         }
-        return new Response(HttpStatus::OK(), $response);
     }
 }

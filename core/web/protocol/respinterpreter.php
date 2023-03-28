@@ -1,6 +1,18 @@
 <?php
 class RespInterpreter implements Interpreter
 {
+    /**
+     * @var EzLocalCache
+     */
+    private $localCache;
+
+    public function __construct() {
+        if (!BeanFinder::get()->has(EzLocalCache::class)) {
+            BeanFinder::get()->import(EzLocalCache::class);
+        }
+        $this->localCache = BeanFinder::get()->pull(EzLocalCache::class);
+    }
+
     public function getSchema(): string {
         return "resp";
     }
@@ -66,5 +78,54 @@ class RespInterpreter implements Interpreter
             }
         }
         return $commandListDecoded;
+    }
+
+    public function getNotFoundResourceResponse(IRequest $request): IResponse
+    {
+        $response = new RespResponse();
+        $response->resultDataType = RespResponse::TYPE_BOOL;
+        $response->isSuccess = false;
+        $response->msg = "NOT FOUND";
+        return $response;
+    }
+
+    public function getNetErrorResponse(IRequest $request, string $errorMessage = ""): IResponse
+    {
+        $response = new RespResponse();
+        $response->resultDataType = RespResponse::TYPE_BOOL;
+        $response->isSuccess = false;
+        $response->msg = $errorMessage?:"NET ERROR";
+        return $response;
+    }
+
+    public function getDynamicResponse(IRequest $request): IResponse {
+        try {
+            DBC::assertTrue(method_exists($this->localCache, $request->command),
+                "[EzResp Exception] Unknow Command $request->command!");
+            $result = call_user_func_array([$this->localCache, $request->command], $request->args);
+            $this->localCache->tryRelease();
+            $response = new RespResponse();
+            if (is_bool($result)) {
+                $isSuccess = $result;
+                $response->resultDataType = RespResponse::TYPE_BOOL;
+            } else if (is_array($result)) {
+                $response->resultDataType = RespResponse::TYPE_ARRAY;
+                $isSuccess = true;
+            } else if (is_int($result)) {
+                $response->resultDataType = RespResponse::TYPE_INT;
+                $isSuccess = true;
+            } else {
+                $response->resultDataType = RespResponse::TYPE_NORMAL;
+                $isSuccess = true;
+            }
+            $response->isSuccess = $isSuccess;
+            $response->resultData = $result;
+        } catch (Exception $e) {
+            $response = new RespResponse();
+            $response->resultDataType = RespResponse::TYPE_BOOL;
+            $response->isSuccess = false;
+            $response->msg = $e->getMessage();
+        }
+        return $response;
     }
 }
