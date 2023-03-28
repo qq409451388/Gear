@@ -86,16 +86,18 @@ abstract class BaseEzHttp implements IHttp
         try {
             $router = $this->dispatcher->matchedRouteMapping($request->getPath());
             if ($router instanceof NullMapping) {
-                return $request->getNotFoundResourceResponse();
+                return $this->interpreter->getNotFoundResourceResponse($request);
             } else {
-                return $request->getDynamicResponse($router);
+                return $this->interpreter->getDynamicResponse($request, $router);
             }
         }catch (GearRunTimeException $e) {
             Logger::error($e->getMessage().$e->getFile().":".$e->getLine());
-            return $request->getNetErrorResponse($e->getMessage());
+            $premix = Env::isDev() ? "[".get_class($e)."]" : "";
+            return $this->interpreter->getNetErrorResponse($request, $premix.$e->getMessage());
         }catch (Exception $e){
             Logger::error($e->getMessage());
-            return $request->getNetErrorResponse($e->getMessage());
+            $premix = Env::isDev() ? "[".get_class($e)."]" : "";
+            return $this->interpreter->getNetErrorResponse($request, $premix.$e->getMessage());
         }
     }
 

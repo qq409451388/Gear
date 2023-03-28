@@ -17,26 +17,6 @@ interface IRequest
     public function isInit():bool;
 
     /**
-     * @return IResponse
-     */
-    public function getNotFoundResourceResponse():IResponse;
-
-    /**
-     * @param string $errorMessage
-     * @return IResponse
-     */
-    public function getNetErrorResponse(string $errorMessage):IResponse;
-
-    /**
-     * @author guohan
-     * @date 2022-09-08
-     * @throws GearRunTimeException
-     * @param IRouteMapping $router
-     * @return IResponse
-     */
-    public function getDynamicResponse(IRouteMapping $router):IResponse;
-
-    /**
      * filter some args from requests
      * @return mixed
      */

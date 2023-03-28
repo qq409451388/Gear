@@ -113,14 +113,6 @@ class Request implements IRequest
         return true;
     }
 
-    public function getNotFoundResourceResponse():IResponse {
-        return new Response(HttpStatus::NOT_FOUND(), "");
-    }
-
-    public function getNetErrorResponse(string $msg):IResponse {
-        return new Response(HttpStatus::INTERNAL_SERVER_ERROR(), $msg);
-    }
-
     public function getDynamicResponse(IRouteMapping $router): IResponse {
         $response = $router->disPatch($this);
         if ($response instanceof IResponse) {

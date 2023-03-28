@@ -188,4 +188,24 @@ class HttpInterpreter implements Interpreter
             $request->setQuery($k, $v);
         }
     }
+
+    public function getNotFoundResourceResponse(IRequest $request): IResponse {
+        return new Response(HttpStatus::NOT_FOUND());
+    }
+
+    public function getNetErrorResponse(IRequest $request, string $errorMessage = ""): IResponse {
+        return new Response(HttpStatus::INTERNAL_SERVER_ERROR(), $errorMessage);
+    }
+
+    public function getDynamicResponse(IRequest $request, IRouteMapping $router): IResponse {
+        $response = $router->disPatch($request);
+        if ($response instanceof IResponse) {
+            return $response;
+        } elseif ($response instanceof EzRpcResponse) {
+            $response = $response->toJson();
+        } elseif (is_array($response) || is_object($response)) {
+            $response = EzString::encodeJson($response);
+        }
+        return new Response(HttpStatus::OK(), $response);
+    }
 }

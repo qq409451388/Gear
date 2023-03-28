@@ -12,16 +12,6 @@ class GmRequest implements IRequest
         // TODO: Implement check() method.
     }
 
-    public function getNotFoundResourceResponse(): IResponse
-    {
-        // TODO: Implement getNotFoundResourceResponse() method.
-    }
-
-    public function getNetErrorResponse(string $errorMessage): IResponse
-    {
-        // TODO: Implement getNetErrorResponse() method.
-    }
-
     public function getDynamicResponse(IRouteMapping $router): IResponse
     {
         // TODO: Implement getDynamicResponse() method.
