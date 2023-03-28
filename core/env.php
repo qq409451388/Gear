@@ -27,7 +27,26 @@ class Env
     }
 
     public static function getIp(){
-        return Config::get("host");
+        $ipAddress = Config::get("host");
+        if ("0.0.0.0" != $ipAddress) {
+            return $ipAddress;
+        }
+        if (self::isUnix()) {
+            $interface = 'en0'; // 网卡名称
+            $ifconfigInfo = shell_exec('/sbin/ifconfig ' . $interface);
+            if (preg_match('/inet\s+([0-9\.]+)/', $ifconfigInfo, $matches)) {
+                $ipAddress = $matches[1];
+            }
+            return $ipAddress;
+        } else if (self::isWin()) {
+            exec("ipconfig", $output);
+            foreach ($output as $line) {
+                if (preg_match('/IPv4 Address.*: ([0-9\.]+)/', $line, $matches)) {
+                    $ipAddress = $matches[1];
+                }
+            }
+        }
+        return $ipAddress;
     }
 
     public static function get(){

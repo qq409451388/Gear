@@ -120,7 +120,7 @@ abstract class BaseTcpServer
     }
 
     public function start() {
-        Logger::console("Start Server Success! ".$this->schema."://".$this->ip.":".$this->port);
+        Logger::console("Start Server Success! ".$this->schema."://".Env::getIp().":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;
             $writeSockets = null;
