@@ -34,10 +34,6 @@ class Env
         return self::getEnv();
     }
 
-    public static function debugMode(){
-        return defined("DEBUG")? DEBUG : false;
-    }
-
     private static function getEnv(){
         return @defined("ENV") ? strtoupper(ENV) : null;
     }
@@ -113,10 +109,18 @@ class Env
         ini_set('memory_limit', $byte);
     }
 
+    /**
+     * 是否使用带有匹配规则的路由
+     * @return true
+     */
     public static function useFuzzyRouter() {
         return Config::get("fuzzyrouter")??true;
     }
 
+    /**
+     * 默认的配置包位置
+     * @return string
+     */
     public static function getDefaultConfigPath() {
         return CORE_PATH.DIRECTORY_SEPARATOR."config";
     }

@@ -36,7 +36,7 @@ class EzCurl
     public function __construct()
     {
         $this->init();
-        $this->setDebug(Env::debugMode());
+        $this->setDebug(Env::isDev());
     }
 
     private function init()

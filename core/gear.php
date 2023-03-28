@@ -41,7 +41,7 @@ class Gear implements IDispatcher
         Config::init();
     }
 
-    private function initRouter() {
+    protected function initRouter() {
         foreach(BeanFinder::get()->getAll() as $objName => $obj) {
             $reflection = new ReflectionClass($obj);
             $reflectionMethods = $reflection->getMethods();
@@ -53,8 +53,7 @@ class Gear implements IDispatcher
                     continue;
                 }
                 $defaultPath = $objName . '/' . $reflectionMethod->getName();
-                EzRouter::get()->setMapping($defaultPath, $objName, $reflectionMethod->getName());
-                Logger::console("[Gear] Mapping Path ".$defaultPath." To Controller ".$objName);
+                EzRouter::get()->setMapping($defaultPath, $reflection->getName(), $reflectionMethod->getName());
             }
         }
     }

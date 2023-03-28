@@ -15,7 +15,7 @@ class Logger
     {
         $template = '[Info]'.$template;
         $res = self::matchTemplate($template, $args);
-        if(Env::debugMode()){
+        if(Env::isDev()){
             self::console($res);
         }
         self::write($res, self::TYPE_RECORD);
@@ -25,7 +25,7 @@ class Logger
     {
         $template = '[Warn]'.$template;
         $res = self::matchTemplate($template, $args);
-        if(Env::debugMode()){
+        if(Env::isDev()){
             self::console($res);
         }
         self::write($res, self::TYPE_RECORD);
@@ -35,7 +35,7 @@ class Logger
     {
         $template = '[Error]'.$template;
         $res = self::matchTemplate($template, $args);
-        if(Env::debugMode()){
+        if(Env::isDev()){
             self::console($res);
         }
         self::write($res, self::TYPE_RECORD);

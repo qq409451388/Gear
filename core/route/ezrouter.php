@@ -23,6 +23,7 @@ class EzRouter
                 Logger::warn("EzRouter Has Setted Path:".$path.", From Obj:".$class."::".$func);
             }
             $this->urlMap[$path] = new UrlMapping($class, $func, $httpMethod);
+            Logger::console("[EzRouter] Mapping Path ".$path." To $func@$class");
         } else {
             $pathExplained = explode("/", $path);
             $endIndex = count($pathExplained) - 1;
