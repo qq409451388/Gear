@@ -38,7 +38,7 @@ class EzRedis extends EzCache
     }
 
     public function connectCluster(string $clusterName, $timeout = 0){
-        $configs = Config::get("rediscluster")[$clusterName];
+        $configs = Config::get("rediscluster.$clusterName");
         DBC::assertTrue(!empty($configs), "[EzRedis Exception] Config $clusterName is Not Exists!");
         $this->auth($configs['auth']??"");
         $this->connectWithCluster($configs['server'], $timeout);

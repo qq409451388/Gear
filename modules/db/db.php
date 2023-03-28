@@ -21,11 +21,11 @@ class DB{
 
     private function getDbConfig($database, $env = null)
     {
-        $this->dbCon = Config::getAll('dbcon');
+        $this->dbCon = Config::getRecursion('dbcon');
         if(is_null($env)){
             DBC::throwEx("[DB] Null Env");
         }
-        $this->sysHash = Config::getAll('syshash')[$env] ?? [];
+        $this->sysHash = Config::getRecursion('syshash')[$env] ?? [];
         if(empty($this->dbCon) || empty($this->sysHash)){
             DBC::throwEx("[DB] Null DB Config");
         }

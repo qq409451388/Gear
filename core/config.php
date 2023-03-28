@@ -1,50 +1,64 @@
 <?php
 class Config
 {
-    private static $config;
-    private const PATH_CONFIG = DIRECTORY_SEPARATOR."config".DIRECTORY_SEPARATOR;
-    private const EXT_JSON = ".json";
-    public static function get($key, $from = CORE_PATH, $useCache = true){
+    /**
+     * @var array $config
+     */
+    private static $config = [];
+    private const KEY_SPLIT = ".";
+    private const EXT_JSON = "json";
+
+    public static function init() {
+        $pjs = [];
+        if (defined("CONFIG_PATH")) {
+            $configPath = CONFIG_PATH;
+            $pjs = SysUtils::scanFile($configPath, -1, [self::EXT_JSON], true);
+        }
+        $configPath2 = Env::getDefaultConfigPath();
+        $pjs2 = SysUtils::scanFile($configPath2, -1, [self::EXT_JSON], true);
+        foreach ($pjs2 as $pjk => $pjv) {
+            if (!isset($pjs[$pjk])) {
+                $pjs[$pjk] = $pjv;
+            }
+        }
+
+        foreach ($pjs as $key => $pj) {
+            if (!is_file($pj)) {
+                return null;
+            }
+            $content = file_get_contents($pj);
+            if(!empty($content) && $decodedObj = EzCollectionUtils::decodeJson($content)){
+                self::setFromFile($key, $decodedObj);
+            }
+        }
+    }
+
+    private static function setFromFile($key, $data) {
+        self::$config[$key] = $data;
+    }
+
+    public static function get($key){
         if(empty($key)){
             return null;
         }
-        $try = self::$config[$key]??null;
-        if(!$useCache || is_null($try)){
-            $pj = $from.self::PATH_CONFIG.$key.self::EXT_JSON;
-            $content = @file_get_contents($pj);
-            if(false !== $content){
-                self::set([$key=>EzCollectionUtils::decodeJson($content)]);
+        $keyArr = explode(self::KEY_SPLIT, $key);
+        $tmpRes = self::$config;
+        foreach ($keyArr as $index => $k) {
+            if (!isset($tmpRes[$k])) {
+                return null;
             }
+            $tmpRes = $tmpRes[$k];
         }
-        return self::$config[$key]??null;
+        return $tmpRes;
     }
 
-    public static function getAll($p){
-        $pj = CORE_PATH.self::PATH_CONFIG.$p.self::EXT_JSON;
-        $content = @file_get_contents($pj);
-        if(false !== $content){
-            self::set([$p=>EzCollectionUtils::decodeJson($content)]);
-        }
-        return self::get($p);
+    public static function getRecursion($p = ""){
+        return empty($p) ? self::$config : self::get($p);
     }
 
     public static function set($arr){
         foreach($arr as $k => $v){
             self::$config[$k] = $v;
-        }
-    }
-
-    public static function write($key, $data, $mode){
-        DBC::assertTrue(in_array($mode, ["x", "w"]), "[Config] Write Fail! UnSupport Mode:".$mode."!");
-        $pj = USER_PATH.self::PATH_CONFIG.$key.self::EXT_JSON;
-        $content = @file_get_contents($pj);
-        if ($mode == "w") {
-            if (false === $content) {
-                file_put_contents($pj, EzString::encodeJson($data));
-            }
-        }
-        if ($mode == "x") {
-            file_put_contents($pj, EzString::encodeJson($data));
         }
     }
 

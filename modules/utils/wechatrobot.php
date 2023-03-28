@@ -16,7 +16,7 @@ class WeChatRobot
     }
 
     public function setRobot($type){
-        $key = Config::get("wechatrobot")[$type] ?? "";
+        $key = Config::get("wechatrobot.$type") ?? "";
         DBC::assertNotEmpty($key, "[WeChatRobot Exception] Unknow Robot Type ".$type);
         $this->key = $key;
     }

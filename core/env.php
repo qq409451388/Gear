@@ -116,4 +116,8 @@ class Env
     public static function useFuzzyRouter() {
         return Config::get("fuzzyrouter")??true;
     }
+
+    public static function getDefaultConfigPath() {
+        return CORE_PATH.DIRECTORY_SEPARATOR."config";
+    }
 }

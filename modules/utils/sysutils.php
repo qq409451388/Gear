@@ -43,7 +43,7 @@ class SysUtils
         return $result;
     }
 
-    public static function scanFile($path, $deep = 1) {
+    public static function scanFile($path, $deep = 1, $filter = [], $holdFileKey = false) {
         $result = [];
         if ($deep == 0) {
             return $result;
@@ -60,7 +60,16 @@ class SysUtils
                 }
                 $result = array_merge($result, self::scanFile($tmpPath, $deep - 1));
             } else if (is_file($tmpPath)) {
-                $result[] = $tmpPath;
+                $pathInfo = pathinfo($tmpPath);
+                $fileExt = $pathInfo['extension']??"";
+                if (in_array($fileExt, $filter, true)) {
+                    if ($holdFileKey) {
+                        $fileName = $pathInfo['filename']??"";
+                        $result[$fileName] = $tmpPath;
+                    } else {
+                        $result[] = $tmpPath;
+                    }
+                }
             }
         }
         return $result;

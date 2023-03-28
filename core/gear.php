@@ -8,12 +8,18 @@ class Gear implements IDispatcher
         $this->initObjects($classess);
     }
 
+    public function initWithConsole() {
+        $this->initConfig();
+    }
+
     public function initWithHttp() {
+        $this->initConfig();
         $this->initRouter();
         $this->initAnno();
     }
 
     public function initWithTcp() {
+        $this->initConfig();
         $this->initAnno();
     }
 
@@ -24,6 +30,10 @@ class Gear implements IDispatcher
         foreach($classess as $class) {
             $this->createObject($class);
         }
+    }
+
+    private function initConfig() {
+        Config::init();
     }
 
     private function initRouter() {

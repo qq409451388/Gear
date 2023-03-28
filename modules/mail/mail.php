@@ -3,7 +3,7 @@ class Mail{
 
 	public static function sendMail($subject, $content, $addresses = [], $attachs = [], $type = 'guohan'):bool
     {/*{{{*/
-        $mailConfig = Config::get('mail')[$type] ?? [];
+        $mailConfig = Config::get("mail.$type") ?? [];
         if(empty($mailConfig))
         {
            DBC::throwEx('[Mail Exception]wrong config type:'.$type);
@@ -40,7 +40,7 @@ class Mail{
             if(!is_file($attach))
             {
                 DBC::throwEx('[Mail Exception]wrong path:'.$attach);
-                continue; 
+                continue;
             }
 		    $mail->addAttachment($attach);
         }
