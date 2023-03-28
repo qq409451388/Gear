@@ -2,10 +2,24 @@
 interface IDispatcher
 {
     /**
-     * 使用Http协议初始化
-     * @return mixed
+     * HTTP服务启动器
+     * @return void
+     * @throws ReflectionException
      */
     public function initWithHttp();
+
+    /**
+     * TCP服务启动器
+     * @return void
+     * @throws ReflectionException
+     */
+    public function initWithTcp();
+
+    /**
+     * 命令行启动器
+     * @return void
+     */
+    public function initWithConsole();
 
     /**
      * 判断path是否能够匹配到路由规则
@@ -21,9 +35,4 @@ interface IDispatcher
      */
     public function matchedRouteMapping(string $path):IRouteMapping;
 
-    /**
-     * 使用Tcp初始化
-     * @return mixed
-     */
-    public function initWithTcp();
 }
