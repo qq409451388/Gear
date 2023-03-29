@@ -1,7 +1,7 @@
 <?php
 class WebSocketResponse implements IResponse
 {
-    public $isHandShake = false;
+    public $method;
 
     public $response;
 

@@ -24,6 +24,9 @@ abstract class BaseDTO
         if (empty($array)) {
             return null;
         }
+        if (!is_array($array)) {
+            return null;
+        }
         $t = new static();
         self::fill($array, $t);
         return $t;

@@ -42,7 +42,8 @@ class WebSocketInterpreter implements Interpreter
      */
     public function encode(IResponse $response): string
     {
-        return $response->isHandShake ? $response->response : $this->frame($response->response);
+        return EzWebSocketMethodEnum::METHOD_HANDSHAKE == $response->method
+            ? $response->response : $this->frame($response->response);
     }
 
     private function frame( $buffer ) {
@@ -65,13 +66,16 @@ class WebSocketInterpreter implements Interpreter
             "[WebSocketInterpreter] Request Data must Has Key method!", 0, GearIllegalArgumentException::class);
         DBC::assertNotEmpty($request->sourceData['data'],
             "[WebSocketInterpreter] Request Data must Has Key data!", 0, GearIllegalArgumentException::class);
+        $jsonObj = EzCollectionUtils::decodeJson($request->sourceData['data']);
+        DBC::assertNotEmpty($jsonObj,
+            "[WebSocketInterpreter] Request Data Decoded is Fail!", 0, GearIllegalArgumentException::class);
         $request->setPath($request->sourceData['method']);
         if (EzWebSocketMethodEnum::METHOD_CONTRACT == $request->getPath()) {
-            $data = EzWebSocketRequestContract::create($request->sourceData['data']);
+            $data = EzWebSocketRequestContract::create($jsonObj);
         } else if (EzWebSocketMethodEnum::METHOD_CALL == $request->getPath()) {
-            $data = EzWebSocketRequestCall::create($request->sourceData['data']);
+            $data = EzWebSocketRequestCall::create($jsonObj);
         } else if (EzWebSocketMethodEnum::METHOD_SERVER == $request->getPath()) {
-            $data = EzWebSocketRequestServer::create($request->sourceData['data']);
+            $data = EzWebSocketRequestServer::create($jsonObj);
         } else {
             $data = null;
         }
@@ -100,16 +104,39 @@ class WebSocketInterpreter implements Interpreter
 
     public function getNotFoundResourceResponse(IRequest $request): IResponse
     {
-        // TODO: Implement getNotFoundResourceResponse() method.
+        $response = new WebSocketResponse();
+        $error = EzRpcResponse::error(
+            HttpStatus::NOT_FOUND()->getCode(),
+            HttpStatus::NOT_FOUND()->getStatus()
+        );
+        $response->response = EzDataUtils::toString($error);
+        return $response;
     }
 
-    public function getNetErrorResponse(IRequest $request, string $errorMessage = ""): IResponse
-    {
-        // TODO: Implement getNetErrorResponse() method.
+    public function getNetErrorResponse(IRequest $request, string $errorMessage = ""): IResponse {
+        $response = new WebSocketResponse();
+        $error = EzRpcResponse::error(
+            HttpStatus::INTERNAL_SERVER_ERROR()->getCode(),
+            $errorMessage??HttpStatus::INTERNAL_SERVER_ERROR()->getStatus()
+        );
+        $response->response = EzDataUtils::toString($error);
+        return $response;
     }
 
-    public function getDynamicResponse(IRequest $request): IResponse
-    {
-
+    /**
+     * @param WebSocketRequest $request
+     * @return IResponse
+     */
+    public function getDynamicResponse(IRequest $request): IResponse {
+        $response = new WebSocketResponse();
+        /**
+         * @var EzWebSocketRequestCall $data
+         */
+        $data = $request->getData();
+        $signature = $data->a."@".$data->c;
+        DBC::assertTrue(is_callable([BeanFinder::get()->pull($data->c),$data->a]),
+            "[WebSocketInterpreter] Unhandle method $signature!", 0, GearUnsupportedOperationException::class);
+        $response->response = call_user_func_array([BeanFinder::get()->pull($data->c),$data->a], $data->args??[]);
+        return $response;
     }
 }

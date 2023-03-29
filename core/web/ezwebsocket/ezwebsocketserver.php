@@ -43,11 +43,10 @@ class EzWebSocketServer extends AbstractTcpServer
          */
         function(IRequest $request):IResponse {
             $webSocketResposne = new WebSocketResponse();
-            $webSocketResposne->isHandShake = true;
+            $webSocketResposne->method = $request->getPath();
             try {
                 switch ($request->getPath()) {
                     case EzWebSocketMethodEnum::METHOD_HANDSHAKE:
-                        $webSocketResposne->isHandShake = true;
                         $webSocketResposne->response = $this->interpreter->doHandShake($request->sourceData);
                         $this->isHandShake[(int)$request->getRequestId()] = true;
                         return $webSocketResposne;
@@ -59,8 +58,16 @@ class EzWebSocketServer extends AbstractTcpServer
                     default:
                         return $this->interpreter->getNotFoundResourceResponse($request);
                 }
-            } catch (Exception $e) {
+            } catch (GearIllegalArgumentException $e) {
+                return $this->interpreter->getNotFoundResourceResponse($request);
+            } catch (GearRunTimeException $e) {
                 return $this->interpreter->getNetErrorResponse($request, $e->getMessage());
+            } catch (Error $e) {
+                if (Env::isDev()) {
+                    return $this->interpreter->getNetErrorResponse($request, $e->getMessage());
+                } else {
+                    return $this->interpreter->getNetErrorResponse($request, "System Error!");
+                }
             }
         });
         $this->socket->setKeepAlive();
