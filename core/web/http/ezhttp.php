@@ -7,7 +7,8 @@ class EzHttp extends BaseEzHttp
 
     protected function setTcpServerInstance() {
         $this->socket = new EzTcpServer($this->ip, $this->port, $this->interpreter->getSchema());
-        $this->socket->setRequestHandler(function (string $buf, $request = null):IRequest {
+        $this->socket->setRequestHandler(function (EzConnection $connection, $request = null):IRequest {
+            $buf = $connection->getBuffer();
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);
             } else {

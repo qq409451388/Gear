@@ -143,14 +143,18 @@ abstract class BaseTcpServer
                         $this->disConnect($readSocket);
                         continue;
                     }
+                    $connection = new EzConnection();
+                    $connection->setBuffer($buffer);
+                    $connection->setClientSocket($readSocket);
+                    $connection->setServerSocket($this->master);
                     //接收并处理消息体
-                    $request = $this->buildRequest($buffer, $lastRequest);
+                    $request = $this->buildRequest($connection, $lastRequest);
                     $request->setRequestId((int) $readSocket);
                     $this->checkAndClearRequest($request);
                     if ($request->isInit()) {
                         $response = $this->buildResponse($request);
                         $content = $response->toString();
-                        @socket_write($readSocket, $content, strlen($content));
+                        socket_write($readSocket, $content, strlen($content));
                         if (!$this->keepAlive) {
                             $this->disConnect($readSocket);
                         }
@@ -296,11 +300,11 @@ abstract class BaseTcpServer
 
     /**
      * 将请求报文转为IRequest接口实例对象
-     * @param string $buf
+     * @param EzConnection $connection
      * @param IRequest|NULL $request
      * @return IRequest
      */
-    protected abstract function buildRequest(string $buf, IRequest $request = null):IRequest;
+    protected abstract function buildRequest(EzConnection $connection, IRequest $request = null):IRequest;
 
     /**
      * 将IRequest接口实例对象转换为IResponse接口实例对象

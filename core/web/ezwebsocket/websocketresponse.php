@@ -1,10 +1,12 @@
 <?php
 class WebSocketResponse implements IResponse
 {
+    public $isHandShake = false;
+
     public $response;
 
     public function toString(): string
     {
-        return $this->response;
+        return (new WebSocketInterpreter())->encode($this);
     }
 }

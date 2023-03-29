@@ -34,7 +34,7 @@ class Env
     }
 
     public static function getDomain(){
-        $host = Config::get('host');
+        $host = self::getIp();
         $port = Config::get('port');
         return 'http://'.$host.':'.$port.'/';
     }

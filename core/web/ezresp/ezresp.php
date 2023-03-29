@@ -9,8 +9,8 @@ class EzResp extends AbstractTcpServer
 
     protected function setTcpServerInstance() {
         $this->socket = new EzTcpServer($this->ip, $this->port, $this->interpreter->getSchema());
-        $this->socket->setRequestHandler(function(string $buf) {
-            return $this->interpreter->decode($buf);
+        $this->socket->setRequestHandler(function(EzConnection $connection) {
+            return $this->interpreter->decode($connection->getBuffer());
         });
 
         $this->socket->setResponseHandler(function(RespRequest $request) {
