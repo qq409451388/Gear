@@ -9,6 +9,10 @@ class DBC
      */
     public static function throwEx($msg, $code = 0, $type = GearRunTimeException::class)
     {
+        $msg = $msg.PHP_EOL;
+        if (GearShutDownException::class == $type) {
+            throw new GearShutDownException($msg, $code);
+        }
         if (Env::isScript()) {
             $type = GearShutDownException::class;
         }

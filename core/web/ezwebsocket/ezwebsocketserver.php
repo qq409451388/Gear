@@ -28,6 +28,11 @@ class EzWebSocketServer extends EzTcpServer
      */
     private $checkActiveList = [];
 
+    /**
+     * @var Interpreter $interpreter
+     */
+    private $interpreter;
+
     private const BIND_USER_KEY = "BIND_USER_KEY";
     private const BIND_USER_KEY_OK = "BIND_USER_KEY_OK";
     private const CHECK_ACTIVE = "CHECK_ACTIVE";
@@ -36,8 +41,9 @@ class EzWebSocketServer extends EzTcpServer
      * 丢弃socket对象，检查次数阈值
      */
     private const THRESOLD_THROW = 5;
-    public function _construct(string $ip, $port) {
-        parent::_construct($ip, $port);
+    public function _construct(string $ip, $port, string $schema = "") {
+        parent::_construct($ip, $port, $schema);
+        $this->interpreter = new WebSocketInterpreter();
     }
 
     /**

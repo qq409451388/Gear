@@ -36,14 +36,15 @@ abstract class BaseTcpServer
      */
     const MASTER = "EZTCP_MASTER";
 
+    private $isInit = false;
+
     public function _construct(string $ip, $port, string $schema = "") {
         $this->ip = $ip;
         $this->port = $port;
         $this->schema = $schema;
-        $this->init();
     }
 
-    private function init() {
+    public function init() {
         $this->master = socket_create(AF_INET, SOCK_STREAM, 0);
         @socket_bind($this->master, $this->ip, $this->port);
         $this->detection();
@@ -52,6 +53,7 @@ abstract class BaseTcpServer
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
         socket_set_nonblock($this->master);
         $this->addConnectPool($this->master, self::MASTER);
+        $this->isInit = true;
     }
 
     private function detection() {
@@ -120,6 +122,7 @@ abstract class BaseTcpServer
     }
 
     public function start() {
+        DBC::assertTrue($this->isInit, "[TcpServer] Must Run TcpServer::init() first!", 0, GearShutDownException::class);
         Logger::console("Start Server Success! ".$this->schema."://".Env::getIp().":".$this->port);
         while (true) {
             $readSockets = $this->connectPool;

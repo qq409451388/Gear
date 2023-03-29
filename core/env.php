@@ -40,8 +40,8 @@ class Env
     }
 
     public static function getIp(){
-        $ipAddress = Config::get("host");
-        if ("0.0.0.0" != $ipAddress) {
+        $ipAddress = Config::get("ip");
+        if (!empty($ipAddress) && "0.0.0.0" != $ipAddress) {
             return $ipAddress;
         }
         if (self::isUnix()) {
@@ -162,7 +162,15 @@ class Env
     }
 
     public static function isScript() {
-        DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!");
+        DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!", 0, GearShutDownException::class);
         return self::$RUN_MODE == self::RUN_MODE_SCRIPT;
+    }
+
+    public static function setRunModeScript() {
+        self::$RUN_MODE = self::RUN_MODE_SCRIPT;
+    }
+
+    public static function setRunModeConsole() {
+        self::$RUN_MODE = self::RUN_MODE_CONSOLE;
     }
 }

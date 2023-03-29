@@ -1,40 +1,36 @@
 <?php
-abstract class BaseEzHttp implements IHttp
+abstract class BaseEzHttp extends AbstractTcpServer
 {
-    protected $host;
-    protected $port;
-
     /**
-     * @var EzTcpServer $socket
+     * @var IDispatcher
      */
-    protected $socket;
-
-    /**
-     * @var Interpreter Http协议解释器
-     */
-    protected $interpreter;
-
     protected $dispatcher;
     protected $_root;
     protected $staticCache = [];
 
     /**
-     * socket 读取8k
+     * 设置分发器
+     * @param IDispatcher|string $dispatcher
+     * @return $this
+     * @throws Exception
      */
-    protected const SOCKET_READ_LENGTH = 8192;
-
-    public function __construct(IDispatcher $dispatcher, $interpreter = null){
+    public function setDispatcher($dispatcher) {
+        if (is_string($dispatcher) && class_exists($dispatcher)) {
+            $dispatcher = new $dispatcher;
+        }
+        DBC::assertTrue($dispatcher instanceof IDispatcher,
+            "[EzHttp] dispatcher Must be instance of IDispatcher!", 0, GearShutDownException::class);
         $this->dispatcher = $dispatcher;
-        $this->interpreter = new HttpInterpreter();
+        return $this;
     }
 
-    public function init(string $host, $port, $root = './'){
-        $this->host = $host;
-        $this->port = $port;
-        $this->_root = $root;
-        Config::set(['host'=>$host, 'port'=>$port]);
-        $this->dispatcher->initWithHttp();
-        return $this;
+    protected function setPropertyCustom() {
+        $this->dispatcher = $this->setDispatcher(Gear::class);
+        $this->_root = "./";
+    }
+
+    protected function setInterpreterInstance() {
+        $this->interpreter = new HttpInterpreter();
     }
 
     protected function buildRequest($buf):IRequest{
@@ -78,7 +74,7 @@ abstract class BaseEzHttp implements IHttp
      * @param string $path
      * @return mixed
      */
-    public function getMime($path){
+    private function getMime($path){
         $type = explode(".",$path);
         return HttpMimeType::MIME_TYPE_LIST[end($type)] ?? HttpMimeType::MIME_HTML;
     }
@@ -87,7 +83,7 @@ abstract class BaseEzHttp implements IHttp
         return $this->dispatcher->judgePath($path);
     }
 
-    public function getDynamicResponse(IRequest $request):IResponse{
+    private function getDynamicResponse(IRequest $request):IResponse{
         try {
             return $this->interpreter->getDynamicResponse($request);
         }catch (GearRunTimeException $e) {

@@ -1,16 +1,12 @@
 <?php
 class EzHttp extends BaseEzHttp
 {
-    public static function create($ip, $port) {
-        (new EzHttp(new Gear()))->init($ip, $port)->start();
+    public static function create(string $ip, int $port, $dispatcher = GearLite::class) {
+        (new EzHttp($ip, $port))->setDispatcher($dispatcher)->start();
     }
 
-    public function __construct(IDispatcher $dispatcher) {
-        parent::__construct($dispatcher, new HttpInterpreter());
-    }
-
-    private function initSocket() {
-        $this->socket = new EzTcpServer($this->host, $this->port, $this->interpreter->getSchema());
+    protected function setTcpServerInstance() {
+        $this->socket = new EzTcpServer($this->ip, $this->port, $this->interpreter->getSchema());
         $this->socket->setRequestHandler(function (string $buf, $request = null):IRequest {
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);
@@ -28,18 +24,16 @@ class EzHttp extends BaseEzHttp
     public function start() {
         Logger::console("[HTTP]Start HTTP Server...");
         try{
-            $this->initSocket();
-            $this->s();
+            $this->dispatcher->initWithHttp();
+            $this->socket->init();
+            $this->socket->start();
         } catch (Exception $e){
             Logger::error("[HTTP] Server restarted! Cause By {}, At {}", $e->getMessage(), $e->getTraceAsString());
-            $this->s();
+            $this->socket->start();
         } catch (Error $t){
             Logger::error("[HTTP] Server restarted! Cause By {}, At {}", $t->getMessage(), $t->getTraceAsString());
-            $this->s();
+            $this->socket->start();
         }
     }
 
-    private function s() {
-        $this->socket->start();
-    }
 }
