@@ -58,7 +58,7 @@ class SysUtils
                 if ("." == $obj || ".." == $obj) {
                     continue;
                 }
-                $result = array_merge($result, self::scanFile($tmpPath, $deep - 1));
+                $result = array_merge($result, self::scanFile($tmpPath, $deep - 1, $filter, $holdFileKey));
             } else if (is_file($tmpPath)) {
                 $pathInfo = pathinfo($tmpPath);
                 $fileExt = $pathInfo['extension']??"";
