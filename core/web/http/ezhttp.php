@@ -27,14 +27,14 @@ class EzHttp extends BaseEzHttp
 
     public function start() {
         Logger::console("[HTTP]Start HTTP Server...");
-        $this->initSocket();
         try{
+            $this->initSocket();
             $this->s();
         } catch (Exception $e){
-            Logger::error("[HTTP] Cause By {}, At {}", $e->getMessage(), $e->getTraceAsString());
+            Logger::error("[HTTP] Server restarted! Cause By {}, At {}", $e->getMessage(), $e->getTraceAsString());
             $this->s();
         } catch (Error $t){
-            Logger::error("[HTTP] Cause By {}, At {}", $t->getMessage(), $t->getTraceAsString());
+            Logger::error("[HTTP] Server restarted! Cause By {}, At {}", $t->getMessage(), $t->getTraceAsString());
             $this->s();
         }
     }

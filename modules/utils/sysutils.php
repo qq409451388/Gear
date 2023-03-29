@@ -21,7 +21,7 @@ class SysUtils
         }
     }
 
-    public static function scanDir($path, $deep = 1) {
+    public static function scanDir($path, $deep = 1, $filterHidden = true) {
         $result = [];
         if ($deep == 0) {
             return $result;
@@ -36,11 +36,32 @@ class SysUtils
                 if ("." == $obj || ".." == $obj) {
                     continue;
                 }
+                if ($filterHidden && self::judgeHiddenDir($obj)) {
+                    continue;
+                }
                 $result[] = $tmpPath;
                 $result = array_merge($result, self::scanDir($tmpPath, $deep - 1));
             }
         }
         return $result;
+    }
+
+    /**
+     * 判断目录是否是隐藏目录
+     * @param $dir
+     * @return boolean
+     * @throws GearUnsupportedOperationException|Exception
+     */
+    public static function judgeHiddenDir($dir):bool {
+        if (Env::isWin()) {
+            $filename = basename($dir);
+            return substr($filename, 0, 1) === '.' || strpos($filename, '.\\') === 0;
+        } else if (Env::isUnix()) {
+            $dir = dirname($dir);
+            return substr($dir, 0, 1) === '.' || false !== strpos($dir, '/.');
+        } else {
+            DBC::throwEx("[SystemUtils] Unsupport OS for judgeHiddenDir!", 0, GearUnsupportedOperationException::class);
+        }
     }
 
     public static function scanFile($path, $deep = 1, $filter = [], $holdFileKey = false) {

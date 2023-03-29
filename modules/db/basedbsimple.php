@@ -127,7 +127,7 @@ abstract class BaseDBSimple extends AbstractDB
 
         //check sqlTemplate
         if($sqlOptions->isUnion()){
-            DBC::assertTrue(false === strpos($sqlTemplate, "limit"), "[DB] PreCheck Exception Please Remove 'limit'");
+            DBC::assertFalse(strpos($sqlTemplate, "limit"), "[DB] PreCheck Exception Please Remove 'limit'");
             str_replace(";", "", $sqlTemplate);
         }
     }

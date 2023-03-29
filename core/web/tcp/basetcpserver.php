@@ -56,7 +56,7 @@ abstract class BaseTcpServer
 
     private function detection() {
         $errCode = socket_last_error();
-        DBC::assertEquals(0, $errCode, socket_strerror($errCode));
+        DBC::assertEquals(0, $errCode, socket_strerror($errCode), $errCode, GearShutDownException::class);
     }
 
     /**
@@ -68,7 +68,7 @@ abstract class BaseTcpServer
     protected function addConnectPool($clientSocket, $alias) {
         DBC::assertTrue(self::MASTER != $alias || $this->master == $clientSocket,
             "[EzWebSocketServer Exception] Cant Set Alias To ".self::MASTER);
-        DBC::assertTrue(!$this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
+        DBC::assertFalse($this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         $this->connectPool[$alias] = $clientSocket;
         if (self::MASTER != $alias) {
             socket_set_nonblock($clientSocket);

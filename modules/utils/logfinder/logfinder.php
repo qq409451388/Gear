@@ -21,7 +21,7 @@ class LogFinder{
         $payLoad = $this->getPayLoad($esLogQuery);
         $res = $ezCurl->post($payLoad, EzCurl::POSTTYPE_NDJSON);
         $res = EzCollectionUtils::decodeJson($res);
-        DBC::assertTrue(!isset($res['statusCode']) || !in_array( $res['statusCode'], self::ERROR_CODE),
+        DBC::assertFalse(isset($res['statusCode']) || !in_array( $res['statusCode'], self::ERROR_CODE),
             "[LogFinder] Server Error ".($res['message']??""));
         return $res;
     }

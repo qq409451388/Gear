@@ -119,7 +119,7 @@ class EzWebSocketServer extends EzTcpServer
             $clientMsg = $this->decode($buffer);
             $obj = EzCollectionUtils::decodeJson($clientMsg);
             if(!is_null($obj) && isset($obj['toMaster']) && $obj['toMaster']){
-                DBC::assertTrue(!empty($obj['userName']), "[EzWebSocketServer] Unknow UserName!");
+                DBC::assertNotEmpty($obj['userName'], "[EzWebSocketServer] Unknow UserName!");
                 if(method_exists($this, $obj['systemFunc'])){
                     $systemFunc = $obj['systemFunc'];
                     @$this->$systemFunc($obj['userName'], $obj['key'], $readSocket);

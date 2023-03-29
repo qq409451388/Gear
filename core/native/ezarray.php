@@ -12,7 +12,7 @@ class EzArray implements ArrayAccess
         if (is_numeric($args)) {
             $this->initEmptyArray($args);
         } elseif (is_array($args)) {
-            DBC::assertTrue(EzDataUtils::isList($args), "[EzArray Exception] Init EzArray Must Be Type Of ArrayList!");
+            DBC::assertList($args, "[EzArray Exception] Init EzArray Must Be Type Of ArrayList!");
             $this->initArray($args);
         } else {
             DBC::throwEx("[EzArray Exception] Unsupport datatype for __construct with ".EzDataUtils::toString($args));
@@ -78,7 +78,7 @@ class EzArray implements ArrayAccess
         if (is_null($index)) {
             $index = count($this->container);
         }
-        DBC::assertTrue(is_numeric($index), "[EzArray Exception] Array is List Struct!");
+        DBC::assertNumeric($index, "[EzArray Exception] Array is List Struct!");
         DBC::assertTrue($index < $this->size, "[EzArray Exception] Index $index out of bounds for length {$this->size}!");
         $this->container[$index] = $value;
     }

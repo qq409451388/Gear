@@ -190,7 +190,7 @@ class EzLocalCache extends EzCache
         if (empty($val)) {
             $val = 0;
         }
-        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        DBC::assertNumeric($val, "[EzLocalCache Exception] value is not an integer");
         $val++;
         $this->set($k, $val);
         return $val;
@@ -202,7 +202,7 @@ class EzLocalCache extends EzCache
         if (empty($val)) {
             $val = 0;
         }
-        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        DBC::assertNumeric($val, "[EzLocalCache Exception] value is not an integer");
         $val+=$by;
         $this->set($k, $val);
         return $val;
@@ -214,8 +214,8 @@ class EzLocalCache extends EzCache
         if (empty($val)) {
             $val = "0";
         }
-        DBC::assertTrue(is_numeric($by), "[EzLocalCache Exception] input value $by is not an float");
-        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an float");
+        DBC::assertNumeric($by, "[EzLocalCache Exception] input value $by is not an float");
+        DBC::assertNumeric($val, "[EzLocalCache Exception] value is not an float");
         $scale = max(strlen(substr(strrchr($by, "."), 1)), strlen(strrchr($val, "."), 1));
         $val = bcadd($val, $by, $scale);
         $this->set($k, $val);
@@ -228,7 +228,7 @@ class EzLocalCache extends EzCache
         if (empty($val)) {
             $val = 0;
         }
-        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        DBC::assertNumeric($val, "[EzLocalCache Exception] value is not an integer");
         $val--;
         $this->set($k, $val);
         return $val;
@@ -240,8 +240,8 @@ class EzLocalCache extends EzCache
         if (empty($val)) {
             $val = "0";
         }
-        DBC::assertTrue(is_numeric($by), "[EzLocalCache Exception] input value $by is not an integer");
-        DBC::assertTrue(is_numeric($val), "[EzLocalCache Exception] value is not an integer");
+        DBC::assertNumeric($by, "[EzLocalCache Exception] input value $by is not an integer");
+        DBC::assertNumeric($val, "[EzLocalCache Exception] value is not an integer");
         $val -= $by;
         $this->set($k, $val);
         return $val;
@@ -387,7 +387,7 @@ class EzLocalCache extends EzCache
         $this->unsupportException($k, EzLocalCacheObject::T_LIST, __FUNCTION__);
         $size = count($this->fetch($k)->dataSource);
         $trueIndex = $index >= 0 ? $index : $size + $index;
-        DBC::assertTrue(!is_null($this->fetch($k)->dataSource[$trueIndex]), "[EzLocalCache Exception] Out Of Bounds!");
+        DBC::assertNonNull($this->fetch($k)->dataSource[$trueIndex], "[EzLocalCache Exception] Out Of Bounds!");
         $this->fetch($k)->dataSource[$trueIndex] = $val;
         return true;
     }
@@ -474,7 +474,7 @@ class EzLocalCache extends EzCache
             if (!isset($map[$field])) {
                 $this->_concurrentHashMap[$k]->dataSource[$field] = 0;
             }
-            DBC::assertTrue(is_numeric($this->_concurrentHashMap[$k]->dataSource[$field]),
+            DBC::assertNumeric($this->_concurrentHashMap[$k]->dataSource[$field],
                 self::EXCEPTION_PREFIX." UnSupport Command ".__FUNCTION__." With Data ".$this->_concurrentHashMap[$k]->dataSource[$field]);
             $this->_concurrentHashMap[$k]->dataSource[$field] += $by;
         }
@@ -494,7 +494,7 @@ class EzLocalCache extends EzCache
             if (!isset($map[$field])) {
                 $this->_concurrentHashMap[$k]->dataSource[$field] = "0";
             }
-            DBC::assertTrue(is_numeric($this->_concurrentHashMap[$k]->dataSource[$field]),
+            DBC::assertNumeric($this->_concurrentHashMap[$k]->dataSource[$field],
                 self::EXCEPTION_PREFIX." UnSupport Command ".__FUNCTION__." With Data ".$this->_concurrentHashMap[$k]->dataSource[$field]);
             $scale = max(strlen(substr(strrchr($by, "."), 1)),
                     strlen(substr(strrchr($this->_concurrentHashMap[$k]->dataSource[$field], "."), 1)));

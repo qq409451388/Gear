@@ -89,12 +89,12 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         }
         $columns = array_column($dbInfo, "Field");
         $diffColumns = array_diff(array_keys($info), $columns);
-        DBC::assertTrue(empty($diffColumns), "[DB Exception] Unknow Columns ".implode(",", $diffColumns));
+        DBC::assertEmpty($diffColumns, "[DB Exception] Unknow Columns ".implode(",", $diffColumns));
         $mustExistsColumns = array_column(array_filter($columns, function($val){
             return is_null($val['Default']??null) ? $val : false;
         }),"Field");
         $diffColumns = array_diff($mustExistsColumns, $columns);
-        DBC::assertTrue(empty($diffColumns), "[DB Exception] Must Set Columns ".implode(",", $diffColumns));
+        DBC::assertEmpty($diffColumns, "[DB Exception] Must Set Columns ".implode(",", $diffColumns));
 
         $timeStampKeys = array_column(array_filter($dbInfo, function($dbInfoItem){
             return $dbInfoItem['Type'] == 'timestamp' ? $dbInfoItem : null;

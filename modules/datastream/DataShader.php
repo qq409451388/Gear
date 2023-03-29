@@ -311,7 +311,7 @@ class DataShader
     public function forEach(Closure $closure){
         $this->reRank();
         $this->runCommand();
-        DBC::assertTrue(!$this->isSplited, "[DataShader Exception] Command forEach Is Not Allowed To Invoke!");
+        DBC::assertFalse($this->isSplited, "[DataShader Exception] Command forEach Is Not Allowed To Invoke!");
         foreach($this->data as $item){
             $closure($item);
         }
