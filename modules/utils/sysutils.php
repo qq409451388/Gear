@@ -62,7 +62,7 @@ class SysUtils
             } else if (is_file($tmpPath)) {
                 $pathInfo = pathinfo($tmpPath);
                 $fileExt = $pathInfo['extension']??"";
-                if (in_array($fileExt, $filter, true)) {
+                if (empty($filter) || in_array($fileExt, $filter, true)) {
                     if ($holdFileKey) {
                         $fileName = $pathInfo['filename']??"";
                         $result[$fileName] = $tmpPath;
