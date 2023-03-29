@@ -43,7 +43,9 @@ abstract class AbstractTcpServer
 
     /**
      * 启动服务
-     * @return mixed
      */
-    abstract public function start();
+    public function start() {
+        $this->socket->init();
+        $this->socket->start();
+    }
 }

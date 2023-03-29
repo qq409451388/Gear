@@ -5,8 +5,9 @@ class Gear implements IDispatcher
 
     }
 
-    public function initWithConsole() {
+    public function initWithScript() {
         $this->initConfig();
+        Env::setRunModeScript();
     }
 
     public function initWithHttp() {
@@ -22,6 +23,7 @@ class Gear implements IDispatcher
 
     public function initWithTcp() {
         $this->initConfig();
+        Env::setRunModeConsole();
         $classess = CacheFactory::getInstance(CacheFactory::TYPE_MEM)->get("GLOBAL_USER_CLASS");
         $classess = EzCollectionUtils::decodeJson($classess);
         //初始化对象

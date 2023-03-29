@@ -9,6 +9,15 @@ class EzResp extends AbstractTcpServer
 
     protected function setTcpServerInstance() {
         $this->socket = new EzTcpServer($this->ip, $this->port, $this->interpreter->getSchema());
+        $this->socket->setRequestHandler(function(string $buf) {
+            return $this->interpreter->decode($buf);
+        });
+
+        $this->socket->setResponseHandler(function(RespRequest $request) {
+            return $this->interpreter->getDynamicResponse($request);
+        });
+
+        $this->socket->setKeepAlive();
     }
 
     protected function setInterpreterInstance() {
@@ -23,15 +32,15 @@ class EzResp extends AbstractTcpServer
     }
 
     public function start() {
-        $this->socket->setRequestHandler(function(string $buf) {
-            return $this->interpreter->decode($buf);
-        });
-
-        $this->socket->setResponseHandler(function(RespRequest $request) {
-            return $this->interpreter->getDynamicResponse($request);
-        });
-
-        $this->socket->setKeepAlive();
-        $this->socket->start();
+        try {
+            $this->socket->init();
+            $this->socket->start();
+        } catch (Exception $e) {
+            Logger::error("[RESP] Exception Server restarted! Cause By {}, At {}", $e->getMessage(), $e->getTraceAsString());
+            $this->socket->start();
+        } catch (Error $t) {
+            Logger::error("[RESP] Error Server restarted! Cause By {}, At {}", $t->getMessage(), $t->getTraceAsString());
+            $this->socket->start();
+        }
     }
 }
