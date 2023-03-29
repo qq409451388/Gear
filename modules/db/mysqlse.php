@@ -2,6 +2,7 @@
 class MySqlSE extends BaseDB implements IDbSe
 {
     private $mysqli;
+    private $database;
 
     protected function initExpireTime(){
         return time()+3600;
@@ -21,6 +22,7 @@ class MySqlSE extends BaseDB implements IDbSe
         }
         $this->mysqli->set_charset('utf-8');
         $this->trace = new Trace();
+        $this->database = $database;
         return $this;
     }
 
@@ -34,7 +36,7 @@ class MySqlSE extends BaseDB implements IDbSe
             return call_user_func_array("array_merge", $chunkResult);
         }
         $query = $this->mysqli->query($this->sql);
-        $this->trace->log($this->sql, __CLASS__);
+        $this->trace->finishAndlog($this->sql, __CLASS__."@".$this->database);
         if (0 != $this->mysqli->errno) {
             $msg = '[Mysql Exception]code:' . $this->mysqli->errno . ',msg:' . $this->mysqli->error;
             DBC::throwEx($msg, $this->mysqli->errno);

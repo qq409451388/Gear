@@ -1,6 +1,9 @@
 <?php
-Abstract class AbstractDB
+abstract class AbstractDB
 {
+    /**
+     * @var Trace $trace
+     */
     protected $trace;
     protected $expireTime;
     protected $sql;

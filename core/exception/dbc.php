@@ -9,6 +9,9 @@ class DBC
      */
     public static function throwEx($msg, $code = 0, $type = GearRunTimeException::class)
     {
+        if (Env::isScript()) {
+            $type = GearShutDownException::class;
+        }
         throw new $type($msg, $code);
     }
 
@@ -93,26 +96,74 @@ class DBC
         }
     }
 
+    /**
+     * @param $obj
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
     public static function assertNull($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertTrue(is_null($obj), $msg, $code, $clazz);
     }
 
+    /**
+     * @param $obj
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
     public static function assertNonNull($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertFalse(is_null($obj), $msg, $code, $clazz);
     }
 
+    /**
+     * @param $obj
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
     public static function assertNumeric($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertTrue(is_numeric($obj), $msg, $code, $clazz);
     }
 
+    /**
+     * @param $obj
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
     public static function assertNotNumeric($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertFalse(is_numeric($obj), $msg, $code, $clazz);
     }
 
+    /**
+     * @param $obj
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
     public static function assertList($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertTrue(EzDataUtils::isList($obj), $msg, $code, $clazz);
     }
 
+    /**
+     * @param $obj
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
     public static function assertNotList($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertFalse(EzDataUtils::isList($obj), $msg, $code, $clazz);
     }

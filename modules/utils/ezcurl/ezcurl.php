@@ -23,6 +23,9 @@ class EzCurl
     private $debug = 0;
 
     //dependent
+    /**
+     * @var Trace $trace
+     */
     private $trace;
 
     //configuration
@@ -287,7 +290,7 @@ class EzCurl
         }
         $this->haveRun = true;
         $msg = $this->geneRequestMsg($httpMethod, $res);
-        $this->trace->log($msg, __CLASS__);
+        $this->trace->finishAndLog($msg, __CLASS__);
         $this->result = $res;
         return $res;
     }

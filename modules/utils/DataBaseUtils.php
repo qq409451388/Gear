@@ -147,10 +147,11 @@ class DataBaseUtils
     }
 
     public static function generateUml($database, $tableName, $type = self::NAMED_SOURCE) {
-        $targetClassName = empty($targetClassName) ? self::convertName($tableName, self::NAMED_CAMELCASE) : $targetClassName;
         $information = DB::get($database)
             ->query("select * from information_schema.`COLUMNS` where TABLE_SCHEMA = '$database' and TABLE_NAME = '$tableName'");
-
+        if (empty($information)) {
+            return "";
+        }
         $hash = [
             "varchar" => "string",
             "tinyint" => "integer",

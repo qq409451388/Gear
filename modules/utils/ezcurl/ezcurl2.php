@@ -327,7 +327,7 @@ class EzCurl2
         }
         $response = $this->buildResponse($httpMethod, $res);
         $msg = $this->geneRequestMsg($response);
-        $this->trace->log($msg, __CLASS__);
+        $this->trace->finishAndlog($msg, __CLASS__);
         $this->result = $res;
         return $response;
     }

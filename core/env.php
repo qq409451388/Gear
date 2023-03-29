@@ -8,6 +8,19 @@ class Env
     private const OS_UNIX = "UNIX";
     private const OS_WINDOWS = "WINDOWS";
 
+    /**
+     * 一次性脚本
+     */
+    public const RUN_MODE_SCRIPT = "SCRIPT";
+    /**
+     * 常驻程序
+     */
+    public const RUN_MODE_CONSOLE = "CONSOLE";
+    /**
+     * @var null|string 运行模式
+     */
+    private static $RUN_MODE = null;
+
     public static function isDev(){
         return self::getEnv() == self::DEV;
     }
@@ -141,5 +154,15 @@ class Env
      */
     public static function getDefaultConfigPath() {
         return CORE_PATH.DIRECTORY_SEPARATOR."config";
+    }
+
+    public static function isConsole() {
+        DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!");
+        return self::$RUN_MODE == self::RUN_MODE_CONSOLE;
+    }
+
+    public static function isScript() {
+        DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!");
+        return self::$RUN_MODE == self::RUN_MODE_SCRIPT;
     }
 }
