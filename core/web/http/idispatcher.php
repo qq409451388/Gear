@@ -16,10 +16,10 @@ interface IDispatcher
     public function initWithTcp();
 
     /**
-     * 命令行启动器
+     * 一次性脚本启动器
      * @return void
      */
-    public function initWithConsole();
+    public function initWithScript();
 
     /**
      * 判断path是否能够匹配到路由规则
