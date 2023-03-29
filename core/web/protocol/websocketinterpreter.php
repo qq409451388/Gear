@@ -2,8 +2,7 @@
 class WebSocketInterpreter implements Interpreter
 {
 
-    public function getSchema(): string
-    {
+    public function getSchema(): string {
         return "ws";
     }
 
@@ -15,10 +14,11 @@ class WebSocketInterpreter implements Interpreter
     public function doHandShake($buffer) {
         $key = $this->getHeaders($buffer);
         //必须以两个回车结尾
-        return "HTTP/1.1 101 Switching Protocol\r\n" .
-            "Upgrade: websocket\r\n" .
-            "Connection: Upgrade\r\n" .
-            "Sec-WebSocket-Accept: " . $this->calcKey($key) . "\r\n\r\n";
+        return "HTTP/1.1 101 Switching Protocol\r\n"
+            ."Upgrade: websocket\r\n"
+            ."Connection: Upgrade\r\n"
+            ."Sec-WebSocket-Accept: ".$this->calcKey($key)
+            ."\r\n\r\n";
     }
 
     //获取请求头
@@ -40,13 +40,12 @@ class WebSocketInterpreter implements Interpreter
      * @param WebSocketResponse $response
      * @return string
      */
-    public function encode(IResponse $response): string
-    {
+    public function encode(IResponse $response): string {
         return EzWebSocketMethodEnum::METHOD_HANDSHAKE == $response->method
             ? $response->response : $this->frame($response->response);
     }
 
-    private function frame( $buffer ) {
+    private function frame($buffer): string {
         $len = strlen($buffer);
         if ($len <= 125) {
             return "\x81" . chr($len) . $buffer;
@@ -102,8 +101,7 @@ class WebSocketInterpreter implements Interpreter
         return $decoded;
     }
 
-    public function getNotFoundResourceResponse(IRequest $request): IResponse
-    {
+    public function getNotFoundResourceResponse(IRequest $request): IResponse {
         $response = new WebSocketResponse();
         $error = EzRpcResponse::error(
             HttpStatus::NOT_FOUND()->getCode(),
