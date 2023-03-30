@@ -7,7 +7,7 @@ class MultiProc
      * @param $args         array           arguments
      * @param int $multi                    processing num
      */
-    public static function build($class, $method, $args, $multi = 1, $multiArgs = false){
+    public static function build($class, $method, $args, $multi = 1, string $append){
         if(is_string($class) && class_exists($class)) {
             $isStaticMode = true;
         }elseif(is_object($class)){
@@ -16,7 +16,7 @@ class MultiProc
             DBC::throwEx("[MultiProc Exception] Class UnKnow DataType!");
         }
         for($i=0;$i<$multi;$i++){
-            system(self::genCmd($class, $method, $multiArgs ? ($args[$i]??[]) : ($args??[]), $isStaticMode));
+            system(self::genCmd($class, $method, $multi > 1 ? ($args[$i]??[]) : ($args??[]), $append, $isStaticMode));
         }
     }
 
@@ -24,13 +24,21 @@ class MultiProc
         return call_user_func_array([$obj, $method], $args);
     }
 
-    private static function genCmd($class, $method, $args, $isStaticMode){
+    /**
+     * @param $class
+     * @param $method
+     * @param $args array arguments
+     * @param $append string 补充语法
+     * @param $isStaticMode boolean 是否静态调用
+     * @return string
+     */
+    private static function genCmd($class, $method, $args, string $append, $isStaticMode){
         $absolutePath = dirname(CORE_PATH)."/autoload.php";
         if($isStaticMode){
-            $preFix = "php -r \"include('$absolutePath');".$class."::$method(";
+            $preFix = "php -r \"include('$absolutePath'); $append ".$class."::$method(";
         }else{
             $class = get_class($class);
-            $preFix = "php -r \"include('$absolutePath'); (new $class())->$method(";
+            $preFix = "php -r \"include('$absolutePath'); $append (new $class())->$method(";
         }
         $argString = "";
         foreach ($args as $arg){
