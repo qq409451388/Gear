@@ -44,6 +44,10 @@ class EzCurlRequestHeader extends EzCurlHeader
         return $s;
     }
 
+    private function contentLengthToString() {
+        return "Content-Length: ".$this->contentLength;
+    }
+
     public function buildSource(): array {
         $vars = get_object_vars($this);
         $s = [];

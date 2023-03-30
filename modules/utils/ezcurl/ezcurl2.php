@@ -254,12 +254,6 @@ class EzCurl2
         curl_setopt($this->ch, CURLOPT_PROXY, $ip);
         curl_setopt($this->ch, CURLOPT_PROXYPORT, $port);
         return $this;
-        /*$proxy = $ip.':'.$port;
-         if($proxy) {
-            curl_setopt($this->ch, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
-            curl_setopt($this->ch, CURLOPT_PROXY,$proxy);
-        }
-        return $this;*/
     }
 
     public function setReferer($referer) {

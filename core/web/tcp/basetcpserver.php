@@ -165,18 +165,27 @@ abstract class BaseTcpServer
     }
 
     private function writeSocket($socket, $content) {
-        do {
-            $contentLen = strlen($content);
-            $writeByte = socket_write($socket, $content, $contentLen);
-            if (false === $writeByte) {
-                DBC::throwEx("[TcpServer] wirte fail!", 0, GearUnsupportedOperationException::class);
+        try {
+            do {
+                $contentLen = strlen($content);
+                $writeByte = socket_write($socket, $content, $contentLen);
+                if (false === $writeByte) {
+                    DBC::throwEx("[TcpServer] write fail!", 0, GearUnsupportedOperationException::class);
+                }
+                if (0 == $contentLen || empty($content)) {
+                    socket_write($socket, "\r\n");
+                    break;
+                }
+                $content = substr($content, $writeByte);
+            } while ($writeByte < $contentLen);
+        } catch (Exception $e ) {
+            if (Env::isDev()) {
+                Logger::warn("[TcpServer] Exception!".PHP_EOL." {} {}", $e->getMessage().PHP_EOL, $e->getTraceAsString());
+            } else {
+                Logger::warn("[TcpServer] Exception!".PHP_EOL." {}", $e->getMessage().PHP_EOL);
             }
-            if (0 == $contentLen || empty($content)) {
-                socket_write($socket, "\r\n");
-                break;
-            }
-            $content = substr($content, $writeByte);
-        } while ($writeByte < $contentLen);
+        }
+
     }
 
     private function getLastRequest($clientSocket) {
