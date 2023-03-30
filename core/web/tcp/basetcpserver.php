@@ -154,7 +154,7 @@ abstract class BaseTcpServer
                     if ($request->isInit()) {
                         $response = $this->buildResponse($request);
                         $content = $response->toString();
-                        socket_write($readSocket, $content, strlen($content));
+                        $this->writeSocket($readSocket, $content);
                         if (!$this->keepAlive) {
                             $this->disConnect($readSocket);
                         }
@@ -162,6 +162,21 @@ abstract class BaseTcpServer
                 }
             }
         }
+    }
+
+    private function writeSocket($socket, $content) {
+        do {
+            $contentLen = strlen($content);
+            $writeByte = socket_write($socket, $content, $contentLen);
+            if (false === $writeByte) {
+                DBC::throwEx("[TcpServer] wirte fail!", 0, GearUnsupportedOperationException::class);
+            }
+            if (0 == $contentLen || empty($content)) {
+                socket_write($socket, "\r\n");
+                break;
+            }
+            $content = substr($content, $writeByte);
+        } while ($writeByte < $contentLen);
     }
 
     private function getLastRequest($clientSocket) {
