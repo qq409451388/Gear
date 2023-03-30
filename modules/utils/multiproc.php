@@ -7,7 +7,7 @@ class MultiProc
      * @param $args         array           arguments
      * @param int $multi                    processing num
      */
-    public static function build($class, $method, $args, $multi = 1, string $append){
+    public static function build($class, $method, $args, $multi = 1, string $append = ""){
         if(is_string($class) && class_exists($class)) {
             $isStaticMode = true;
         }elseif(is_object($class)){
