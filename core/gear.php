@@ -263,15 +263,16 @@ class Gear implements IDispatcher
      * create an obj if none in objects[]
      * @param $class
      * @return void
+     * @throws Exception
      */
     private function createObject($class){
+        if (!is_subclass_of($class, EzBean::class)) {
+            return;
+        }
         try {
-            if (is_subclass_of($class, EzComponent::class) || !is_subclass_of($class, EzBean::class)) {
-                return;
-            }
             BeanFinder::get()->import($class);
         } catch (Exception $e) {
-            DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}");
+            DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}", 0, GearShutDownException::class);
         }
     }
 }

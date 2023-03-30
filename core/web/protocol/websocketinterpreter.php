@@ -56,11 +56,18 @@ class WebSocketInterpreter implements Interpreter
         }
     }
 
+    /**
+     * @param string $content
+     * @return IRequest
+     * @throws GearIllegalArgumentException|Exception
+     */
     public function decode(string $content): IRequest
     {
         $content = $this->decodeBuffer($content);
         $request = new WebSocketRequest();
         $request->sourceData = EzCollectionUtils::decodeJson($content);
+        DBC::assertNonNull($request->sourceData,
+        "[WebSocketInterpreter] Request Data decode fail! sourceData: $content", 0, GearIllegalArgumentException::class);
         DBC::assertNotEmpty($request->sourceData['method'],
             "[WebSocketInterpreter] Request Data must Has Key method!", 0, GearIllegalArgumentException::class);
         DBC::assertNotEmpty($request->sourceData['data'],
@@ -124,6 +131,7 @@ class WebSocketInterpreter implements Interpreter
     /**
      * @param WebSocketRequest $request
      * @return IResponse
+     * @throws GearUnsupportedOperationException|Exception
      */
     public function getDynamicResponse(IRequest $request): IResponse {
         $response = new WebSocketResponse();
