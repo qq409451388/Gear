@@ -13,7 +13,7 @@ class DiAspect extends Aspect implements BuildAspect
 
     public function adhere(): void
     {
-        if($this->getAnnoName() == Resource::class){
+        if(Resource::class == $this->getAnnoName()){
             $className = $this->getValue()->className;
             if(!BeanFinder::get()->has($className)){
                 BeanFinder::get()->save($className, (new $className));
@@ -24,7 +24,23 @@ class DiAspect extends Aspect implements BuildAspect
             $classObj = $classObj instanceof DynamicProxy ? $classObj->getSourceObj() : $classObj;
             $this->getAtProperty()->setValue($classObj, $object);
             $this->getAtProperty()->setAccessible(false);
-        }else{
+        }
+        if (Autowired::class == $this->getAnnoName()) {
+            BeanFinder::get()->analyseClasses();
+            $className = $this->getValue()->className;
+            $thisClassRef = new ReflectionClass($className);
+            $subClasses = $thisClassRef->getSubclasses();
+            var_dump($subClasses);
+
+            if(!BeanFinder::get()->has($className)){
+                BeanFinder::get()->save($className, (new $className));
+            }
+            $object =  BeanFinder::get()->pull($className);
+            $this->getAtProperty()->setAccessible(true);
+            $classObj = BeanFinder::get()->pull($this->getAtClass()->getName());
+            $classObj = $classObj instanceof DynamicProxy ? $classObj->getSourceObj() : $classObj;
+            $this->getAtProperty()->setValue($classObj, $object);
+            $this->getAtProperty()->setAccessible(false);
         }
     }
 }

@@ -11,39 +11,28 @@ class EzTree
         $this->root = new EzTreeNode();
     }
 
-    public function append($data){
-        $treeNode = new EzTreeNode($data);
-        $route = $this->getRoute();
-        $routeLen = count($route);
-        $tmpNode = $this->root;
-        for($i=0;$i<$routeLen;$i++){
-            $isSet = $i == $routeLen-1;
-            if($route[$i]){
-                $isSet ? $tmpNode->setLeft($treeNode) : $tmpNode = $tmpNode->getLeft();
-            }else{
-                $isSet ? $tmpNode->setRight($treeNode) : $tmpNode = $tmpNode->getRight();
-            }
-        }
-        $this->size++;
-        $this->deepth = null;
+    /**
+     * @return EzTreeNode
+     */
+    public function getRoot() {
+        return $this->root;
     }
 
-    public function getRoute():array{
-        $route = [];
-        $tmpRoot = $this->root;
-        while(true){
-            if(!is_null($tmpRoot->getRight())){
-                $route[] = false;
-                $tmpRoot = $tmpRoot->getRight();
-            }else if(!is_null($tmpRoot->getLeft())){
-                $route[] = false;
-                break;
-            }else{
-                $route[] = true;
-                break;
-            }
+    /**
+     * @return void
+     */
+    public function traverse(Closure $closure, $node = null, $level = 0) {
+        $node = is_null($node) ? $this->getRoot() : $node;
+        $children = $node->getChildren();
+        if (is_null($children)) {
+            return;
         }
-        return $route;
+        foreach ($children as $child) {
+            if (!$child->isLeaf()) {
+                $this->traverse($closure, $child, $level+1);
+            }
+            $closure($child, $level);
+        }
     }
 
     public function getDeepth(){
@@ -67,5 +56,8 @@ class EzTree
     }
 
     public function toString(){
+        $this->traverse(function (EzTreeNode $node, int $level) {
+            echo "【level:$level->".$node->toString()."】";
+        });
     }
 }

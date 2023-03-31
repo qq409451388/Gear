@@ -30,6 +30,8 @@ class EzDataUtils
     public static function toString($obj){
         if (is_string($obj) || is_numeric($obj)) {
             return (string) $obj;
+        } else if ($obj instanceof EzDataObject) {
+            return json_encode(get_mangled_object_vars($obj));
         } elseif (is_array($obj) || is_object($obj)) {
             return json_encode($obj);
         } elseif (is_resource($obj)) {

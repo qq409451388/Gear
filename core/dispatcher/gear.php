@@ -13,10 +13,8 @@ class Gear implements IDispatcher
     public function initWithHttp() {
         $this->initConfig();
         Env::setRunModeConsole();
-        $classess = CacheFactory::getInstance(CacheFactory::TYPE_MEM)->get("GLOBAL_USER_CLASS");
-        $classess = EzCollectionUtils::decodeJson($classess);
         //初始化对象
-        $this->initObjects($classess);
+        $this->initObjects();
         $this->initRouter();
         $this->initAnno();
     }
@@ -31,7 +29,8 @@ class Gear implements IDispatcher
         $this->initAnno();
     }
 
-    private function initObjects($classess){
+    private function initObjects(){
+        $classess = Config::get("GLOBAL_USER_CLASS");
         if (empty($classess)) {
             return;
         }

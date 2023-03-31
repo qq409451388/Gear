@@ -542,4 +542,19 @@ class EzLocalCache extends EzCache
     public function quit() {
         return true;
     }
+
+    public function putSource(string $k, array $v) {
+        if (EzDataUtils::isList($v)) {
+            $this->_concurrentHashMap[$k] = EzLocalCacheObject::create($v, null, EzLocalCacheObject::T_LIST);
+        } else {
+            $this->_concurrentHashMap[$k] = EzLocalCacheObject::create($v, null, EzLocalCacheObject::T_HASH);
+        }
+    }
+
+    public function getSource(string $k) {
+        if (!$this->has($k)) {
+            return null;
+        }
+        return $this->_concurrentHashMap[$k]->dataSource;
+    }
 }
