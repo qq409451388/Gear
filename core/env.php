@@ -7,6 +7,7 @@ class Env
 
     const OS_UNIX = "UNIX";
     const OS_WINDOWS = "WINDOWS";
+    const OS_MAC = "MACOS";
 
     /**
      * 一次性脚本
@@ -182,7 +183,8 @@ class Env
     public static function eol($os) {
         $hash = [
             self::OS_WINDOWS => "\r\n",
-            self::OS_UNIX => "\r"
+            self::OS_UNIX => "\n",
+            self::OS_MAC => "\r"
         ];
 
         return $hash[$os]??"";
