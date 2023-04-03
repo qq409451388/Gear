@@ -44,6 +44,11 @@ class Env
         if (!empty($ipAddress) && "0.0.0.0" != $ipAddress) {
             return $ipAddress;
         }
+        return self::getOuterIp() ? self::getOuterIp() : $ipAddress;
+    }
+
+    public static function getOuterIp() {
+        static $ipAddress = "";
         if (self::isUnix()) {
             $interface = 'en0'; // 网卡名称
             $ifconfigInfo = shell_exec('/sbin/ifconfig ' . $interface);
