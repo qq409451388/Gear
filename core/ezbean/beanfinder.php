@@ -54,51 +54,11 @@ class BeanFinder
 
     /**
      * 分析引用类，生成EzTree
+     * todo
      * @return void
      */
     public function analyseClasses() {
         $this->tree = new EzTree();
         $classes = Config::get("GLOBAL_CORE_CLASS");
-        $cache = [];
-        include_once CORE_PATH."/config/a.php";
-        $class = A::class;
-        $this->getParentClasses($class, $cache);
-        print_r($this->tree);
-
-        die;
-        foreach ($classes as $class) {
-
-
-            die;
-        }
-    }
-
-    /**
-     * @param $className
-     * @param $cache
-     * @return EzTreeNode 由$className得到的TreeNode
-     * @throws ReflectionException
-     */
-    private function getParentClasses($className, &$cache) {
-        if (isset($cache[$className])) {
-            return null;
-        }
-        $cache[$className] = true;
-        $ref = new ReflectionClass($className);
-        if ($ref->isInterface()) {
-            $ezBean = EzBeanNamedInterface::create($ref->getName(), $ref);
-        } else {
-            $ezBean = EzBeanNamedClass::create($ref->getName(), $ref);
-        }
-        $ezBean = $ref->getName();
-        $node = new EzTreeNode($ezBean);
-        $parentClassRef = $ref->getParentClass();
-        if ($parentClassRef instanceof ReflectionClass) {
-            $parentClassName = $parentClassRef->getName();
-            $parentNode = $this->getParentClasses($parentClassName, $cache);
-            $parentNode->setParent($this->tree->getRoot());
-            $node->setParent($parentNode);
-        }
-        return $node;
     }
 }

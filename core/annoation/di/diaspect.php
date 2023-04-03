@@ -26,11 +26,10 @@ class DiAspect extends Aspect implements BuildAspect
             $this->getAtProperty()->setAccessible(false);
         }
         if (Autowired::class == $this->getAnnoName()) {
+            // todo
+            return;
             BeanFinder::get()->analyseClasses();
             $className = $this->getValue()->className;
-            $thisClassRef = new ReflectionClass($className);
-            $subClasses = $thisClassRef->getSubclasses();
-            var_dump($subClasses);
 
             if(!BeanFinder::get()->has($className)){
                 BeanFinder::get()->save($className, (new $className));
