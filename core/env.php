@@ -5,8 +5,8 @@ class Env
     public const DEV = "DEV";
     public const TEST = "TEST";
 
-    private const OS_UNIX = "UNIX";
-    private const OS_WINDOWS = "WINDOWS";
+    const OS_UNIX = "UNIX";
+    const OS_WINDOWS = "WINDOWS";
 
     /**
      * 一次性脚本
@@ -177,5 +177,14 @@ class Env
 
     public static function setRunModeConsole() {
         self::$RUN_MODE = self::RUN_MODE_CONSOLE;
+    }
+
+    public static function eol($os) {
+        $hash = [
+            self::OS_WINDOWS => "\r\n",
+            self::OS_UNIX => "\r"
+        ];
+
+        return $hash[$os]??"";
     }
 }

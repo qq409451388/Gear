@@ -49,7 +49,7 @@ class HttpInterpreter implements Interpreter
 
     private function buildHttpRequestSource($buf):RequestSource{
         $requestSource = new RequestSource();
-        $httpOptions = explode("\r\n", $buf);
+        $httpOptions = explode(Env::eol(Env::OS_WINDOWS), $buf);
         $firstLine = explode(" ", array_shift($httpOptions));
         $requestSource->requestMethod = strtolower($firstLine[0]);
         $requestSource->path = $firstLine[1]??"";
@@ -64,7 +64,7 @@ class HttpInterpreter implements Interpreter
                 break;
             }
             if($whenBody){
-                $body .= $httpOption.PHP_EOL;
+                $body .= $httpOption.Env::eol(Env::OS_WINDOWS);
             }else{
                 if(empty($httpOption)){
                     $whenBody = true;
@@ -83,8 +83,7 @@ class HttpInterpreter implements Interpreter
             }
 
         }
-        //$body = trim($body, PHP_EOL);
-        $body = substr($body, 0, -2);
+        $body = substr($body, 0, -strlen(Env::eol(Env::OS_WINDOWS)));
         $requestSource->contentLengthActual = strlen($body);
         $requestSource->bodyContent = $body;
         return $requestSource;
