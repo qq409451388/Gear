@@ -113,21 +113,29 @@ class HttpInterpreter implements Interpreter
         switch ($contentType){
             case HttpContentType::H_X_WWW_FORM_URLENCODE:
                 parse_str($requestBody, $requestBodyArr);
+                $requestBodyObj = new RequestBody();
+                $requestBodyObj->contentType = $contentType;
+                $requestBodyObj->content = $requestBodyArr;
                 break;
             case HttpContentType::H_JSON:
-                $requestBodyArr = EzCollectionUtils::decodeJson($requestBody);
+                $requestBodyObj = new RequestBody();
+                $requestBodyObj->contentType = $contentType;
+                $requestBodyObj->content = EzCollectionUtils::decodeJson($requestBody);
                 break;
             case HttpContentType::H_MULTIPART_FORMDATA:
-                $requestBodyArr = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);
+                /**
+                 * @var $requestBodyArr array<string, RequestBody>
+                 */
+                $requestBodyObj = new RequestMultiBody();
+                $requestBodyObj->data = $this->buildHttpRequestBodyMultiPartForm($requestSource, $requestBody);
                 break;
             default:
-                $baseRequestBody = new RequestBaseBody();
-                $baseRequestBody->contentType = $contentType;
-                $baseRequestBody->content = $requestBody;
-                $baseRequestBody->contentDispostion = "DEFAULT";
-                return $baseRequestBody;
+                $requestBodyObj = new RequestBody();
+                $requestBodyObj->contentType = $contentType;
+                $requestBodyObj->content = $requestBody;
+                $requestBodyObj->contentDispostion = "DEFAULT";
         }
-        return $requestBodyArr;
+        return $requestBodyObj;
     }
 
     private function buildHttpRequestBodyMultiPartForm(RequestSource $requestSource, string $requestBody) {
@@ -150,12 +158,15 @@ class HttpInterpreter implements Interpreter
                 if (is_null($requestBodyObj->requestName)) {
                     preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
                     $requestBodyObj->requestName = $matches['requestName']??null;
+                    var_dump($requestBodyObj);
                     //初始化
                     $requestBodyArr[$requestBodyObj->requestName] = $requestBodyObj;
                 }
-                if (is_null($requestBodyObj->fileName)) {
-                    preg_match('/filename="(?<fileName>(.*))"/', $requestBodyLine, $matches);
-                    $requestBodyObj->fileName = $matches['fileName']??null;
+                preg_match('/filename="(?<fileName>(.*))"/', $requestBodyLine, $matches);
+                if (isset($matches['fileName'])) {
+                    $requestBodyObj = RequestFileBody::copyOfRequestBody($requestBodyObj);
+                    $requestBodyArr[$requestBodyObj->requestName] = $requestBodyObj;
+                    $requestBodyObj->fileName = $matches['fileName'];
                 }
                 preg_match('/Content-Type: (?<contentType>[\/a-zA-Z0-9]+)(.*)/', $requestBodyLine, $matches);
                 if (is_null($requestBodyObj->contentType) || !empty($matches['contentType'])) {
@@ -204,6 +215,7 @@ class HttpInterpreter implements Interpreter
         if ($router instanceof NullMapping) {
             return $this->getNotFoundResourceResponse($request);
         } else {
+            $request->setRequestSource(null);
             $response = $router->disPatch($request);
             if ($response instanceof IResponse) {
                 return $response;

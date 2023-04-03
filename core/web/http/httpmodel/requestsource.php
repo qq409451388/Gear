@@ -1,5 +1,5 @@
 <?php
-class RequestSource
+class RequestSource implements EzDataObject
 {
     public $requestMethod;
     public $path;

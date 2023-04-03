@@ -1,5 +1,5 @@
 <?php
-class EzRpcResponse
+class EzRpcResponse implements EzDataObject
 {
     public $errCode;
     public $data;

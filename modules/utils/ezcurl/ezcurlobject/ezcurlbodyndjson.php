@@ -9,7 +9,7 @@ class EzCurlBodyNdJson extends EzCurlBody
     /**
      * HTTP BODY NDJSON
      */
-    const BODY_NDJSON = "Content-Type: application/x-ndjson";
+    const BODY_NDJSON = "application/x-ndjson";
 
     protected function setContentType() {
         $this->contentType = self::BODY_NDJSON;

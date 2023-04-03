@@ -6,7 +6,7 @@ class EzCurlBodyJson extends EzCurlBody
     /**
      * HTTP BODY JSON
      */
-    const BODY_JSON = "Content-Type: application/json;charset=utf-8";
+    const BODY_JSON = "application/json;charset=utf-8";
 
     protected function setContentType() {
         $this->contentType = self::BODY_JSON;

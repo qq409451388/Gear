@@ -45,16 +45,14 @@ class EzCurlBodyFile extends EzCurlBody
 
     protected function setContentType() {
         if (is_null($this->filePath)) {
-            $this->contentType = HttpMimeType::MIME_STREAM;
+            $this->contentType = "Content-Type: ".HttpMimeType::MIME_STREAM;
         } else {
-            $this->contentType = mime_content_type($this->filePath);
+            $this->contentType = "Content-Type: ".mime_content_type($this->filePath);
         }
     }
 
     public function toString() {
-        if (!is_file($this->filePath)) {
-            return "";
-        }
+        DBC::assertTrue(is_file($this->filePath), "[EzCurl2] filePath:$this->filePath is not a file!");
         return file_get_contents($this->filePath);
     }
 

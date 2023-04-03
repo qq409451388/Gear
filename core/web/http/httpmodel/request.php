@@ -3,7 +3,7 @@
 /**
  * build for http
  */
-class Request implements IRequest
+class Request implements IRequest,EzDataObject
 {
     //content-type
     private $contentType;
@@ -154,11 +154,18 @@ class Request implements IRequest
         return $this->contentLen;
     }
 
-    public function setRequestSource(RequestSource $requestSource) {
+    /**
+     * @param RequestSource|null $requestSource
+     * @return void
+     */
+    public function setRequestSource($requestSource) {
         $this->requestSource = $requestSource;
     }
 
-    public function getRequestSource():RequestSource {
+    /**
+     * @return RequestSource|null
+     */
+    public function getRequestSource() {
         return $this->requestSource;
     }
 

@@ -1,5 +1,5 @@
 <?php
-class Response implements IResponse
+class Response implements IResponse,EzDataObject
 {
     /**
      * @var HttpStatus

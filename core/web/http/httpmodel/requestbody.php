@@ -3,8 +3,13 @@
 /**
  * 基础请求体对象
  */
-class RequestBaseBody
+class RequestBody implements EzDataObject
 {
+    /**
+     * @var string $requestName the key of requestData
+     */
+    public $requestName;
+
     /**
      * @link HttpMimeType
      * @var string $contentType

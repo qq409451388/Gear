@@ -15,7 +15,7 @@ class EzCurlBodyFormData extends EzCurlBody
     /**
      * HTTP BODY FORM DATA
      */
-    const BODY_FORM_DATA = "Content-Type: multipart/form-data;boundary=";
+    const BODY_FORM_DATA = "multipart/form-data;boundary=";
 
     public function __construct() {
         parent::__construct();

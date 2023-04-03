@@ -53,6 +53,7 @@ class EzCurlRequestHeader extends EzCurlHeader
         $s = [];
         foreach ($vars as $varName => $var) {
             $varToStringMethodName = $varName."ToString";
+            var_dump($varToStringMethodName);
             if (method_exists($this, $varToStringMethodName)) {
                 $h = $this->$varToStringMethodName();
                 if (empty($h)) {
@@ -63,6 +64,7 @@ class EzCurlRequestHeader extends EzCurlHeader
                 Logger::warn(__CLASS__." Unset Method {} for property {}!", $varToStringMethodName, $varName);
             }
         }
+        var_dump($s);
         return $s;
     }
 }

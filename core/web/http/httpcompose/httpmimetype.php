@@ -38,6 +38,7 @@ class HttpMimeType
     public const EXT_TEXT = "txt";
     public const EXT_HTML = "html";
     public const MIME_HTML = "text/html";
+    public const MIME_PLAINTEXT = "text/plain";
 
     public const EXT_CSS = "css";
     public const MIME_CSS = "text/css";
@@ -75,7 +76,7 @@ class HttpMimeType
         self::EXT_WBMP => self::MIME_WBMP,
         self::EXT_ICO => self::MIME_ICO,
         self::EXT_HTML => self::MIME_HTML,
-        self::EXT_TEXT => self::MIME_HTML,
+        self::EXT_TEXT => self::MIME_PLAINTEXT,
         self::EXT_CSS => self::MIME_CSS,
         self::EXT_RTF => self::MIME_RTF,
         self::EXT_RTX => self::MIME_RTX,
