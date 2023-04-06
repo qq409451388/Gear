@@ -3,6 +3,7 @@ class ObjectA implements EzDataObject
 {
     /**
      * @var string
+     * @required
      */
     public $name;
 

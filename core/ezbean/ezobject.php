@@ -23,7 +23,7 @@ class EzObject
                         0, GearIllegalArgumentException::class);
                 }
                 $doc = $refProperty->getDocComment();
-                list($struct, $propertyType) = self::analysePropertyDocComment($doc, $dItem);
+                list($struct, $propertyType) = self::analysePropertyDocComment($doc, $key, $dItem);
                 switch ($struct) {
                     case "LIST":
                     case "MAP":
@@ -70,10 +70,13 @@ class EzObject
      * }
      * @return array<string, string>
      */
-    private static function analysePropertyDocComment(string $doc, $data) {
+    private static function analysePropertyDocComment(string $doc, $column, $data) {
         if (empty($doc)) {
             return [null, null];
         }
+        preg_match("/\s+@required\s*/", $doc, $matched);
+        DBC::assertTrue(empty($matched) || isset($data), "[EzObject] Required Column $column Check Fail! Data Must Be Set!",
+            0, GearIllegalArgumentException::class);
         preg_match("/\*\s+@var\s+(?<propertyType>[a-zA-Z0-9\s<>,]+)(\r\n|\s+[\$][A-Za-z0-9]+\s*)/", $doc, $matched);
         $propertyTypeMatched = $matched['propertyType']??"";
         if (empty($propertyTypeMatched)) {
