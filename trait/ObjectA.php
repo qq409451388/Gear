@@ -4,6 +4,7 @@ class ObjectA implements EzDataObject
     /**
      * @var string
      * @required
+     * @defualt
      */
     public $name;
 
