@@ -63,7 +63,7 @@ class Request implements IRequest,EzDataObject
     }
 
     /**
-     * @return array<string, RequestBody>
+     * @return RequestMultiBody|RequestBody
      */
     public function getBody() {
         return $this->body;

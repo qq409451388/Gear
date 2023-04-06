@@ -1,7 +1,15 @@
 <?php
 
-abstract class BaseDTO
+abstract class BaseDTO implements EzDataObject,EzIgnoreUnknow
 {
+    public function __toString() {
+        return $this->toString();
+    }
+
+    public function toString() {
+        return EzDataUtils::toString($this->toArray());
+    }
+
     //非public字段不参与转换
     public function toArray()
     {
@@ -51,14 +59,20 @@ abstract class BaseDTO
             } else if (isset($object->listKeys()[$k])) {
                 $listClass = $object->listKeys()[$k];
                 foreach ($v as $vKey => $vItem) {
-                    $listObj = new $listClass;
-                    self::fill($vItem, $listObj);
-                    $object->$k[$vKey] = $listObj;
+                    if ("array" == $listClass) {
+                        $object->$k[$vKey] = $vItem;
+                    } else if (class_exists($listClass)) {
+                        $listObj = new $listClass;
+                        self::fill($vItem, $listObj);
+                        $object->$k[$vKey] = $listObj;
+                    } else {
+                        DBC::throwEx("[DTO] Unknow Class Name $listClass From". get_class($object), 0, GearIllegalArgumentException::class);
+                    }
                 }
-            } else if (isset($object->jsonKeys()[$k])) {
-
             } else {
-                $object->$k = $v;
+                if (property_exists($object, $k) || !$object instanceof EzIgnoreUnknow) {
+                    $object->$k = $v;
+                }
             }
         }
     }
@@ -76,21 +90,18 @@ abstract class BaseDTO
         return null;
     }
 
+    /**
+     * @return array<string, string:ClassName> 字段名=>对象类名
+     */
     protected function listKeys(): array
     {
         return [];
     }
 
-    protected function dtoKeys(): array
-    {
-        return [];
-    }
-
     /**
-     * @var ["key" => ]
-     * @return array
+     * @return array<string, string:ClassName> 字段名=>list子项对象类名
      */
-    protected function jsonKeys() : array
+    protected function dtoKeys(): array
     {
         return [];
     }

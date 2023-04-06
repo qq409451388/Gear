@@ -27,3 +27,4 @@
 | 2.3.0 | HTTP服务增加文件上传支持                                | 2023-02-27 |
 | 2.3.1 | 基于Resp和EzLocalCache的CacheServer&TcpServer抽象重构 | 2023-03-01 |
 | 2.3.2 | 更好的EzCurl（EzCurl2）                            | 2023-03-08 |
+| 2.3.3 | EzData&EsApi                                  | 2023-04-06 |
