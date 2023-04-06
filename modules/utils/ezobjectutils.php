@@ -1,5 +1,5 @@
 <?php
-class EzObject
+class EzObjectUtils
 {
     public static function hashCode($obj){
         $hashCode = 0;

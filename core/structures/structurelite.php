@@ -43,7 +43,7 @@ class HashMap extends AbstractMap
 
     public function put(string $k, $v): void
     {
-        $hashCode = EzObject::hashCode($k);
+        $hashCode = EzObjectUtils::hashCode($k);
         if(isset($this->dataSpace[$hashCode])){
             if($this->dataSpace[$hashCode] instanceof EzLinkedList){
                 if($this->dataSpace[$hashCode]->size() > self::THRESHOLD_LINKEDLIST_MAXSIZE){
