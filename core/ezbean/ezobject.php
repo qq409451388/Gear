@@ -74,9 +74,15 @@ class EzObject
         if (empty($doc)) {
             return [null, null];
         }
-        preg_match("/\*\s+@var\s+(?<propertyType>[a-zA-Z0-9\s<>,]+)\s+[\$][A-Za-z0-9]+\s*/", $doc, $matched);
+        preg_match("/\*\s+@var\s+(?<propertyType>[a-zA-Z0-9\s<>,]+)(\r\n|\s+[\$][A-Za-z0-9]+\s*)/", $doc, $matched);
         $propertyTypeMatched = $matched['propertyType']??"";
         if (empty($propertyTypeMatched)) {
+            return [null, null];
+        }
+        if (EzDataUtils::isScalarType($propertyTypeMatched)) {
+            DBC::assertTrue(EzDataUtils::dataTypeNameEquals(gettype($data), $propertyTypeMatched),
+                "[EzObject] Match data Fail! Type Must Be An $propertyTypeMatched, But ".gettype($data),
+                0, GearIllegalArgumentException::class);
             return [null, null];
         }
         // 1. Array

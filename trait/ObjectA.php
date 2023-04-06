@@ -1,6 +1,9 @@
 <?php
 class ObjectA implements EzDataObject
 {
+    /**
+     * @var string
+     */
     public $name;
 
     /**

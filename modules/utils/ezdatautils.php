@@ -71,8 +71,16 @@ class EzDataUtils
         "resource" => "Resource"
     ];
 
+    private static $scalarTypeList = [
+        "Integer", "Double", "String"
+    ];
+
     public static function isScalar($data) {
         return is_scalar($data);
+    }
+
+    public static function isScalarType($dataType) {
+        return in_array(self::$dataTypeMap[$dataType]??"", self::$scalarTypeList);
     }
 
     public static function dataTypeNameEquals($actual, $expect) {
