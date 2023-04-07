@@ -51,6 +51,10 @@ abstract class BaseTcpServer
         @socket_listen($this->master, 511);
         $this->detection();
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
+        //接收超时
+        socket_set_option($this->master,SOL_SOCKET,SO_RCVTIMEO,["sec"=>3, "usec"=>0]);
+        //发送超时
+        socket_set_option($this->master,SOL_SOCKET,SO_SNDTIMEO,["sec"=>3, "usec"=>0]);
         socket_set_nonblock($this->master);
         $this->addConnectPool($this->master, self::MASTER);
         $this->isInit = true;
@@ -234,94 +238,6 @@ abstract class BaseTcpServer
         $this->keepAlive = false;
     }
 
-    /*private function init() {
-        //创建socket套接字
-        $this->socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        // set the option to reuse the port
-        socket_set_option($this->socket, SOL_SOCKET, SO_REUSEADDR, 1);
-        //为套接字绑定ip和端口
-        @socket_bind($this->socket,$this->ip,$this->port);
-        //监听socket
-        socket_listen($this->socket,4);
-        //设置阻塞模式
-        socket_set_block($this->socket);
-        $isSucc = socket_last_error();
-        if(0 == $isSucc){
-            Logger::console("[EzTcpServer]Start Success tcp://".$this->ip.":".$this->port);
-        }else{
-            $err = socket_strerror($isSucc);
-            Logger::console("[EzTcpServer]Start Fail! ".$err);
-            exit();
-        }
-    }*/
-
-/*    private function init() {
-        $add = "tcp://".$this->ip.":".$this->port;
-        $this->socket = stream_socket_server($add, $errno, $errstr);
-        if (0 == $errno) {
-            Logger::console("[EzTcpServer]Start Success ".$add);
-        } else {
-            Logger::console("[EzTcpServer]Start Fail! ".$errstr);
-            exit();
-        }
-        stream_set_blocking($this->socket, 0);
-        $base = event_base_new();
-        $event = event_new();
-        event_set($event, $this->socket, EV_READ | EV_PERSIST, 'ev_accept', $base);
-        event_base_set($event, $base);
-        event_add($event);
-        event_base_loop($base);
-    }*/
-
-    /*private function ev_accept($socket, $flag, $base) {
-        $connection = stream_socket_accept($socket);
-        stream_set_blocking($connection, 0);
-        $buffer = event_buffer_new($connection, 'ev_read', NULL, 'ev_error',  $connection);
-        event_buffer_base_set($buffer, $base);
-        event_buffer_timeout_set($buffer, 30, 30);
-        event_buffer_watermark_set($buffer, EV_READ, 0, 0xffffff);
-        event_buffer_priority_set($buffer, 10);
-        event_buffer_enable($buffer, EV_READ | EV_PERSIST);
-    }
-
-    private function ev_error($buffer, $error, $connection) {
-        event_buffer_disable($buffer, EV_READ | EV_WRITE);
-        event_buffer_free($buffer);
-        fclose($connection);
-    }
-
-    private function ev_read($buffer, $connection) {
-        $read = event_buffer_read($buffer, self::SOCKET_READ_LENGTH);
-        $request = $this->buildRequest($read);
-        $response = $this->buildResponse($request);
-        $content = $response->toString();
-        @socket_write($connection, $content, strlen($content));
-    }*/
-
-    /*public function start() {
-        try {
-            while(true)
-            {
-                //接收客户端请求
-                if($msgsocket = socket_accept($this->socket)){
-                    //读取请求内容
-                    $request = $this->buildRequest(socket_read($msgsocket, self::SOCKET_READ_LENGTH));
-                    $response = $this->buildResponse($request);
-                    $content = $response->toString();
-                    @socket_write($msgsocket, $content, strlen($content));
-                    @socket_close($msgsocket);
-                }
-            }
-        } catch (Exception $e) {
-            $this->init();
-            $this->start();
-        } catch (Throwable $t){
-            $this->init();
-            $this->start();
-        }
-
-    }*/
-
     /**
      * 将请求报文转为IRequest接口实例对象
      * @param EzConnection $connection
@@ -337,4 +253,13 @@ abstract class BaseTcpServer
      */
     protected abstract function buildResponse(IRequest $request):IResponse;
 
+    private function closeServer() {
+        if (is_resource($this->master)) {
+            socket_close($this->master);
+        }
+    }
+
+    public function __destory() {
+        $this->closeServer();
+    }
 }
