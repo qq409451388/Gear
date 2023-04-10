@@ -38,14 +38,17 @@ class EzTcpServer extends BaseTcpServer
     }
 
 
-
     /**
      * 加入连接池
      * @param $clientSocket
      * @param $alias
      * @return void
+     * @throws Exception
      */
     protected function addConnectPool($clientSocket, $alias) {
+        if (is_null($clientSocket)) {
+            return;
+        }
         DBC::assertTrue(self::MASTER != $alias || $this->master == $clientSocket,
             "[EzWebSocketServer Exception] Cant Set Alias To ".self::MASTER);
         DBC::assertFalse($this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
@@ -67,21 +70,20 @@ class EzTcpServer extends BaseTcpServer
 
     /**
      * 接入新客户端
-     * @return void
+     * @return Socket|null socket资源
      */
     protected function newConnect() {
         //新连接加入
         $client = socket_accept($this->master);
         if ($client < 0) {
             Logger::console("Client Connect Fail!");
-            return;
+            return null;
         }
         if (count($this->connectPool) > $this->maxConnectNum) {
             Logger::console("Over MaxConnectNum!");
-            return;
+            return null;
         }
-        //刚刚建立连接的socket对象没有别名
-        $this->addConnectPool($client, (string)$client);
+        return $client;
     }
 
     /**
@@ -135,7 +137,11 @@ class EzTcpServer extends BaseTcpServer
             DBC::assertTrue($startSucc, "[EzTcpServer] Srart Fail!".socket_strerror(socket_last_error()));
             foreach ($readSockets as $readSocket) {
                 if ($this->master == $readSocket) {
-                    $this->newConnect();
+                    $socket = $this->newConnect();
+                    if (!is_null($socket)) {
+                        //刚刚建立连接的socket对象没有别名
+                        $this->addConnectPool($socket, (string)$socket);
+                    }
                 } else {
                     $readLength = self::SOCKET_READ_LENGTH;
                     $lastRequest = $this->getLastRequest($readSocket);

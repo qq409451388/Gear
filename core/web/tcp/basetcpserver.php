@@ -42,10 +42,34 @@ abstract class BaseTcpServer
         $this->port = $port;
         $this->schema = $schema;
     }
+
+    /**
+     * 当一个新的client进来后，将其加入连接池
+     * @param $clientSocket
+     * @param $alias
+     * @return void
+     */
     protected abstract function addConnectPool($clientSocket, $alias);
+
+    /**
+     * 关闭socket
+     * @param $socket
+     * @return void
+     */
     protected abstract function disConnect($socket);
+
+    /**
+     * 监听master拿到新的client socket
+     * @return socket
+     */
     protected abstract function newConnect();
 
+    /**
+     * 向socket写入
+     * @param $socket
+     * @param $content
+     * @return void
+     */
     protected abstract function writeSocket($socket, $content);
 
     /**
@@ -97,6 +121,10 @@ abstract class BaseTcpServer
      */
     protected abstract function buildResponse(IRequest $request):IResponse;
 
+    /**
+     * 关闭Server
+     * @return void
+     */
     protected abstract function closeServer();
 
     public function __destory() {
