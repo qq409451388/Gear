@@ -38,7 +38,7 @@ abstract class BaseTcpServer
 
     private $isInit = false;
 
-    public function _construct(string $ip, $port, string $schema = "") {
+    public function __construct(string $ip, $port, string $schema = "") {
         $this->ip = $ip;
         $this->port = $port;
         $this->schema = $schema;

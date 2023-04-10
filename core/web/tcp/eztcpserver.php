@@ -13,7 +13,7 @@ class EzTcpServer extends BaseTcpServer
     private $responseHandler;
 
     public function __construct(string $ip, $port, $schema = "") {
-        parent::_construct($ip, $port, $schema);
+        parent::__construct($ip, $port, $schema);
     }
 
     /**
