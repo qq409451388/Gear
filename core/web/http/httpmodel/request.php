@@ -194,4 +194,8 @@ class Request implements IRequest,EzDataObject
     {
         $this->dispatcher = $dispatcher;
     }
+
+    public function toString () {
+        return EzDataUtils::toString(get_object_vars($this));
+    }
 }

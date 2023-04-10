@@ -158,7 +158,6 @@ class HttpInterpreter implements Interpreter
                 if (is_null($requestBodyObj->requestName)) {
                     preg_match('/(.*)name="(?<requestName>[\/a-zA-Z0-9]+)"(.*)/', $requestBodyLine, $matches);
                     $requestBodyObj->requestName = $matches['requestName']??null;
-                    var_dump($requestBodyObj);
                     //初始化
                     $requestBodyArr[$requestBodyObj->requestName] = $requestBodyObj;
                 }

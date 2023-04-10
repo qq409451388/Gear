@@ -27,4 +27,8 @@ class RequestBody implements EzDataObject
      * @var string $content requestData
      */
     public $content;
+
+    public function toString () {
+        return EzDataUtils::toString(get_object_vars($this));
+    }
 }

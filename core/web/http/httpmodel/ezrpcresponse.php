@@ -22,7 +22,11 @@ class EzRpcResponse implements EzDataObject
         return (new self(null, $code, $msg));
     }
 
-    public function toJson():String{
+    public function toJson():string{
         return EzString::encodeJson($this)??self::EMPTY_RESPONSE;
+    }
+
+    public function toString () {
+        return EzDataUtils::toString(get_object_vars($this));
     }
 }
