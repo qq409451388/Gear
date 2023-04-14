@@ -11,6 +11,21 @@ class EzCollectionUtils
         return empty($json) ? null : json_decode($json, true);
     }
 
+    public static function decodeXml($xml) {
+        if (!$xml instanceof SimpleXMLElement) {
+            $xml = simplexml_load_string($xml);
+        }
+        $data = [];
+        foreach ($xml->children() as $k => $child) {
+            if (0 < $child->count()) {
+                $data[$k] = self::decodeXml($child);
+            } else {
+                $data[$k] = strval($child);
+            }
+        }
+        return $data;
+    }
+
     /**
      * @param $sourceHash
      * @paramformat array(item1,item2,...)

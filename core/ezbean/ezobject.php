@@ -9,6 +9,11 @@ class EzObject
         return self::createObject($data, $className);
     }
 
+    public static function createObjectFromXml(string $xml, string $className) {
+        $data = EzCollectionUtils::decodeXml($xml);
+        return self::createObject($data, $className);
+    }
+
     public static function createObject(array $data, string $className) {
         DBC::assertTrue(class_exists($className), "[EzObject] ClassName $className is not found!", 0, GearIllegalArgumentException::class);
         if (is_subclass_of($className, BaseDTO::class)) {
@@ -16,11 +21,21 @@ class EzObject
         } else {
             $class = new $className;
             $refClass = new ReflectionClass($class);
+            $propertyAlias = self::analyseClassDocComment($refClass);
             foreach ($data as $key => $dItem) {
-                $refProperty = $refClass->getProperty($key);
+                try {
+                    $key = $propertyAlias[$key] ?? $key;
+                    $refProperty = $refClass->getProperty($key);
+                }catch (ReflectionException $reflectionException) {
+                    $refProperty = null;
+                }
                 if (!$class instanceof EzIgnoreUnknow) {
                     DBC::assertNonNull($refProperty, "[EzObject] PropertyName $key is not found From Class $className!",
                         0, GearIllegalArgumentException::class);
+                } else {
+                    if (is_null($refProperty)) {
+                        continue;
+                    }
                 }
                 $doc = $refProperty->getDocComment();
                 list($struct, $propertyType) = self::analysePropertyDocComment($doc, $key, $dItem);
@@ -55,6 +70,19 @@ class EzObject
             }
             return $class;
         }
+    }
+
+    private static function analyseClassDocComment(ReflectionClass $reflectionClass) {
+        $propertyReflections = $reflectionClass->getProperties();
+        $hash = [];
+        foreach ($propertyReflections as $propertyReflection) {
+            $propertyDoc = $propertyReflection->getDocComment();
+            preg_match("/(.*)@JsonAlias\(\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*]+)\'?\"?\)/", $propertyDoc, $matched);
+            if (isset($matched['content'])) {
+                $hash[$matched['content']] = $propertyReflection->getName();
+            }
+        }
+        return $hash;
     }
 
     /**
