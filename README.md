@@ -22,5 +22,7 @@
 ### 3.3 Redis操作类 EzRedis [[点击跳转](https://github.com/qq409451388/Gear/blob/main/modules/ezcache/README.md)]
 ### 3.4 数据流处理工具 DataFilter [[点击跳转](https://github.com/qq409451388/Gear/blob/main/modules/datastream/README.md)]
 ## 4.TODO List
-### HTTP类多线程优化
 ### Mapping支持Restful风格
+### 使用文档更新
+### 注解解析逻辑抽象拆分
+### 限定EzObject的支持的注解
