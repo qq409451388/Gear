@@ -5,9 +5,10 @@ class MultiProc
      * @param $class        string|object   for Static invoke:ClassName,for dynamic invoke:instance object
      * @param $method       string           method name
      * @param $args         array           arguments
-     * @param int $multi                    processing num
+     * @param $isMulti      boolean          is multi process
+     * @var   $multi        int              processing num
      */
-    public static function build($class, $method, $args, $multi = 1, string $append = ""){
+    public static function build($class, $method, $args, $isMulti, string $append = ""){
         if(is_string($class) && class_exists($class)) {
             $isStaticMode = true;
         }elseif(is_object($class)){
@@ -15,8 +16,9 @@ class MultiProc
         }else{
             DBC::throwEx("[MultiProc Exception] Class UnKnow DataType!");
         }
+        $multi = $isMulti ? count($args) : 1;
         for($i=0;$i<$multi;$i++){
-            system(self::genCmd($class, $method, $multi > 1 ? ($args[$i]??[]) : ($args??[]), $append, $isStaticMode));
+            system(self::genCmd($class, $method, $isMulti ? ($args[$i]??[]) : ($args??[]), $append, $isStaticMode));
         }
     }
 

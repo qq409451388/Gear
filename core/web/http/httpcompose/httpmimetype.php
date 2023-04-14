@@ -39,6 +39,7 @@ class HttpMimeType
     public const EXT_HTML = "html";
     public const MIME_HTML = "text/html";
     public const MIME_PLAINTEXT = "text/plain";
+    public const MIME_XML = 'text/xml';
 
     public const EXT_CSS = "css";
     public const MIME_CSS = "text/css";
