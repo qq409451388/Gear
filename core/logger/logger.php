@@ -66,6 +66,9 @@ class Logger
 
     private static function generateFilePath($type, $fileName) {
         $dirPath = self::LOG_PATH.$type.DIRECTORY_SEPARATOR;
+        if (!is_dir($dirPath)) {
+            mkdir($dirPath, 0777, true);
+        }
         $ext = '.log';
         return $dirPath.$fileName.$ext;
     }
