@@ -92,6 +92,7 @@ class Env
                 case "BSD":
                 case "Linux":
                 case "Solaris":
+                case "Darwin":
                     return self::OS_UNIX;
                 case "Unknown":
                 default:
@@ -101,6 +102,7 @@ class Env
         } else if (defined("PHP_OS")) {
             switch (PHP_OS) {
                 case "Linux":
+                case "Darwin":
                     return self::OS_UNIX;
                 case "WINNT":
                 case "WIN32":

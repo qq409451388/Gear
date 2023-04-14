@@ -19,7 +19,7 @@ class EzFileCache extends EzLocalCache
     }
 
     private function initDataBase() {
-        $data = Logger::get(__CLASS__);
+        $data = Logger::get(__CLASS__, true);
         $data = explode(PHP_EOL, $data);
         $len = count($data);
         for ($i = 0; $i < $len; $i+=2) {
