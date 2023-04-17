@@ -2,6 +2,7 @@
 
 /**
  * 标明身份，对象组件为系统组件
+ * 不会被BeanFilter收集
  */
 interface EzComponent
 {

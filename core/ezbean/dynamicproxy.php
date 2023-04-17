@@ -5,19 +5,38 @@
  */
 class DynamicProxy
 {
+    /**
+     * @var {to $object} $obj
+     */
     private $obj;
+    private $init;
+
+    /**
+     * @var ReflectionClass
+     */
     private $ref;
     private $callBefore;
     private $callAfter;
 
     public function __construct($object){
         $this->obj = $object;
+        $this->init = false;
         $this->ref = new ReflectionClass($this->obj);
         $this->callBefore = $this->callAfter = [];
     }
 
-    public static function get($object):DynamicProxy{
-        return new static($object);
+    public function isInit() {
+        return $this->init;
+    }
+
+    public function getReflectionClass() {
+        return $this->ref;
+    }
+
+    public static function get($object, $isInit = false):DynamicProxy{
+        $dp = new static($object);
+        $dp->init = true;
+        return $dp;
     }
 
     public function __call($funcName, $args){

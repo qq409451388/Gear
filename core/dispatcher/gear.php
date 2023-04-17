@@ -35,7 +35,7 @@ class Gear implements IDispatcher
             return;
         }
         foreach($classess as $class) {
-            $this->createObject($class);
+            $this->createBean($class);
         }
     }
 
@@ -44,14 +44,21 @@ class Gear implements IDispatcher
     }
 
     protected function initRouter() {
-        foreach(BeanFinder::get()->getAll() as $objName => $obj) {
-            $reflection = new ReflectionClass($obj);
+        foreach(BeanFinder::get()->getAll(DynamicProxy::class) as $objName => $obj) {
+            /**
+             * @var DynamicProxy $obj
+             */
+            $reflection = $obj->getReflectionClass();
             $reflectionMethods = $reflection->getMethods();
             foreach($reflectionMethods as $reflectionMethod) {
                 if(!$reflection->isSubclassOf(BaseController::class)){
                     continue;
                 }
-                if(!$reflectionMethod->isPublic() || BaseController::class === $reflectionMethod->getDeclaringClass()->getName()){
+                if(!$reflectionMethod->isPublic()
+                    || BaseController::class === $reflectionMethod->getDeclaringClass()->getName()){
+                    continue;
+                }
+                if (!$reflectionMethod->isUserDefined() || $reflectionMethod->isConstructor()) {
                     continue;
                 }
                 $defaultPath = $objName . '/' . $reflectionMethod->getName();
@@ -63,7 +70,7 @@ class Gear implements IDispatcher
     /**
      * @throws ReflectionException
      */
-    private function initAnno(){
+    private function initAnno() {
         $annoList = $this->fetchAnno();
         $this->startAnno($annoList);
     }
@@ -71,11 +78,15 @@ class Gear implements IDispatcher
     private function fetchAnno(){
         $annoList = [];
         foreach(BeanFinder::get()->getAll() as $obj){
-            $reflection = new ReflectionClass($obj);
+            if ($obj instanceof DynamicProxy) {
+                $reflection = $obj->getReflectionClass();
+            } else {
+                $reflection = new ReflectionClass($obj);
+            }
             $reflectionMethods = $reflection->getMethods();
             $reflectionProperties = $reflection->getProperties();
             $classDocComment = $reflection->getDocComment();
-            $classAnnoList = $this->analyzeDocComment($classDocComment, AnnoElementType::TYPE_CLASS);
+            $classAnnoList = AnnoationRule::searchAnnoationFromDocument($classDocComment, AnnoElementType::TYPE_CLASS);
             $twichClassAnno = [];
             foreach($classAnnoList as $classAnno){
                 $aspectClass = $this->buildPoorAspect($classAnno);
@@ -88,7 +99,7 @@ class Gear implements IDispatcher
             }
             $annoMethodList = [];
             foreach($reflectionMethods as $reflectionMethod){
-                $methodAnnoList = $this->analyzeDocComment($reflectionMethod->getDocComment(), AnnoElementType::TYPE_METHOD);
+                $methodAnnoList = AnnoationRule::searchAnnoationFromDocument($reflectionMethod->getDocComment(), AnnoElementType::TYPE_METHOD);
                 foreach($methodAnnoList as $methodAnno){
                     $aspectMethod = $this->buildPoorAspect($methodAnno);
                     $aspectMethod->setAtClass($reflection);
@@ -102,7 +113,7 @@ class Gear implements IDispatcher
             }
             $annoPropertyList = [];
             foreach($reflectionProperties as $reflectionProperty){
-                $propertyAnnoList = $this->analyzeDocComment($reflectionProperty->getDocComment(), AnnoElementType::TYPE_FIELD);
+                $propertyAnnoList = AnnoationRule::searchAnnoationFromDocument($reflectionProperty->getDocComment(), AnnoElementType::TYPE_FIELD);
                 foreach($propertyAnnoList as $propertyAnno){
                     $aspectProperty = $this->buildPoorAspect($propertyAnno);
                     $aspectProperty->setAtClass($reflection);
@@ -137,7 +148,6 @@ class Gear implements IDispatcher
                 /**
                  * @var $annoItem Aspect|BuildAspect
                  */
-
                 $annoItem->adhere();
             }
             if(AnnoPolicyEnum::POLICY_RUNTIME == $annoItem->getPolicy()){
@@ -177,79 +187,6 @@ class Gear implements IDispatcher
         return $aspect;
     }
 
-    /**
-     * @return array<AnnoItem>
-     */
-    private function analyzeDocComment($comment, $at){
-        $result = [];
-        if(empty($comment)){
-            return $result;
-        }
-        /**
-         * 注解第一种类型，参数为普通字符串
-         * @example: @XXX("qqq") 或 @YYY('qqq')
-         */
-        $s= "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*]+)\'?\"?\)/";
-        preg_match_all($s, $comment, $matches, 2);
-        foreach($matches as $matched){
-            $annoName = $matched['annoName']??null;
-            $content = $matched['content']??null;
-            if(empty($annoName)){
-                Logger::warn("[Gear] Not Found AnnoClass AnnoInfo:{} ({})", $annoName, $content);
-                continue;
-            } else if (!is_subclass_of($annoName, Anno::class)){
-                Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName, $content);
-                continue;
-            }else if(!is_numeric($content) && empty($content)){
-                Logger::warn("[Gear] Empty Content AnnoInfo:{} ({})", $annoName, $content);
-                continue;
-            }
-            $result[] = AnnoItem::create($annoName, $content, $at);
-        }
-        /**
-         * 注解第二种类型，参数为JSON字符串
-         * @example: @XXX({"a":"a", "b":"b"})
-         */
-        $s = "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\{(?<content>(.*)+)\}\)/";
-        preg_match_all($s, $comment, $matches, 2);
-        foreach($matches as $matched){
-            $annoName = $matched['annoName']??null;
-            $content = $matched['content']??null;
-            if(empty($annoName)){
-                Logger::warn("[Gear] Not Found AnnoClass AnnoInfo:{} ({})", $annoName, $content);
-                continue;
-            } else if (!is_subclass_of($annoName, Anno::class)){
-                Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName, $content);
-                continue;
-            }else if(!is_numeric($content) && empty($content)){
-                Logger::warn("[Gear] Empty Content AnnoInfo:{} ({})", $annoName, $content);
-                continue;
-            }
-
-            $content = "{".$content."}";
-            $result[] = AnnoItem::createComplex($annoName, $content, $at);
-        }
-        /**
-         * 注解第三种类型，无任何参数
-         * @example: @XXX
-         */
-        $s = "/(.*)@(?<annoName>[a-zA-Z0-9]+)[\f\n\r\t\v]+/";
-        preg_match_all($s, $comment, $matches, 2);
-        foreach($matches as $matched){
-            $annoName = $matched['annoName']??null;
-            if(empty($annoName)){
-                Logger::warn("[Gear] Not Found AnnoClass AnnoInfo:{} ", $annoName);
-                continue;
-            } else if (!is_subclass_of($annoName, Anno::class)){
-                Logger::warn("[Gear] UnExpected AnnoInfo:{}", $annoName);
-                continue;
-            }
-
-            $result[] = AnnoItem::createComplex($annoName, null, $at);
-        }
-        return $result;
-    }
-
     public function judgePath(string $path):bool{
         return EzRouter::get()->judgePath($path);
     }
@@ -260,18 +197,22 @@ class Gear implements IDispatcher
 
     /**
      * create an obj if none in objects[]
-     * @param $class
+     * @param string $class
      * @return void
      * @throws Exception
      */
-    private function createObject($class){
+    private function createBean($class){
         if (!is_subclass_of($class, EzBean::class)) {
             return;
         }
         try {
-            BeanFinder::get()->import($class);
+            /**
+             * isDeep传false， 交由注解逻辑:startAnno()统一注入
+             */
+            BeanFinder::get()->save($class, EzBeanUtils::createBean($class, false));
+            Logger::console("[Gear]Create Bean {$class}");
         } catch (Exception $e) {
-            DBC::throwEx("[Gear]Create Object Exception {$e->getMessage()}", 0, GearShutDownException::class);
+            DBC::throwEx("[Gear]Create Bean Exception {$e->getMessage()}", 0, GearShutDownException::class);
         }
     }
 }

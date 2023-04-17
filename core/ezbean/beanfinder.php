@@ -28,7 +28,7 @@ class BeanFinder
     public function save($key, $obj){
         $key = strtolower($key);
         if($this->has($key)){
-            DBC::throwEx("[BeanFinder] $key is exists!");
+            Logger::warn("[BeanFinder] $key is exists!");
         }
         $this->objects[$key] = $obj;
     }
@@ -41,14 +41,19 @@ class BeanFinder
         return $this->objects[$key] ?? null;
     }
 
-    public function getAll(){
-        return $this->objects;
+    public function getAll($filter = null){
+        if (is_null($filter)) {
+            return $this->objects;
+        }
+        return array_filter($this->objects, function($object) use ($filter) {
+            return get_class($object) == $filter;
+        });
     }
 
     public function import($className){
         $o = new $className;
         $this->save($className, $o);
-        Logger::console("[Gear]Create Bean {$className}");
+        Logger::console("[Bean]Create Object {$className}");
         return get_class($o);
     }
 

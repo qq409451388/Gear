@@ -10,6 +10,13 @@ class EzDataUtils
         return true;
     }
 
+    public static function isJson($obj) {
+        if (!is_string($obj)) {
+            return false;
+        }
+        return self::isArray(EzCollectionUtils::decodeJson($obj));
+    }
+
     public static function isArray($obj){
         return is_array($obj);
     }

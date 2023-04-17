@@ -1,5 +1,5 @@
 <?php
-class EzObject
+class EzBeanUtils implements EzHelper
 {
     public static function createObjectFromJson(string $json, string $className) {
         $data = EzCollectionUtils::decodeJson($json);
@@ -12,6 +12,47 @@ class EzObject
     public static function createObjectFromXml(string $xml, string $className) {
         $data = EzCollectionUtils::decodeXml($xml);
         return self::createObject($data, $className);
+    }
+
+    /**
+     * 创建Bean，$className类的代理类
+     * @param string $className
+     * @param boolean $isDeep 是否递归创建依赖的Bean 实验性功能默认关闭
+     * @return DynamicProxy<$className>
+     */
+    public static function createBean(string $className, $isDeep = false) {
+        DBC::assertTrue(class_exists($className), "[EzObject] ClassName $className is not found!",
+            0, GearIllegalArgumentException::class);
+        DBC::assertTrue(is_subclass_of($className, EzBean::class), "[EzObject] Class Must implements EzBean, But {$className}!",
+            0, GearIllegalArgumentException::class);
+        $class = BeanFinder::get()->pull($className);
+        if ($class instanceof DynamicProxy && $class->isInit()) {
+            return $class;
+        }
+        $class = new $className;
+        if ($isDeep) {
+            $refClass = new ReflectionClass($class);
+            $properties = $refClass->getProperties();
+            foreach ($properties as $property) {
+                $propertyDoc = $property->getDocComment();
+                if (empty($propertyDoc)) {
+                    continue;
+                }
+                $annoItem = AnnoationRule::searchCertainlyNormalAnnoation($propertyDoc, AnnoElementType::TYPE_FIELD, Resource::class);
+                if ($property->isPublic()) {
+                    $property->setValue($class, self::createBean($annoItem->value, $isDeep));
+                } else {
+                    $property->setAccessible(true);
+                    $property->setValue($class, self::createBean($annoItem->value, $isDeep));
+                    $property->setAccessible(false);
+                }
+            }
+        }
+        $dp = DynamicProxy::get($class, $isDeep);
+        if ($isDeep) {
+            BeanFinder::get()->save($className, $dp);
+        }
+        return $dp;
     }
 
     public static function createObject(array $data, string $className) {
