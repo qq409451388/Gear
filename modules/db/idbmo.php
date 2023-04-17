@@ -1,5 +1,5 @@
 <?php
-Interface IDbMo{
+interface IDbMo{
     public function setCollection(string $col);
     public function setQuery(array $query);
     public function sort(array $query);

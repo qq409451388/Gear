@@ -1,5 +1,5 @@
 <?php
-Interface IDbSe
+interface IDbSe
 {
     public function isExpired():bool;
 

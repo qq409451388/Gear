@@ -1,5 +1,5 @@
 <?php
-Interface IEzIp
+interface IEzIp
 {
     public static function getInfo(string $ip):EzIpInfo;
 }
