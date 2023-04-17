@@ -38,7 +38,7 @@ class EzBeanUtils implements EzHelper
                 if (empty($propertyDoc)) {
                     continue;
                 }
-                $annoItem = AnnoationRule::searchCertainlyNormalAnnoation($propertyDoc, AnnoElementType::TYPE_FIELD, Resource::class);
+                $annoItem = AnnoationRule::searchCertainlyNormalAnnoationFromDoc($propertyDoc, AnnoElementType::TYPE_FIELD, Resource::class);
                 if ($property->isPublic()) {
                     $property->setValue($class, self::createBean($annoItem->value, $isDeep));
                 } else {
@@ -55,62 +55,82 @@ class EzBeanUtils implements EzHelper
         return $dp;
     }
 
-    public static function createObject(array $data, string $className) {
+    /**
+     * @param array|null $data
+     * @param string $className
+     * @return BaseDTO|EzIgnoreUnknow|mixed|null
+     * @throws ReflectionException
+     */
+    public static function createObject($data, string $className) {
+        if (is_null($data)) {
+            return null;
+        }
         DBC::assertTrue(class_exists($className), "[EzObject] ClassName $className is not found!", 0, GearIllegalArgumentException::class);
         if (is_subclass_of($className, BaseDTO::class)) {
             return $className::create($data);
         } else {
-            $class = new $className;
-            $refClass = new ReflectionClass($class);
-            $propertyAlias = self::analyseClassDocComment($refClass);
-            foreach ($data as $key => $dItem) {
-                try {
-                    $key = $propertyAlias[$key] ?? $key;
-                    $refProperty = $refClass->getProperty($key);
-                }catch (ReflectionException $reflectionException) {
-                    $refProperty = null;
-                }
-                if (!$class instanceof EzIgnoreUnknow) {
-                    DBC::assertNonNull($refProperty, "[EzObject] PropertyName $key is not found From Class $className!",
-                        0, GearIllegalArgumentException::class);
-                } else {
-                    if (is_null($refProperty)) {
-                        continue;
-                    }
-                }
-                $doc = $refProperty->getDocComment();
-                list($struct, $propertyType) = self::analysePropertyDocComment($doc, $key, $dItem);
-                switch ($struct) {
-                    case "LIST":
-                    case "MAP":
-                        $list = [];
-                        foreach ($dItem as $k => $item) {
-                            if (EzDataUtils::isScalar($item)) {
-                                $list[$k] = $item;
-                            } else {
-                                $list[$k] = self::createObject($item, $propertyType);
-                            }
-                        }
-                        $dItem = $list;
-                        break;
-                    case "OBJECT":
-                        $dItem = self::createObject($dItem, $propertyType);
-                        break;
-                    case "ARRAY":
-                    default:
-                        break;
-                }
 
-                if ($refProperty->isPublic()) {
-                    $refProperty->setValue($class, $dItem);
-                } else {
-                    $refProperty->setAccessible(true);
-                    $refProperty->setValue($class, $dItem);
-                    $refProperty->setAccessible(false);
-                }
+            if (is_subclass_of($className, EzSerializeDataObject::class)) {
+                // todo
+                $class = Clazz::get($className)->deserialize($data);
+            } else {
+                $class = self::createNormalObject($data, $className);
             }
             return $class;
         }
+    }
+
+    private static function createNormalObject($data, $className) {
+        $class = new $className;
+        $refClass = new ReflectionClass($class);
+        $propertyAlias = self::analyseClassDocComment($refClass);
+        foreach ($data as $key => $dItem) {
+            try {
+                $key = $propertyAlias[$key] ?? $key;
+                $refProperty = $refClass->getProperty($key);
+            }catch (ReflectionException $reflectionException) {
+                $refProperty = null;
+            }
+            if (!$class instanceof EzIgnoreUnknow) {
+                DBC::assertNonNull($refProperty, "[EzObject] PropertyName $key is not found From Class $className!",
+                    0, GearIllegalArgumentException::class);
+            } else {
+                if (is_null($refProperty)) {
+                    continue;
+                }
+            }
+            $doc = $refProperty->getDocComment();
+            list($struct, $propertyType) = self::analysePropertyDocComment($doc, $key, $dItem);
+            switch ($struct) {
+                case "LIST":
+                case "MAP":
+                    $list = [];
+                    foreach ($dItem as $k => $item) {
+                        if (EzDataUtils::isScalar($item)) {
+                            $list[$k] = $item;
+                        } else {
+                            $list[$k] = self::createObject($item, $propertyType);
+                        }
+                    }
+                    $dItem = $list;
+                    break;
+                case "OBJECT":
+                    $dItem = self::createObject($dItem, $propertyType);
+                    break;
+                case "ARRAY":
+                default:
+                    break;
+            }
+
+            if ($refProperty->isPublic()) {
+                $refProperty->setValue($class, $dItem);
+            } else {
+                $refProperty->setAccessible(true);
+                $refProperty->setValue($class, $dItem);
+                $refProperty->setAccessible(false);
+            }
+        }
+        return $class;
     }
 
     private static function analyseClassDocComment(ReflectionClass $reflectionClass) {
@@ -118,9 +138,9 @@ class EzBeanUtils implements EzHelper
         $hash = [];
         foreach ($propertyReflections as $propertyReflection) {
             $propertyDoc = $propertyReflection->getDocComment();
-            preg_match("/(.*)@JsonAlias\(\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*]+)\'?\"?\)/", $propertyDoc, $matched);
-            if (isset($matched['content'])) {
-                $hash[$matched['content']] = $propertyReflection->getName();
+            $annoItem = AnnoationRule::searchCertainlyNormalAnnoationFromDoc($propertyDoc, AnnoElementType::TYPE_FIELD, ColumnAlias::class);
+            if ($annoItem instanceof AnnoItem) {
+                $hash[$annoItem->value] = $propertyReflection->getName();
             }
         }
         return $hash;

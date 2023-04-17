@@ -1,5 +1,6 @@
 <?php
-class EzDate{
+class EzDate implements EzSerializeDataObject
+{
     private $timeStamp;
 
     public const DAY_SEC = 86400;
@@ -123,5 +124,9 @@ class EzDate{
            DBC::throwEx("[EzDate] UnKnow DateTime $dateTime");
         }
         return $res;
+    }
+
+    public function __toString() {
+        return $this->toString();
     }
 }

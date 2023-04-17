@@ -2,6 +2,10 @@
 class AnnoItem
 {
     public $annoName;
+    /**
+     * @var Anno $anno
+     */
+    public $anno;
     public $value;
 
     /**
@@ -34,16 +38,16 @@ class AnnoItem
     }
 
     public function getValue():Anno{
+        if (!is_null($this->anno)) {
+            return $this->anno;
+        }
         $class = $this->annoName;
         /**
          * @var $anno Anno
          */
         $anno = new $class;
-        if($this->isNormal()){
-            $anno->combine($this->value);
-        }else{
-            $anno->combine(EzCollectionUtils::decodeJson($this->value));
-        }
+        $anno->combine($this->value);
+        $this->anno = $anno;
         return $anno;
     }
 

@@ -5,5 +5,4 @@
  */
 interface EzDataObject
 {
-    public function toString();
 }

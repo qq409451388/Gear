@@ -10,22 +10,53 @@ class AnnoationRule implements EzHelper
      * @param string $annoName implements Anno
      * @return AnnoItem
      */
-    public static function searchCertainlyNormalAnnoation($document, $at, $annoName) {
+    public static function searchCertainlyNormalAnnoationFromDoc($document, $at, $annoName) {
         if (empty($annoName)) {
             return null;
         }
-        $s= "/(.*)@$annoName\(\s?\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*]+)\'?\"?\s?\)/";
+        if (!is_subclass_of($annoName, Anno::class)) {
+            Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName);
+            return null;
+        }
+        $s= "/(.*)@$annoName\(\s?\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*_]+)\'?\"?\s?\)/";
         preg_match($s, $document, $matched);
         if (empty($matched['content'])) {
-            Logger::warn("[Gear] Empty Content AnnoInfo:{} ", $annoName);
             return null;
         }
-        $content = $matched['content'];
+        return AnnoItem::create($annoName, $matched['content'], $at);
+    }
+
+    /**
+     * @param string $document
+     * @param int $at {@see AnnoElementType}
+     * @return AnnoItem
+     */
+    public static function searchCertainlyRelationshipAnnoationFromDoc($document, $at, $annoName) {
         if (!is_subclass_of($annoName, Anno::class)) {
-            Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName, $content);
+            Logger::warn("[Gear] UnExpected AnnoInfo:{}", $annoName);
             return null;
         }
-        return AnnoItem::create($annoName, $content, $at);
+        /**
+         * 注解第四种类型，参数为箭头映射
+         * @example: @XXX(a=>1, b=>2)
+         */
+        $s = "/\s?@(?<annoName>[a-zA-Z]+)\s?\((?<content>[\w\s=>\"\',]+)\)/";
+        preg_match($s, $document, $matched);
+        $s2 = "/(?<key>[a-zA-Z]+)\s?=>\s?\"?(?<value>[\w\s]+)\"?/";
+        preg_match_all($s2, $matched['content'], $matchedes2, 2);
+        if (empty($matchedes2)) {
+            return null;
+        }
+        $arr = array_combine(array_column($matchedes2, "key"), array_column($matchedes2, "value"));
+        return AnnoItem::createComplex($annoName, $arr, $at);
+    }
+
+    /**
+     * @return AnnoItem
+     */
+    public static function searchCertainlyRelationshipAnnoation($class, $annoName) {
+        return self::searchCertainlyRelationshipAnnoationFromDoc((new ReflectionClass($class))->getDocComment(),
+            AnnoElementType::TYPE_CLASS, $annoName);
     }
 
     /**
