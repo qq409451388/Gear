@@ -12,7 +12,7 @@ class DynamicProxy
     private $init;
 
     /**
-     * @var ReflectionClass
+     * @var EzReflectionClass
      */
     private $ref;
     private $callBefore;
@@ -21,7 +21,7 @@ class DynamicProxy
     public function __construct($object){
         $this->obj = $object;
         $this->init = false;
-        $this->ref = new ReflectionClass($this->obj);
+        $this->ref = new EzReflectionClass($this->obj);
         $this->callBefore = $this->callAfter = [];
     }
 

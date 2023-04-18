@@ -44,10 +44,10 @@ class Gear implements IDispatcher
     }
 
     protected function initRouter() {
+        /**
+         * @var DynamicProxy $obj
+         */
         foreach(BeanFinder::get()->getAll(DynamicProxy::class) as $objName => $obj) {
-            /**
-             * @var DynamicProxy $obj
-             */
             $reflection = $obj->getReflectionClass();
             $reflectionMethods = $reflection->getMethods();
             foreach($reflectionMethods as $reflectionMethod) {
@@ -81,12 +81,11 @@ class Gear implements IDispatcher
             if ($obj instanceof DynamicProxy) {
                 $reflection = $obj->getReflectionClass();
             } else {
-                $reflection = new ReflectionClass($obj);
+                $reflection = new EzReflectionClass($obj);
             }
             $reflectionMethods = $reflection->getMethods();
             $reflectionProperties = $reflection->getProperties();
-            $classDocComment = $reflection->getDocComment();
-            $classAnnoList = AnnoationRule::searchAnnoationFromDocument($classDocComment, AnnoElementType::TYPE_CLASS);
+            $classAnnoList = $reflection->getAnnoationList();
             $twichClassAnno = [];
             foreach($classAnnoList as $classAnno){
                 $aspectClass = $this->buildPoorAspect($classAnno);
@@ -99,7 +98,7 @@ class Gear implements IDispatcher
             }
             $annoMethodList = [];
             foreach($reflectionMethods as $reflectionMethod){
-                $methodAnnoList = AnnoationRule::searchAnnoationFromDocument($reflectionMethod->getDocComment(), AnnoElementType::TYPE_METHOD);
+                $methodAnnoList = $reflectionMethod->getAnnoationList();
                 foreach($methodAnnoList as $methodAnno){
                     $aspectMethod = $this->buildPoorAspect($methodAnno);
                     $aspectMethod->setAtClass($reflection);
@@ -113,7 +112,7 @@ class Gear implements IDispatcher
             }
             $annoPropertyList = [];
             foreach($reflectionProperties as $reflectionProperty){
-                $propertyAnnoList = AnnoationRule::searchAnnoationFromDocument($reflectionProperty->getDocComment(), AnnoElementType::TYPE_FIELD);
+                $propertyAnnoList = $reflectionProperty->getAnnoationList();
                 foreach($propertyAnnoList as $propertyAnno){
                     $aspectProperty = $this->buildPoorAspect($propertyAnno);
                     $aspectProperty->setAtClass($reflection);
@@ -166,7 +165,7 @@ class Gear implements IDispatcher
     private function buildPoorAspect(AnnoItem $annoItem){
         $k = $annoItem->annoName;
         $v = $annoItem->getValue();
-        $annoReflection = new ReflectionClass($k);
+        $annoReflection = new EzReflectionClass($k);
         $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
         DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
         $dependConf = $annoReflection->getConstant("DEPEND");

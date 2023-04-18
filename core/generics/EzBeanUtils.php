@@ -62,15 +62,15 @@ class EzBeanUtils implements EzHelper
         DBC::assertTrue(class_exists($className), "[EzObject] ClassName $className is not found!", 0, GearIllegalArgumentException::class);
         if (is_subclass_of($className, BaseDTO::class)) {
             return $className::create($data);
-        } else {
-
-            if (is_subclass_of($className, EzSerializeDataObject::class)) {
-                // todo
-                $class = Clazz::get($className)->deserialize($data);
+        } else if (is_subclass_of($className, EzSerializeDataObject::class)) {
+            $serializerClass = Clazz::get($className)->getDeserializer();
+            if (is_null($serializerClass)) {
+                return null;
             } else {
-                $class = self::createNormalObject($data, $className);
+                return $serializerClass->deserialize($data);
             }
-            return $class;
+        } else {
+            return self::createNormalObject($data, $className);
         }
     }
 
@@ -127,12 +127,11 @@ class EzBeanUtils implements EzHelper
         return $class;
     }
 
-    private static function analyseClassDocComment(ReflectionClass $reflectionClass) {
+    private static function analyseClassDocComment(EzReflectionClass $reflectionClass) {
         $propertyReflections = $reflectionClass->getProperties();
         $hash = [];
         foreach ($propertyReflections as $propertyReflection) {
-            $propertyDoc = $propertyReflection->getDocComment();
-            $annoItem = AnnoationRule::searchCertainlyNormalAnnoationFromDoc($propertyDoc, AnnoElementType::TYPE_FIELD, ColumnAlias::class);
+            $annoItem = $propertyReflection->getAnnoation(Clazz::get(ColumnAlias::class));
             if ($annoItem instanceof AnnoItem) {
                 $hash[$annoItem->value] = $propertyReflection->getName();
             }

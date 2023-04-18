@@ -5,5 +5,9 @@
  */
 abstract class Deserializer
 {
-
+    /**
+     * @param $data
+     * @return object
+     */
+    abstract public function deserialize($data);
 }

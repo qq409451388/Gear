@@ -5,6 +5,7 @@
  */
 class ColumnAlias implements Anno
 {
+    public const STRUCT = AnnoValueTypeEnum::TYPE_NORMAL;
     public const POLICY = AnnoPolicyEnum::POLICY_BUILD;
     public const TARGET = AnnoElementType::TYPE_FIELD;
 
