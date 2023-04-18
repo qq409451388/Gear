@@ -31,21 +31,15 @@ class EzBeanUtils implements EzHelper
         }
         $class = new $className;
         if ($isDeep) {
-            $refClass = new ReflectionClass($class);
+            $refClass = new EzReflectionClass($class);
             $properties = $refClass->getProperties();
             foreach ($properties as $property) {
                 $propertyDoc = $property->getDocComment();
                 if (empty($propertyDoc)) {
                     continue;
                 }
-                $annoItem = AnnoationRule::searchCertainlyNormalAnnoationFromDoc($propertyDoc, AnnoElementType::TYPE_FIELD, Resource::class);
-                if ($property->isPublic()) {
-                    $property->setValue($class, self::createBean($annoItem->value, $isDeep));
-                } else {
-                    $property->setAccessible(true);
-                    $property->setValue($class, self::createBean($annoItem->value, $isDeep));
-                    $property->setAccessible(false);
-                }
+                $annoItem = $property->getAnnoation(Clazz::get(Resource::class));
+                $property->forceSetValue($class, self::createBean($annoItem->value, $isDeep));
             }
         }
         $dp = DynamicProxy::get($class, $isDeep);
@@ -58,7 +52,7 @@ class EzBeanUtils implements EzHelper
     /**
      * @param array|null $data
      * @param string $className
-     * @return BaseDTO|EzIgnoreUnknow|mixed|null
+     * @return object ? extends $className
      * @throws ReflectionException
      */
     public static function createObject($data, string $className) {
@@ -82,7 +76,7 @@ class EzBeanUtils implements EzHelper
 
     private static function createNormalObject($data, $className) {
         $class = new $className;
-        $refClass = new ReflectionClass($class);
+        $refClass = new EzReflectionClass($class);
         $propertyAlias = self::analyseClassDocComment($refClass);
         foreach ($data as $key => $dItem) {
             try {

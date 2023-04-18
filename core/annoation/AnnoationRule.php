@@ -5,6 +5,73 @@ class AnnoationRule implements EzHelper
     }
 
     /**
+     * @param EzReflectionClass|EzReflectionMethod|EzReflectionProperty $reflection
+     * @param Clazz                                                     $annoName
+     * @return AnnoItem
+     * @throws Exception
+     */
+    public static function searchAnnoation($reflection, Clazz $annoName) {
+        $valueType = $annoName->getConst("STRUCT");
+        $at = $annoName->getConst("TARGET");
+        $refTarget = self::getRefTarget($reflection);
+        if (EzDataUtils::isArray($at)) {
+            DBC::assertTrue(in_array($refTarget, $at), "[AnnoationRule] Unsupport positon!");
+        } else {
+            DBC::assertEquals($at, $refTarget, "[AnnoationRule] Unsupport positon!");
+        }
+        switch ($valueType) {
+            case AnnoValueTypeEnum::TYPE_LITE:
+                return self::searchCertainlyLiteAnnoationFromDoc($reflection->getDocComment(), $refTarget, $annoName->getName());
+            case AnnoValueTypeEnum::TYPE_NORMAL:
+                return self::searchCertainlyNormalAnnoationFromDoc($reflection->getDocComment(), $refTarget, $annoName->getName());
+            case AnnoValueTypeEnum::TYPE_RELATION:
+                return self::searchCertainlyRelationshipAnnoationFromDoc($reflection->getDocComment(), $refTarget, $annoName->getName());
+            default:
+                Logger::warn("[AnnoationRule] Unsupport STRUCT for Anno:{}", $annoName->getName());
+                return null;
+        }
+    }
+
+    private static function getRefTarget($reflection) {
+        $className = get_class($reflection);
+        switch ($className) {
+            case EzReflectionClass::class:
+            case ReflectionClass::class:
+                return AnnoElementType::TYPE_CLASS;
+            case EzReflectionMethod::class:
+            case ReflectionMethod::class:
+                return AnnoElementType::TYPE_METHOD;
+            case EzReflectionProperty::class:
+            case ReflectionProperty::class:
+                return AnnoElementType::TYPE_FIELD;
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * @param string $document
+     * @param int $at {@see AnnoElementType}
+     * @param string $annoName implements Anno
+     * @return AnnoItem
+     */
+    public static function searchCertainlyLiteAnnoationFromDoc($document, $at, $annoName) {
+        if (empty($annoName)) {
+            return null;
+        }
+        if (!is_subclass_of($annoName, Anno::class)) {
+            Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName);
+            return null;
+        }
+        $s= "/(.*)@$annoName\s?/";
+        preg_match($s, $document, $matched);
+        if (empty($matched)) {
+            return null;
+        }
+        return AnnoItem::create($annoName, null, $at);
+    }
+
+    /**
      * @param string $document
      * @param int $at {@see AnnoElementType}
      * @param string $annoName implements Anno

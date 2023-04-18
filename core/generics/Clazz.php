@@ -13,6 +13,10 @@ class Clazz implements EzComponent
         return $this->className::$method(...$args);
     }
 
+    public function getConst($constName) {
+        return $this->className::$constName;
+    }
+
     public function isSubClassOf($parentClassName) {
         return is_subclass_of($this->className, $parentClassName);
     }
@@ -21,7 +25,4 @@ class Clazz implements EzComponent
         return $this->className;
     }
 
-    public function deserialize($data) {
-
-    }
 }

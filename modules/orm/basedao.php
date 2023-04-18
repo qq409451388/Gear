@@ -26,6 +26,13 @@ abstract class BaseDAO implements EzBean
     }
 
     abstract protected function bindEntity():Clazz;
+
+    /**
+     * @param $sql
+     * @param $params
+     * @return BaseDO
+     * @throws ReflectionException
+     */
     protected function findOne($sql, $params){
         $sql = "select * from {$this->table} {$sql} limit 1";
         $res = DB::get($this->database)->queryOne($sql, $params);
@@ -33,6 +40,11 @@ abstract class BaseDAO implements EzBean
         return EzBeanUtils::createObject($res, $className);
     }
 
+    /**
+     * @param $id
+     * @return BaseDO
+     * @throws ReflectionException
+     */
     public function findById($id) {
         /**
          * @var EzLocalCache $localCache
