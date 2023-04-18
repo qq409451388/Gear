@@ -51,13 +51,13 @@ abstract class BaseDAO implements EzBean
          */
         $localCache = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
         if(null != $localCache && $data = $localCache->get($this->entityClazz->getName().$id)){
-            return EzBeanUtils::createObjectFromJson($data, $this->entityClazz->getName());
+            return unserialize($data);
         }
         $data = $this->findOne("where id = :id", [":id" => $id]);
         if(empty($data)){
             return null;
         }
-        null != $localCache && $localCache->set($this->entityClazz->getName().$id, EzString::encodeJson($data));
+        null != $localCache && $localCache->set($this->entityClazz->getName().$id, serialize($data));
         return $data;
     }
 
