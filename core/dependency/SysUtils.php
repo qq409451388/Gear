@@ -110,4 +110,15 @@ class SysUtils
         }
         return $result;
     }
+
+    public static function searchModules($dependencies) {
+        $classes = [];
+        foreach ($dependencies as $dependency) {
+            foreach ($dependency as $d) {
+                $path = GEAR_PATH.$d;
+                $classes += self::scanFile($path, -1, ["php"], true);
+            }
+        }
+        return $classes;
+    }
 }

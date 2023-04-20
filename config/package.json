@@ -1,17 +1,18 @@
 {
   "orm": [
-    "modules/orm/*"
+    "modules/db",
+    "modules/orm"
   ],
   "utils": [
-    "modules/utils/*"
+    "modules/utils"
   ],
   "db": [
-    "modules/db/*"
+    "modules/db"
   ],
   "ezcache": [
-    "modules/ezcache/*"
+    "modules/ezcache"
   ],
   "datastream": [
-    "modules/datastream/*"
+    "modules/datastream"
   ]
 }
