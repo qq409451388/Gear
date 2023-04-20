@@ -17,19 +17,19 @@ abstract class Aspect
 
     /**
      * 注解被设置在哪个类上面
-     * @var ReflectionClass
+     * @var EzReflectionClass
      */
     private $atClass;
 
     /**
      * 注解被设置在哪个方法上面
-     * @var ReflectionMethod
+     * @var EzReflectionMethod
      */
     private $atMethod;
 
     /**
      * 注解被设置在哪个属性上面
-     * @var ReflectionProperty
+     * @var EzReflectionProperty
      */
     private $atProperty;
 

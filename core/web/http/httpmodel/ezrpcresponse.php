@@ -1,4 +1,5 @@
 <?php
+
 class EzRpcResponse implements EzDataObject
 {
     public $errCode;
@@ -23,9 +24,11 @@ class EzRpcResponse implements EzDataObject
     }
 
     public function toJson():string{
-        foreach ($this->data as $k => &$v) {
-            if ($v instanceof EzSerializeDataObject) {
-                $v = Clazz::get($v)->getSerializer()->serialize($v);
+        if (is_array($this->data) || is_object($this->data)) {
+            foreach ($this->data as $k => &$v) {
+                if ($v instanceof EzSerializeDataObject) {
+                    $v = Clazz::get($v)->getSerializer()->serialize($v);
+                }
             }
         }
         return EzString::encodeJson($this)??self::EMPTY_RESPONSE;

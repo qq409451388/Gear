@@ -1,4 +1,5 @@
 <?php
+
 interface Map
 {
     public function clear():void;

@@ -5,10 +5,29 @@ class EzReflectionClass extends ReflectionClass
     use EzReflectionTrait;
 
     /**
-     * @return AnnoItem[]
+     * 获取类上的所有注解
+     * @return array<AnnoItem>
      */
     public function getAnnoationList() {
         return AnnoationRule::searchAnnoationFromDocument($this->getDocComment(), AnnoElementType::TYPE_CLASS);
+    }
+
+    /**
+     * 获取属性中的指定注解
+     * @param Clazz $annoClazz
+     * @return array<AnnoItem>
+     * @throws ReflectionException
+     */
+    public function getPropertyAnnotationList(Clazz $annoClazz) {
+        $properties = $this->getProperties();
+        $annoList = [];
+        foreach ($properties as $property) {
+            $annoItem = $property->getAnnoation($annoClazz);
+            if ($annoItem instanceof AnnoItem) {
+                $annoList[$property->getName()] = $annoItem;
+            }
+        }
+        return $annoList;
     }
 
     /**

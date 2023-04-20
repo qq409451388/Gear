@@ -1,4 +1,5 @@
 <?php
+
 class LogFinder{
     private const ERROR_CODE = [500];
 

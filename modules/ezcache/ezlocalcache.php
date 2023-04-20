@@ -1,4 +1,5 @@
 <?php
+
 class EzLocalCache extends EzCache
 {
     private const EXCEPTION_PREFIX = "[EzLocalCache Exception] ";

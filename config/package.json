@@ -1,0 +1,17 @@
+{
+  "orm": [
+    "modules/orm/*"
+  ],
+  "utils": [
+    "modules/utils/*"
+  ],
+  "db": [
+    "modules/db/*"
+  ],
+  "ezcache": [
+    "modules/ezcache/*"
+  ],
+  "datastream": [
+    "modules/datastream/*"
+  ]
+}

@@ -1,4 +1,5 @@
 <?php
+
 class AnnoationRule implements EzHelper
 {
     private function __construct() {

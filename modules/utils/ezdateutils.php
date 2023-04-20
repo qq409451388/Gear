@@ -1,4 +1,5 @@
 <?php
+
 class EzDateUtils
 {
     private const DAY_SEC = EzDate::DAY_SEC;

@@ -1,4 +1,5 @@
 <?php
+
 abstract class BaseDAO implements EzBean
 {
     /**
@@ -62,11 +63,35 @@ abstract class BaseDAO implements EzBean
     }
 
     public function save(BaseDO $domain) {
-        $data = $domain->toArray();
-        $data2 = [];
-        foreach ($data as $k => $v) {
-            $data2[strtolower($k)] = $v;
+        $refClass = new EzReflectionClass($domain);
+        $annoItme = $refClass->getAnnoation(Clazz::get(IdGenerator::class));
+        if ($annoItme instanceof AnnoItem) {
+            /**
+             * @var EzIdClient $idClient
+             */
+            $idClient = BeanFinder::get()->pull($annoItme->value);
+            $domain->id = $idClient->nextId();
         }
-        return DB::get($this->database)->save($this->table, $data2);
+        $domain->ver = 1;
+        $date = EzDate::now();
+        $domain->createTime = $date;
+        $domain->updateTime = $date;
+        return DB::get($this->database)->save($this->table, $domain->toArray());
+    }
+
+    public function update(BaseDO $domain) {
+        if (is_null($domain->id)) {
+            return false;
+        }
+        $domain->updateTime = EzDate::now();
+        $ver = $domain->ver;
+        $domain->ver++;
+        $updateRes = DB::get($this->database)->update($this->table, $domain->toArray(), "id", "ver = $ver");
+        /**
+         * @var EzLocalCache $localCache
+         */
+        $localCache = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
+        $localCache->del($this->entityClazz->getName().$domain->id);
+        return $updateRes;
     }
 }

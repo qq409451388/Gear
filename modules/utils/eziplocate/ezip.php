@@ -1,4 +1,5 @@
 <?php
+
 class EzIp implements IEzIp
 {
     public static function getInfo(string $ip): EzIpInfo

@@ -1,4 +1,5 @@
 <?php
+
 class EzIdClient
 {
     private $version;

@@ -41,6 +41,17 @@ class BeanFinder
         return $this->objects[$key] ?? null;
     }
 
+    public function fetch($key) {
+        if ($this->has($key)) {
+            return $this->pull($key);
+        }
+        if (class_exists($key) && is_subclass_of($key, EzBean::class)) {
+            $this->import($key);
+            return $this->pull($key);
+        }
+        return null;
+    }
+
     public function getAll($filter = null){
         if (is_null($filter)) {
             return $this->objects;
@@ -51,10 +62,10 @@ class BeanFinder
     }
 
     public function import($className){
-        $o = new $className;
-        $this->save($className, $o);
+        $clazz =  Clazz::get($className);
+        $this->save($className, $clazz->new());
         Logger::console("[Bean]Create Object {$className}");
-        return get_class($o);
+        return $clazz->getName();
     }
 
     /**

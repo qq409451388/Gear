@@ -1,4 +1,5 @@
 <?php
+
 class Trace
 {
     private $s1;

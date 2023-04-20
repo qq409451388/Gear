@@ -1,4 +1,5 @@
 <?php
+
 class EzBeanUtils implements EzHelper
 {
     public static function createObjectFromJson(string $json, string $className) {

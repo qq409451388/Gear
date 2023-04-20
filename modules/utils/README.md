@@ -1,6 +1,7 @@
 # 常用小工具包
 ### 1.1 基于php——curl的HTTP工具 EzCurl
 #### 1.1.1 请求构建
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");
@@ -9,6 +10,7 @@
     $info = $ezCurl->post();
 ```
 #### 1.1.2 设置query参数
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");
@@ -26,6 +28,7 @@
     $info = $ezCurl->get($params);
 ```
 #### 1.1.3 设置body参数
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");
@@ -47,6 +50,7 @@
 ```
 
 #### 1.1.3 设置请求头
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");
@@ -60,6 +64,7 @@
 ```
 
 #### 1.1.4 设置超时时间
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");
@@ -69,6 +74,7 @@
 ```
 
 #### 1.1.5 设置显式打印出响应信息
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");
@@ -78,6 +84,7 @@
 ```
 
 #### 1.1.6 设置代理
+
 ```php
     $ezCurl = new EzCurl();
     $ezCurl->setUrl("http://www.baidu.com");

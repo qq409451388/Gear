@@ -1,4 +1,5 @@
 <?php
+
 class WeChatRobot
 {
     private static $ins;

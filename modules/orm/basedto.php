@@ -1,6 +1,6 @@
 <?php
 
-abstract class BaseDTO implements EzDataObject,EzIgnoreUnknow
+abstract class BaseDTO implements EzDataObject, EzIgnoreUnknow
 {
     public function __toString() {
         return $this->toString();

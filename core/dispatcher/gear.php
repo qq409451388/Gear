@@ -1,4 +1,5 @@
 <?php
+
 class Gear implements IDispatcher
 {
     public function __construct(){
@@ -141,19 +142,19 @@ class Gear implements IDispatcher
      * @return void
      */
     private function startAnno($annoList){
-        foreach($annoList as $annoItem){
-            DBC::assertTrue($annoItem->check(), "[Gear] Init Anno Check Fail! AnnoInfo:".$annoItem->getAnnoName());
-            if(AnnoPolicyEnum::POLICY_BUILD == $annoItem->getPolicy()){
+        foreach($annoList as $aspect){
+            DBC::assertTrue($aspect->check(), "[Gear] Init Anno Check Fail! AnnoInfo:".$aspect->getAnnoName());
+            if(AnnoPolicyEnum::POLICY_BUILD == $aspect->getPolicy()){
                 /**
-                 * @var $annoItem Aspect|BuildAspect
+                 * @var $aspect Aspect|BuildAspect
                  */
-                $annoItem->adhere();
+                $aspect->adhere();
             }
-            if(AnnoPolicyEnum::POLICY_RUNTIME == $annoItem->getPolicy()){
+            if(AnnoPolicyEnum::POLICY_RUNTIME == $aspect->getPolicy()){
                 /**
-                 * @var $annoItem Aspect|RunTimeAspect
+                 * @var $aspect Aspect|RunTimeAspect
                  */
-                $annoItem->around();
+                $aspect->around();
             }
         }
     }

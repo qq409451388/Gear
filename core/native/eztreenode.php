@@ -1,4 +1,5 @@
 <?php
+
 class EzTreeNode implements EzDataObject
 {
     private $data;

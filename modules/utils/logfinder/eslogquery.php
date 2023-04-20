@@ -1,4 +1,5 @@
 <?php
+
 class EsLogQuery
 {
     //string for search

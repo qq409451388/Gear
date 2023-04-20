@@ -1,4 +1,5 @@
 <?php
+
 abstract class BaseDB extends BaseDBSimple implements IDbSe
 {
 
@@ -48,29 +49,32 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         return $this->query($sql, [], SqlOptions::new());
     }
 
-    public function update(string $table, array $info,string $singleKey = 'id'):bool{
+    public function update(string $table, array $info, string $singleKey = 'id', string $appendSignleString = ""):bool{
         DBC::assertTrue(key_exists($singleKey, $info),
             "[DB Exception] Update Statement Must Have A Limit Sql String In Where!");
         $singleString = $setString = "";
         foreach($info as $k => $v){
             $v = is_numeric($v) ? $v : "'".$v."'";
-            if($singleKey == $k){
+            if ($singleKey == $k) {
                 $singleString = "`".$k."`=".$v;
             }else{
                 $setString .= '`'.$k.'`='.$v.",";
             }
         }
         $setString = trim($setString, ",");
+        if (!empty($appendSignleString)) {
+            $singleString .= " and ".$appendSignleString;
+        }
         $sql = "update $table set ".$setString." where ".$singleString;
         return $this->query($sql, []);
     }
 
-    public function updateList(string $table, array $infos, string $singleKey = ''):array{
+    public function updateList(string $table, array $infos, string $singleKey = '', string $appendSignleString = ""):array{
         $result = [];
         foreach($infos as $info){
             DBC::assertTrue(key_exists($singleKey, $info),
                 "[DB Exception] Update Statement Must Have A Limit Sql String In Where!");
-            $result[$info[$singleKey]] = $this->update($table, $info, $singleKey);
+            $result[$info[$singleKey]] = $this->update($table, $info, $singleKey, $appendSignleString);
         }
         return $result;
     }

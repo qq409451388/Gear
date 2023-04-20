@@ -1,4 +1,5 @@
 <?php
+
 class HttpInterpreter implements Interpreter
 {
     public function getSchema():string {
