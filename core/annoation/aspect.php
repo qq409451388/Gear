@@ -148,7 +148,7 @@ abstract class Aspect
      */
     public function getDependConf()
     {
-        return $this->dependConf;
+        return $this->dependConf?:[];
     }
 
     /**

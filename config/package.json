@@ -13,6 +13,10 @@
     "modules/ezcache"
   ],
   "datastream": [
-    "modules/datastream"
+    "modules/datastream",
+    "modules/datasplit"
+  ],
+  "idclient": [
+    "modules/idclient"
   ]
 }

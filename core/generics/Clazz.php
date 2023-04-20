@@ -1,5 +1,5 @@
 <?php
-class Clazz implements EzComponent
+class Clazz
 {
     private $className;
 

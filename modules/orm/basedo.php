@@ -1,6 +1,6 @@
 <?php
 
-abstract class BaseDO implements EzDataObject, EzIgnoreUnknow
+abstract class BaseDO implements EzDataObject, EzIgnoreUnknow, EzComponent
 {
     /**
      * @ColumnAlias("id")

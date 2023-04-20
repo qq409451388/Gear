@@ -1,5 +1,5 @@
 <?php
-interface RunTimeAspect extends EzComponent
+interface RunTimeAspect
 {
     public function check():bool;
 

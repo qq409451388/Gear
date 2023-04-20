@@ -34,8 +34,8 @@ class RouterAspect extends Aspect implements BuildAspect
     public function adhere(): void
     {
         foreach ($this->getDependList() as $dependSon) {
-            $cPath = trim($this->getValue()->path, "/");
-            $aPath = trim($dependSon->getValue()->path, "/");
+            $cPath = trim($this->getValue()->getPath(), "/");
+            $aPath = trim($dependSon->getValue()->getPath(), "/");
             $path =  $cPath."/".$aPath;
             if (!empty($path)) {
                 EzRouter::get()->setMapping(

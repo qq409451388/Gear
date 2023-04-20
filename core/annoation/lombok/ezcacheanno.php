@@ -1,5 +1,5 @@
 <?php
-class EzCacheAnno implements Anno
+class EzCacheAnno extends Anno
 {
     /**
      * @var string 数据类型
@@ -15,13 +15,4 @@ class EzCacheAnno implements Anno
     public const ASPECT = LombokDataAspect::class;
     public const TARGET = AnnoElementType::TYPE_METHOD;
     public const DEPEND = [];
-
-    public function combine($values)
-    {
-        if(empty($values)){
-            return;
-        }
-        $this->dataType = $values['dataType'];
-        $this->defaultValue = $values['defaultValue']??null;
-    }
 }

@@ -161,7 +161,7 @@ class Env
      * @return string
      */
     public static function getDefaultConfigPath() {
-        return CORE_PATH.DIRECTORY_SEPARATOR."config";
+        return GEAR_PATH.DIRECTORY_SEPARATOR."config";
     }
 
     public static function isConsole() {

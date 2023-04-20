@@ -54,10 +54,19 @@ class Application
         if (is_null($dependencies)) {
             return;
         }
+        $this->loadModules($dependencies);
+    }
+
+    public function loadModules(array $modules) {
         $packages = Config::get("package");
-        $dependencies = EzCollectionUtils::matchKeys($dependencies, $packages);
+        $dependencies = EzCollectionUtils::matchKeys($modules, $packages);
         $hash = SysUtils::searchModules($dependencies);
         $this->register($hash);
+        foreach ($hash as $className => $classPath) {
+            if (is_subclass_of($className, EzComponent::class)) {
+                Config::add("GLOBAL_COMPONENTS", $className);
+            }
+        }
     }
 
     private function getFilePaths($path)
@@ -94,15 +103,6 @@ class Application
                 include($filePath);
             }
         });
-    }
-
-    public static function run($constants = null) {
-        $app = new self();
-        $app->envConstants($constants);
-        $app->loadCore();
-        $app->initConfig();
-        $app->loadModulePackages();
-        $app->loadUserDefined();
     }
 
     public static function runScript($constants = null) {

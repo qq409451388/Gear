@@ -1,5 +1,5 @@
 <?php
-class EzGmpDump implements Anno
+class EzGmpDump extends Anno
 {
     public const ASPECT = EzGmpDumpAspect::class;
     public const TARGET = AnnoElementType::TYPE_CLASS;

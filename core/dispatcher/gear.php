@@ -7,13 +7,12 @@ class Gear implements IDispatcher
     }
 
     public function initWithScript() {
-        $this->initConfig();
         Env::setRunModeScript();
     }
 
     public function initWithHttp() {
-        $this->initConfig();
         Env::setRunModeConsole();
+        $this->initComponents();
         //初始化对象
         $this->initObjects();
         $this->initRouter();
@@ -21,13 +20,23 @@ class Gear implements IDispatcher
     }
 
     public function initWithTcp() {
-        $this->initConfig();
         Env::setRunModeConsole();
-        $classess = CacheFactory::getInstance(CacheFactory::TYPE_MEM)->get("GLOBAL_USER_CLASS");
-        $classess = EzCollectionUtils::decodeJson($classess);
+        $this->initComponents();
         //初始化对象
-        $this->initObjects($classess);
+        $this->initObjects();
         $this->initAnno();
+    }
+
+    private function initComponents() {
+        $classess = Config::get("GLOBAL_USER_CLASS");
+        if (empty($classess)) {
+            return;
+        }
+        foreach($classess as $class) {
+            if (is_subclass_of($class, EzComponent::class)) {
+                Config::add("GLOBAL_COMPONENTS", $class);
+            }
+        }
     }
 
     private function initObjects(){
@@ -38,10 +47,6 @@ class Gear implements IDispatcher
         foreach($classess as $class) {
             $this->createBean($class);
         }
-    }
-
-    private function initConfig() {
-        Config::init();
     }
 
     protected function initRouter() {
@@ -72,67 +77,115 @@ class Gear implements IDispatcher
      * @throws ReflectionException
      */
     private function initAnno() {
-        $annoList = $this->fetchAnno();
+        $annoList = $this->fetchComponentAnno();
         $this->startAnno($annoList);
+
+        $annoList2 = $this->fetchBeanAnno();
+        $this->startAnno($annoList2);
     }
 
-    private function fetchAnno(){
-        $annoList = [];
-        foreach(BeanFinder::get()->getAll() as $obj){
-            if ($obj instanceof DynamicProxy) {
-                $reflection = $obj->getReflectionClass();
-            } else {
-                $reflection = new EzReflectionClass($obj);
+    private function fetchAnnoFromClass($reflection, array &$annoList, array &$twichClassAnno) {
+        $classAnnoList = $reflection->getAnnoationList();
+        foreach($classAnnoList as $classAnno){
+            $aspectClass = $this->buildPoorAspect($classAnno);
+            if (is_null($aspectClass)) {
+                continue;
             }
-            $reflectionMethods = $reflection->getMethods();
-            $reflectionProperties = $reflection->getProperties();
-            $classAnnoList = $reflection->getAnnoationList();
-            $twichClassAnno = [];
-            foreach($classAnnoList as $classAnno){
-                $aspectClass = $this->buildPoorAspect($classAnno);
-                $aspectClass->setAtClass($reflection);
-                if(!is_null($aspectClass->getDependConf())){
-                    $twichClassAnno[] = $aspectClass;
+            $aspectClass->setAtClass($reflection);
+            if(!is_null($aspectClass->getDependConf())){
+                $twichClassAnno[] = $aspectClass;
+            }else{
+                $annoList[] = $aspectClass;
+            }
+        }
+    }
+
+    private function fetchAnnoFromMethod($reflection, array &$annoList, array &$annoMethodList) {
+        $reflectionMethods = $reflection->getMethods();
+        foreach($reflectionMethods as $reflectionMethod){
+            $methodAnnoList = $reflectionMethod->getAnnoationList();
+            foreach($methodAnnoList as $methodAnno){
+                $aspectMethod = $this->buildPoorAspect($methodAnno);
+                if (is_null($aspectMethod)) {
+                    continue;
+                }
+                $aspectMethod->setAtClass($reflection);
+                $aspectMethod->setAtMethod($reflectionMethod);
+                if($aspectMethod->isCombination()){
+                    $annoMethodList[$aspectMethod->getAnnoName()][] = $aspectMethod;
                 }else{
-                    $annoList[] = $aspectClass;
+                    $annoList[] = $aspectMethod;
                 }
             }
+        }
+    }
+
+    private function fetchAnnoFromProperty($reflection, array &$annoList, array &$annoPropertyList) {
+        $reflectionProperties = $reflection->getProperties();
+        foreach($reflectionProperties as $reflectionProperty){
+            $propertyAnnoList = $reflectionProperty->getAnnoationList();
+            foreach($propertyAnnoList as $propertyAnno){
+                $aspectProperty = $this->buildPoorAspect($propertyAnno);
+                if (is_null($aspectProperty)) {
+                    continue;
+                }
+                $aspectProperty->setAtClass($reflection);
+                $aspectProperty->setAtProperty($reflectionProperty);
+                if($aspectProperty->isCombination()){
+                    $annoPropertyList[$aspectProperty->getAnnoName()][] = $aspectProperty;
+                }else{
+                    $annoList[] = $aspectProperty;
+                }
+            }
+        }
+    }
+
+    private function fetchAnnoForDepend($twichClassAnno, $annoMethodList, $annoPropertyList, array &$annoList) {
+        foreach($twichClassAnno as $classAnno){
+            /**
+             * @var Aspect $classAnno
+             */
+            $dependClassList = $classAnno->getDependConf();
+            foreach($dependClassList as $dependClass){
+                $classAnno->addDepend($annoMethodList[$dependClass]??[]);
+                $classAnno->addDepend($annoPropertyList[$dependClass]??[]);
+            }
+            $annoList[] = $classAnno;
+        }
+    }
+    private function fetchBeanAnno(){
+        $annoList = [];
+        foreach(BeanFinder::get()->getAll(DynamicProxy::class) as $obj) {
+            /**
+             * @var DynamicProxy $obj
+             */
+            $reflection = $obj->getReflectionClass();
+            $twichClassAnno = [];
             $annoMethodList = [];
-            foreach($reflectionMethods as $reflectionMethod){
-                $methodAnnoList = $reflectionMethod->getAnnoationList();
-                foreach($methodAnnoList as $methodAnno){
-                    $aspectMethod = $this->buildPoorAspect($methodAnno);
-                    $aspectMethod->setAtClass($reflection);
-                    $aspectMethod->setAtMethod($reflectionMethod);
-                    if($aspectMethod->isCombination()){
-                        $annoMethodList[$aspectMethod->getAnnoName()][] = $aspectMethod;
-                    }else{
-                        $annoList[] = $aspectMethod;
-                    }
-                }
-            }
             $annoPropertyList = [];
-            foreach($reflectionProperties as $reflectionProperty){
-                $propertyAnnoList = $reflectionProperty->getAnnoationList();
-                foreach($propertyAnnoList as $propertyAnno){
-                    $aspectProperty = $this->buildPoorAspect($propertyAnno);
-                    $aspectProperty->setAtClass($reflection);
-                    $aspectProperty->setAtProperty($reflectionProperty);
-                    if($aspectProperty->isCombination()){
-                        $annoPropertyList[$aspectProperty->getAnnoName()][] = $aspectProperty;
-                    }else{
-                        $annoList[] = $aspectProperty;
-                    }
-                }
-            }
-            foreach($twichClassAnno as $classAnno){
-                $dependClassList = $classAnno->getDependConf();
-                foreach($dependClassList as $dependClass){
-                    $classAnno->addDepend($annoMethodList[$dependClass]??[]);
-                    $classAnno->addDepend($annoPropertyList[$dependClass]??[]);
-                }
-                $annoList[] = $classAnno;
-            }
+            $this->fetchAnnoFromClass($reflection, $annoList, $twichClassAnno);
+            $this->fetchAnnoFromMethod($reflection, $annoList, $annoMethodList);
+            $this->fetchAnnoFromProperty($reflection, $annoList, $annoPropertyList);
+            $this->fetchAnnoForDepend($twichClassAnno, $annoMethodList, $annoPropertyList, $annoList);
+        }
+        return $annoList;
+    }
+
+    private function fetchComponentAnno() {
+        $annoList = [];
+        if (empty(Config::get("GLOBAL_COMPONENTS"))) {
+            return $annoList;
+        }
+        var_dump(Config::get("GLOBAL_COMPONENTS"));
+        foreach (Config::get("GLOBAL_COMPONENTS") as $componentClassName) {
+            $reflection = new EzReflectionClass($componentClassName);
+            $twichClassAnno = [];
+            $annoMethodList = [];
+            $annoPropertyList = [];
+            $this->fetchAnnoFromClass($reflection, $annoList, $twichClassAnno);
+            $this->fetchAnnoFromMethod($reflection, $annoList, $annoMethodList);
+            $this->fetchAnnoFromProperty($reflection, $annoList, $annoPropertyList);
+            $this->fetchAnnoForDepend($twichClassAnno, $annoMethodList, $annoPropertyList, $annoList);
         }
         return $annoList;
     }
@@ -170,18 +223,25 @@ class Gear implements IDispatcher
         $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
         DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
         $dependConf = $annoReflection->getConstant("DEPEND");
+        $policy = $annoReflection->getConstant("POLICY");
+        DBC::assertNotEmpty($policy, "[Gear] Anno $k Must Defined Const POLICY!");
+        DBC::assertNotEmpty($annoReflection->getConstant("STRUCT"), "[Gear] Anno $k Must Defined Const STRUCT!");
         $aspectClass = $annoReflection->getConstant("ASPECT");
-        DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");
+        //Runtime为必填 才需要检查
+        if (AnnoPolicyEnum::POLICY_RUNTIME == $policy) {
+            DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");
+        } else if (!$aspectClass) {
+            //如果是BuildPolicy，又没定义过Aspect类走空逻辑
+            return null;
+        }
         /**
          * @var $aspect Aspect
          */
         $aspect = new $aspectClass;
-        $policy = $annoReflection->getConstant("POLICY");
-        DBC::assertTrue($policy, "[Gear] Anno $k Must Defined Const POLICY!");
         $aspect->setPolicy($policy);
         $aspect->setAnnoName($k);
         $aspect->setValue($v);
-        $aspect->setIsCombination($annoReflection->getConstant("ISCOMBINATION")??false);
+        $aspect->setIsCombination($annoReflection->implementsInterface(AnnoationCombination::class));
         $aspect->setTarget($target);
         $aspect->setDependConf($dependConf);
         return $aspect;

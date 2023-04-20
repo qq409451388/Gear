@@ -115,7 +115,7 @@ class SysUtils
         $classes = [];
         foreach ($dependencies as $dependency) {
             foreach ($dependency as $d) {
-                $path = GEAR_PATH.$d;
+                $path = GEAR_PATH.DIRECTORY_SEPARATOR.$d;
                 $classes += self::scanFile($path, -1, ["php"], true);
             }
         }

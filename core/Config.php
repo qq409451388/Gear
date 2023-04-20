@@ -59,8 +59,22 @@ class Config
 
     public static function set($arr){
         foreach($arr as $k => $v){
-            self::$config[$k] = $v;
+            self::setOne($k, $v);
         }
     }
 
+    public static function setOne($k, $v) {
+        self::$config[$k] = $v;
+    }
+
+    public static function add($key, $item) {
+        $list = self::get($key);
+        if (is_null($list)) {
+            $list = [];
+        }
+        if (is_array($list)) {
+            $list[] = $item;
+            self::setOne($key, $list);
+        }
+    }
 }

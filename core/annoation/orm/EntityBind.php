@@ -7,7 +7,7 @@ class EntityBind implements Anno
 {
     public const POLICY = AnnoPolicyEnum::POLICY_BUILD;
     public const TARGET = AnnoElementType::TYPE_CLASS;
-
+    public const STRUCT = AnnoValueTypeEnum::TYPE_RELATION;
     public $table;
     public $db;
 

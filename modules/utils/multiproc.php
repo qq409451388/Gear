@@ -36,7 +36,7 @@ class MultiProc
      * @return string
      */
     private static function genCmd($class, $method, $args, string $append, $isStaticMode){
-        $absolutePath = dirname(CORE_PATH)."/autoload.php";
+        $absolutePath = dirname(GEAR_PATH)."/autoload.php";
         if($isStaticMode){
             $preFix = "php -r \"include('$absolutePath'); $append ".$class."::$method(";
         }else{

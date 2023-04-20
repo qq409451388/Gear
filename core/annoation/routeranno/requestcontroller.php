@@ -1,5 +1,5 @@
 <?php
-class RequestController implements Anno
+class RequestController extends Anno
 {
     public const DEPEND = [
         GetMapping::class,
@@ -11,11 +11,9 @@ class RequestController implements Anno
 
     public const ASPECT = RouterAspect::class;
     public const TARGET = AnnoElementType::TYPE_CLASS;
+    public const STRUCT = AnnoValueTypeEnum::TYPE_NORMAL;
 
-    public $path;
-
-    public function combine($values)
-    {
-        $this->path = $values;
+    public function getPath() {
+        return $this->value;
     }
 }
