@@ -8,8 +8,12 @@ class Application
 {
     private function envConstants($constants = null) {
         $this->envCheck("PROJECT_PATH");
-        define("GEAR_PATH", PROJECT_PATH."/gear");
-        define("CORE_PATH", GEAR_PATH."/core");
+        if (!defined("GEAR_PATH")) {
+            define("GEAR_PATH", PROJECT_PATH."/gear");
+        }
+        if (!defined("CORE_PATH")) {
+            define("CORE_PATH", GEAR_PATH."/core");
+        }
         if (!empty($constants)) {
             foreach ($constants as $k => $v) {
                 define($k, PROJECT_PATH.DIRECTORY_SEPARATOR.$v);
