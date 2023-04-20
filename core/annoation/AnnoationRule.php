@@ -12,8 +12,8 @@ class AnnoationRule implements EzHelper
      * @throws Exception
      */
     public static function searchAnnoation($reflection, Clazz $annoName) {
-        $valueType = $annoName->getConst("STRUCT");
-        $at = $annoName->getConst("TARGET");
+        $valueType = $annoName->callStatic("constStruct");
+        $at = $annoName->callStatic("constTarget");
         $refTarget = self::getRefTarget($reflection);
         if (EzDataUtils::isArray($at)) {
             DBC::assertTrue(in_array($refTarget, $at), "[AnnoationRule] Unsupport positon!");

@@ -2,6 +2,7 @@
 
 /**
  * 初始化依赖，只调用基础函数
+ * @description 使用方式：定义项目路径常量PROJECT_PATH, 在启动文件require once该文件，调用启动方法即可
  */
 class Application
 {
@@ -113,6 +114,7 @@ class Application
         $app->loadModulePackages();
         $app->loadUserDefined();
         Env::setRunModeScript();
+        return $app;
     }
 
     public static function runWebServer($constants = null) {
@@ -123,5 +125,6 @@ class Application
         $app->loadModulePackages();
         $app->loadUserDefined();
         Env::setRunModeConsole();
+        return $app;
     }
 }

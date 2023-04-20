@@ -50,6 +50,9 @@ class Env
 
     public static function getOuterIp() {
         static $ipAddress = "";
+        if (!empty($ipAddress)) {
+            return $ipAddress;
+        }
         if (self::isUnix()) {
             $interface = 'eth0'; // 网卡名称
             $ifconfigInfo = shell_exec('/sbin/ifconfig ' . $interface);

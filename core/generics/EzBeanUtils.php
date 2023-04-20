@@ -166,9 +166,10 @@ class EzBeanUtils implements EzHelper
             return [null, null];
         }
         if (EzDataUtils::isScalarType($propertyTypeMatched)) {
-            DBC::assertTrue(EzDataUtils::dataTypeNameEquals(gettype($data), $propertyTypeMatched),
+            //todo type 处理
+            /*DBC::assertTrue(EzDataUtils::dataTypeNameEquals(gettype($data), $propertyTypeMatched),
                 "[EzObject] Match data Fail! Type Must Be An $propertyTypeMatched, But ".gettype($data),
-                0, GearIllegalArgumentException::class);
+                0, GearIllegalArgumentException::class);*/
             return [null, null];
         }
         // 1. Array

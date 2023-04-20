@@ -176,7 +176,6 @@ class Gear implements IDispatcher
         if (empty(Config::get("GLOBAL_COMPONENTS"))) {
             return $annoList;
         }
-        var_dump(Config::get("GLOBAL_COMPONENTS"));
         foreach (Config::get("GLOBAL_COMPONENTS") as $componentClassName) {
             $reflection = new EzReflectionClass($componentClassName);
             $twichClassAnno = [];
@@ -219,14 +218,13 @@ class Gear implements IDispatcher
     private function buildPoorAspect(AnnoItem $annoItem){
         $k = $annoItem->annoName;
         $v = $annoItem->getValue();
-        $annoReflection = new EzReflectionClass($k);
-        $target = $annoReflection->getConstant("TARGET")?:AnnoElementType::TYPE;
+        DBC::assertNotEmpty($v->constStruct(), "[Gear] Anno $k Must Defined Const STRUCT!");
+        $target = $v->constTarget();
         DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
-        $dependConf = $annoReflection->getConstant("DEPEND");
-        $policy = $annoReflection->getConstant("POLICY");
+        $dependConf = $v instanceof AnnoationCombination ? $v->constDepend() : [];
+        $policy = $v->constPolicy();
         DBC::assertNotEmpty($policy, "[Gear] Anno $k Must Defined Const POLICY!");
-        DBC::assertNotEmpty($annoReflection->getConstant("STRUCT"), "[Gear] Anno $k Must Defined Const STRUCT!");
-        $aspectClass = $annoReflection->getConstant("ASPECT");
+        $aspectClass = $v->constAspect();
         //Runtime为必填 才需要检查
         if (AnnoPolicyEnum::POLICY_RUNTIME == $policy) {
             DBC::assertTrue($aspectClass, "[Gear] Anno $k Must Defined Const ASPECT!");
@@ -241,7 +239,7 @@ class Gear implements IDispatcher
         $aspect->setPolicy($policy);
         $aspect->setAnnoName($k);
         $aspect->setValue($v);
-        $aspect->setIsCombination($annoReflection->implementsInterface(AnnoationCombination::class));
+        $aspect->setIsCombination(is_subclass_of($v, AnnoationCombination::class));
         $aspect->setTarget($target);
         $aspect->setDependConf($dependConf);
         return $aspect;

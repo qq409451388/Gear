@@ -1,10 +1,5 @@
 <?php
 class GetMapping extends Anno implements AnnoationCombination {
-    public const ASPECT = RouterAspect::class;
-    public const POLICY = AnnoPolicyEnum::POLICY_BUILD;
-    public const TARGET = AnnoElementType::TYPE_METHOD;
-    public const STRUCT = AnnoValueTypeEnum::TYPE_NORMAL;
-
     /**
      * @var array 路由参数匹配正则
      */
@@ -34,5 +29,30 @@ class GetMapping extends Anno implements AnnoationCombination {
         }
         $this->path = $newPath;
         $this->argMatcher = $argMatcher;
+    }
+
+    public static function constTarget()
+    {
+        return AnnoElementType::TYPE_METHOD;
+    }
+
+    public static function constPolicy()
+    {
+        return AnnoPolicyEnum::POLICY_BUILD;
+    }
+
+    public static function constStruct()
+    {
+        return AnnoValueTypeEnum::TYPE_NORMAL;
+    }
+
+    public static function constAspect()
+    {
+        return RouterAspect::class;
+    }
+
+    public static function constDepend()
+    {
+        return null;
     }
 }

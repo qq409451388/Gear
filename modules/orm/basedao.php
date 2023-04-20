@@ -11,7 +11,7 @@ abstract class BaseDAO implements EzBean
 
     public function __construct() {
         $this->entityClazz = $this->bindEntity();
-        DBC::assertTrue($this->entityClazz->isSubClassOf(BaseDO::class),
+        DBC::assertTrue($this->entityClazz->isSubClassOf(AbstractDO::class),
             "[DAO] create Fail!",0, GearShutDownException::class);
         /**
          * @var AnnoItem $annoItem
@@ -22,8 +22,8 @@ abstract class BaseDAO implements EzBean
          */
         $anno = $annoItem->getValue();
 
-        $this->table = $anno->table;
-        $this->database = $anno->db;
+        $this->table = $anno->getTable();
+        $this->database = $anno->getDb();
     }
 
     abstract protected function bindEntity():Clazz;
@@ -31,12 +31,15 @@ abstract class BaseDAO implements EzBean
     /**
      * @param $sql
      * @param $params
-     * @return BaseDO
+     * @return AbstractDO
      * @throws ReflectionException
      */
     protected function findOne($sql, $params){
         $sql = "select * from {$this->table} {$sql} limit 1";
         $res = DB::get($this->database)->queryOne($sql, $params);
+        if (empty($res)) {
+            return null;
+        }
         $className = $this->entityClazz->getName();
         return EzBeanUtils::createObject($res, $className);
     }
