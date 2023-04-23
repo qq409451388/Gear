@@ -94,7 +94,7 @@ class Application
             }
             if(is_file($curPath)){
                 $className = str_replace('.php','',$item);
-                $curPath = str_replace("/", "\\", $curPath);
+                //$curPath = str_replace("/", "\\", $curPath);
                 $hash[$className] = $curPath;
             }
         }
