@@ -20,6 +20,7 @@ class DataBaseUtils
         "text" => "string",
         "timestamp" => "string",
         "date" => "string",
+        "char" => "string",
     ];
 
     public static function detectName($name) {
@@ -197,6 +198,12 @@ class DataBaseUtils
     }
 
     public static function generateDomainClassFileForGear($database) {
+        if (!is_dir(USER_PATH.DIRECTORY_SEPARATOR."/domain/$database")) {
+            mkdir(USER_PATH.DIRECTORY_SEPARATOR."/domain/$database", 0777, true);
+        }
+        if (!is_dir(USER_PATH.DIRECTORY_SEPARATOR."/dao/$database")) {
+            mkdir(USER_PATH.DIRECTORY_SEPARATOR."/dao/$database", 0777, true);
+        }
         $tableNameList = DB::get($database)->queryColumn("show tables;", [], "Tables_in_".$database);
         foreach ($tableNameList as $tableName) {
             $information = DB::get($database)
@@ -204,9 +211,9 @@ class DataBaseUtils
                     "select * from information_schema.`COLUMNS` where TABLE_SCHEMA = '$database' and TABLE_NAME = '$tableName'"
                 );
             $targetClassName = self::convertName($tableName, self::NAMED_CAMELCASE);
-            file_put_contents(USER_PATH.DIRECTORY_SEPARATOR."/domain"."/{$targetClassName}DO.php",
+            file_put_contents(USER_PATH.DIRECTORY_SEPARATOR."/domain/$database/{$targetClassName}DO.php",
                 self::gearDomainStr($database, $tableName, $information, $targetClassName."DO"));
-            file_put_contents(USER_PATH.DIRECTORY_SEPARATOR."/dao"."/{$targetClassName}DAO.php",
+            file_put_contents(USER_PATH.DIRECTORY_SEPARATOR."/dao/$database/{$targetClassName}DAO.php",
                 self::gearDaoStr($targetClassName));
         }
     }
