@@ -97,7 +97,7 @@ class Logger
         $fp = fopen($filePath, 'a');
         if(self::TYPE_RECORD == $type)
         {
-            $msg = date('Y/m/d H:i:s  ').$msg;
+            $msg = date('Y/m/d H:i:s  ').$msg.PHP_EOL;
         }
         fwrite($fp, $msg);
         fclose($fp);
@@ -109,7 +109,7 @@ class Logger
         {
             $template = EzString::str_replace_once('{}', $arg, $template);
         }
-        return $template.PHP_EOL;
+        return $template;
     }
 
     public static function removeDir($type)
