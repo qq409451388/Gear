@@ -94,7 +94,7 @@ class EzFileCache extends EzLocalCache
         return $this->callParent($k, $v);
     }
 
-    public function __destory() {
+    public function __destruct() {
         if (self::AOF_MODE === $this->writeMode) {
             $this->writeAof();
         }
