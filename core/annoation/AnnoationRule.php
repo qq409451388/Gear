@@ -61,7 +61,7 @@ class AnnoationRule implements EzHelper
             return null;
         }
         if (!is_subclass_of($annoName, Anno::class)) {
-            Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName);
+            Logger::warn("[Gear] UnExpected AnnoInfo:{}", $annoName);
             return null;
         }
         $s= "/(.*)@$annoName\s?/";
@@ -83,7 +83,7 @@ class AnnoationRule implements EzHelper
             return null;
         }
         if (!is_subclass_of($annoName, Anno::class)) {
-            Logger::warn("[Gear] UnExpected AnnoInfo:{} ({})", $annoName);
+            Logger::warn("[Gear] UnExpected AnnoInfo:{}", $annoName);
             return null;
         }
         $s= "/(.*)@$annoName\(\s?\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*_]+)\'?\"?\s?\)/";
