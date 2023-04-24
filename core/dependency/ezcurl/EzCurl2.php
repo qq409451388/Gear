@@ -174,7 +174,11 @@ class EzCurl2
 
     private function reBuildUrl()
     {
-        $this->url = $this->scheme . "://" . $this->host . ":" . $this->port . $this->path;
+        if ($this->port === 80) {
+            $this->url = $this->scheme . "://" . $this->host . $this->path;
+        } else {
+            $this->url = $this->scheme . "://" . $this->host . ":" . $this->port . $this->path;
+        }
         if (!empty($this->query)) {
             $this->url .= "?" . $this->query;
         }
@@ -342,17 +346,29 @@ class EzCurl2
 
     private function exec($httpMethod): EzCurlResponse
     {
-        $this->trace->start();
-        $this->prepare();
-        curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $httpMethod);
-        $res = curl_exec($this->ch);
-        if (curl_errno($this->ch)) {
-            DBC::throwEx('[EzCurl Exception] Proxy Errno:' . curl_error($this->ch));
+        try {
+            $this->trace->start();
+            $this->prepare();
+            curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST, $httpMethod);
+            $res = curl_exec($this->ch);
+            if (curl_errno($this->ch)) {
+                DBC::throwEx('[EzCurl Exception] Proxy Errno:' . curl_error($this->ch));
+            }
+            $response = $this->buildResponse($httpMethod, $res);
+            $msg = $this->geneRequestMsg($response);
+            $this->trace->finishAndlog($msg, __CLASS__);
+            $this->result = $res;
+        } catch (GearRunTimeException $gearRunTimeException) {
+            $msg = 'EzCurl [' . $response->requestMethod . '] ' . $this->url . PHP_EOL;
+            $msg .= '[Exception]'.$gearRunTimeException->getMessage().PHP_EOL;
+            throw $gearRunTimeException;
+        } catch (Exception $e) {
+            $msg = 'EzCurl [' . $response->requestMethod . '] ' . $this->url . PHP_EOL;
+            $msg .= $e->getMessage();
+            throw $e;
+        } finally {
+            $this->trace->finishAndlog($msg, __CLASS__);
         }
-        $response = $this->buildResponse($httpMethod, $res);
-        $msg = $this->geneRequestMsg($response);
-        $this->trace->finishAndlog($msg, __CLASS__);
-        $this->result = $res;
         return $response;
     }
 
