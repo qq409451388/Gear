@@ -41,6 +41,14 @@ class EzCurlBodyFormData extends EzCurlBody
         $this->data[$k] = $v;
     }
 
+    /**
+     * @param string                $k
+     * @param string                $filePath
+     */
+    public function setFile(string $k, $filePath) {
+        $this->data[$k] = new EzCurlBodyFile($filePath);
+    }
+
     protected function setContentType()
     {
         $this->contentType = self::BODY_FORM_DATA;
