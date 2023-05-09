@@ -41,7 +41,7 @@ class Request implements IRequest,EzDataObject
         return isset($this->query[$key]) ? $this->query[$key] : $default;
     }
 
-    public function getAll(){
+    public function getQuery(){
         return $this->query;
     }
 
