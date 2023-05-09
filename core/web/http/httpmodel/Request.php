@@ -69,6 +69,20 @@ class Request implements IRequest,EzDataObject
         return $this->body;
     }
 
+    /**
+     * @return RequestBody|null
+     */
+    public function getNormalRequestBody() {
+        return $this->body instanceof RequestBody ? $this->body : null;
+    }
+
+    /**
+     * @return RequestMultiBody|null
+     */
+    public function getMultiRequestBody() {
+        return $this->body instanceof RequestMultiBody ? $this->body : null;
+    }
+
     public function filter(){
         //todo
     }

@@ -101,4 +101,20 @@ class EzCurlBodyFile extends EzCurlBody
     {
         return $this->fileName;
     }
+
+    /**
+     * @return string
+     */
+    public function getFileExt(): string
+    {
+        return $this->fileExt;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFileRealType(): string
+    {
+        return $this->fileRealType;
+    }
 }
