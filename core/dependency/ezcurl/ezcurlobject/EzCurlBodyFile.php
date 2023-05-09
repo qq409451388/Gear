@@ -76,7 +76,7 @@ class EzCurlBodyFile extends EzCurlBody
 
     public function isImage() {
         $this->analyse();
-        return in_array($this->contentType, HttpMimeType::MIME_IMAGE_LIST);
+        return in_array(str_replace("Content-Type: ", "", $this->contentType), HttpMimeType::MIME_IMAGE_LIST);
     }
 
     /**

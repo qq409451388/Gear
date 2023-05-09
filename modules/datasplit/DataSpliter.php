@@ -301,11 +301,35 @@ class DataSpliter
     }
 
     public function count(){
-
+        $this->reRank();
+        $this->runRules();
+        if ($this->isSplited) {
+            $res = [];
+            foreach ($this->data as $k => $dataObj) {
+                if ($dataObj instanceof DataSpliter) {
+                    $res[$k] = $dataObj->count();
+                }
+            }
+            return $res;
+        } else {
+            return count($this->data);
+        }
     }
 
     public function sum(){
-
+        $this->reRank();
+        $this->runRules();
+        if ($this->isSplited) {
+            $res = [];
+            foreach ($this->data as $k => $dataObj) {
+                if ($dataObj instanceof DataSpliter) {
+                    $res[$k] = $dataObj->sum();
+                }
+            }
+            return $res;
+        } else {
+            return array_sum($this->data);
+        }
     }
 
 }
