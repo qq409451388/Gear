@@ -58,8 +58,8 @@ class EzCurlBodyFormData extends EzCurlBody
         foreach ($dataList as $k => $v) {
             if ($v instanceof EzCurlBodyFile) {
                 $v->analyse();
-                $body .= $this->boundary . "\r\n" . 'Content-Disposition: form-data; name="' . $k . '"; filename="' . $v->getFileName(
-                    ) . '"' . "\r\n";
+                $body .= $this->boundary . "\r\n" . 'Content-Disposition: form-data; name="' . $k . '"; filename="' . $v->getFileName() . '"';
+                $body .= "\r\n";
                 $body .= $v->getContentType() . "\r\n\r\n";
                 $body .= file_get_contents($v->getFilePath()) . "\r\n";
             } else {
