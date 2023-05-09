@@ -27,6 +27,14 @@ class EzCurlBodyFile extends EzCurlBody
      */
     private $isAnalysed = false;
 
+    public function __construct($filePath = "") {
+        parent::__construct();
+        if (!empty($filePath)) {
+            $this->setFilePath($filePath);
+            $this->analyse();
+        }
+    }
+
     /**
      * @return string
      */
@@ -37,9 +45,11 @@ class EzCurlBodyFile extends EzCurlBody
 
     /**
      * @param string $filePath
+     * @throws GearRunTimeException|Exception
      */
     public function setFilePath(string $filePath): void
     {
+        DBC::assertTrue(is_file($filePath), "[EzCurl2] File Not Found from path:$filePath!");
         $this->filePath = $filePath;
         $this->setContentType();
     }
@@ -52,8 +62,13 @@ class EzCurlBodyFile extends EzCurlBody
         }
     }
 
+    /**
+     * 返回文件的content
+     * @return false|string
+     * @throws GearRunTimeException|Exception
+     */
     public function toString() {
-        DBC::assertTrue(is_file($this->filePath), "[EzCurl2] filePath:$this->filePath is not a file!");
+        DBC::assertNotEmpty($this->filePath, "[EzCurl2] filePath:$this->filePath is not a file!");
         return file_get_contents($this->filePath);
     }
 
