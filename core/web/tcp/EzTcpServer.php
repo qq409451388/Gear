@@ -22,6 +22,10 @@ class EzTcpServer extends BaseTcpServer
         $this->detection();
         @socket_listen($this->master, 511);
         $this->detection();
+        //设置 SO_LINGER 套接字选项
+        $linger = array('l_onoff' => 1, 'l_linger' => 0);
+        socket_set_option($this->master, SOL_SOCKET, SO_LINGER, $linger);
+        //复用地址
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
         //接收超时
         socket_set_option($this->master,SOL_SOCKET,SO_RCVTIMEO,["sec"=>3, "usec"=>0]);
