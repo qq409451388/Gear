@@ -345,8 +345,8 @@ class SMTP
             $this->setError(
                 'Failed to connect to server',
                 '',
-                (string) $errno,
-                (string) $errstr
+                (string)$errno,
+                (string)$errstr
             );
             $this->edebug(
                 'SMTP ERROR: ' . $this->error['error']
@@ -404,14 +404,12 @@ class SMTP
         );
         restore_error_handler();
 
-        return (bool) $crypto_ok;
+        return (bool)$crypto_ok;
     }
 
     /**
      * Perform SMTP authentication.
      * Must be run after hello().
-     *
-     * @see    hello()
      *
      * @param string $username The user name
      * @param string $password The password
@@ -419,6 +417,8 @@ class SMTP
      * @param OAuth  $OAuth    An optional OAuth instance for XOAUTH2 authentication
      *
      * @return bool True if successfully authenticated
+     * @see    hello()
+     *
      */
     public function authenticate(
         $username,
@@ -878,10 +878,10 @@ class SMTP
         }
 
         return $this->sendCommand(
-           'RCPT TO',
-           $rcpt,
-           [250, 251]
-       );
+            'RCPT TO',
+            $rcpt,
+            [250, 251]
+        );
     }
 
     /**
@@ -942,7 +942,7 @@ class SMTP
 
         $this->edebug('SERVER -> CLIENT: ' . $this->last_reply, self::DEBUG_SERVER);
 
-        if (!in_array($code, (array) $expect)) {
+        if (!in_array($code, (array)$expect)) {
             $this->setError(
                 "$command command failed",
                 $detail,
@@ -1293,7 +1293,7 @@ class SMTP
         $this->setError(
             $notice,
             $errmsg,
-            (string) $errno
+            (string)$errno
         );
         $this->edebug(
             "$notice Error #$errno: $errmsg [$errfile line $errline]",
