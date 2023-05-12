@@ -192,8 +192,7 @@ class EzLocalCache extends EzCache
             $val = 0;
         }
         DBC::assertNumeric($val, "[EzLocalCache Exception] value is not an integer");
-        $val++;
-        $this->set($k, $val);
+        $this->set($k, ++$val);
         return $val;
     }
 

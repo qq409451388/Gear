@@ -18,5 +18,11 @@
   ],
   "idclient": [
     "modules/idclient"
+  ],
+  "api": [
+    "modules/api"
+  ],
+  "mail":[
+    "modules/mail"
   ]
 }
