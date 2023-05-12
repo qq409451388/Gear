@@ -84,6 +84,12 @@ class Gear implements IDispatcher
         $this->startAnno($annoList2);
     }
 
+    /**
+     * @param EzReflectionClass $reflection
+     * @param array<Aspect> $annoList
+     * @param array<EzReflectionClass> $annoPropertyList
+     * @return void
+     */
     private function fetchAnnoFromClass($reflection, array &$annoList, array &$twichClassAnno) {
         $classAnnoList = $reflection->getAnnoationList();
         foreach($classAnnoList as $classAnno){
@@ -100,6 +106,12 @@ class Gear implements IDispatcher
         }
     }
 
+    /**
+     * @param EzReflectionClass $reflection
+     * @param array<Aspect> $annoList
+     * @param array<EzReflectionMethod> $annoPropertyList
+     * @return void
+     */
     private function fetchAnnoFromMethod($reflection, array &$annoList, array &$annoMethodList) {
         $reflectionMethods = $reflection->getMethods();
         foreach($reflectionMethods as $reflectionMethod){
@@ -120,6 +132,12 @@ class Gear implements IDispatcher
         }
     }
 
+    /**
+     * @param EzReflectionClass $reflection
+     * @param array<Aspect> $annoList
+     * @param array<EzReflectionProperty> $annoPropertyList
+     * @return void
+     */
     private function fetchAnnoFromProperty($reflection, array &$annoList, array &$annoPropertyList) {
         $reflectionProperties = $reflection->getProperties();
         foreach($reflectionProperties as $reflectionProperty){

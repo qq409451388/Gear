@@ -138,7 +138,7 @@ class AnnoationRule implements EzHelper
          * 注解第一种类型，参数为普通字符串
          * @example: @XXX("qqq") 或 @YYY('qqq')
          */
-        $s= "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\s?\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*]+)\'?\"?\s?\)/";
+        $s= "/(.*)@(?<annoName>[a-zA-Z0-9]+)\(\s?\'?\"?(?<content>[\/a-zA-Z0-9\#\{\}\*\.]+)\'?\"?\s?\)/";
         preg_match_all($s, $document, $matchedes, 2);
         foreach ($matchedes as $matched) {
             if (empty($matched['annoName'])) {

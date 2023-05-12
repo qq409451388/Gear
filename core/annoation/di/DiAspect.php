@@ -13,6 +13,15 @@ class DiAspect extends Aspect implements BuildAspect
 
     public function adhere(): void
     {
+        if (ValueAnno::class == $this->getAnnoName()) {
+            $configName = $this->getValue()->getConfigName();
+            $this->getAtProperty()->setAccessible(true);
+            $classObj = BeanFinder::get()->pull($this->getAtClass()->getName());
+            DBC::assertTrue($classObj instanceof DynamicProxy, "[DiAspect] 被注入对象{$this->getAtClass()->getName()}必须为DynamicProxy实例!",
+                0, GearShutDownException::class);
+            $this->getAtProperty()->setValue($classObj->getSourceObj(), Config::get($configName));
+            $this->getAtProperty()->setAccessible(false);
+        }
         if(Resource::class == $this->getAnnoName()){
             $className = $this->getValue()->className;
             $object =  BeanFinder::get()->pull($className);
