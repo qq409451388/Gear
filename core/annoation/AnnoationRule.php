@@ -107,14 +107,14 @@ class AnnoationRule implements EzHelper
         /**
          * 注解第四种类型，参数为箭头映射
          * @example: @XXX(a=>1, b=>2)
-         * todo 精准匹配
          */
-        $s = "/\s?@(?<annoName>[a-zA-Z]+)\s?\((?<content>[\w\s=>\"\',]+)\)/";
+        //$s = "/\s?@(?<annoName>[a-zA-Z]+)\s?\((?<content>[\w\s=>\"\',]+)\)/";
+        $s = "/\s?@$annoName\s?\((?<content>[\w\s=>\"\',\%]+)\)/";
         preg_match($s, $document, $matched);
-        if (!isset($matched['annoName']) || $matched['annoName'] != $annoName) {
+        if (empty($matched)) {
             return null;
         }
-        $s2 = "/(?<key>[a-zA-Z]+)\s?=>\s?\"?(?<value>[\w\s]+)\"?/";
+        $s2 = "/(?<key>[a-zA-Z]+)\s?=>\s?\"?(?<value>[\w\s\%]+)\"?/";
         preg_match_all($s2, $matched['content'], $matchedes2, 2);
         if (empty($matchedes2)) {
             return null;

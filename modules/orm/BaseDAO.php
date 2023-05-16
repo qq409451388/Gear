@@ -25,9 +25,6 @@ abstract class BaseDAO implements EzBean
         DBC::assertTrue($this->entityClazz->isSubClassOf(AbstractDO::class),
             "[DAO] create Fail!",0, GearShutDownException::class);
 
-        if (StockCheckRecordDAO::class == get_class($this)) {
-            var_dump($this);
-        }
         /**
          * @var AnnoItem $annoItem
          */
