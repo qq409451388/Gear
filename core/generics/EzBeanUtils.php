@@ -53,7 +53,6 @@ class EzBeanUtils implements EzHelper
     /**
      * @param array|null $data
      * @param string $className
-     * @return object ? extends $className
      * @throws ReflectionException
      */
     public static function createObject($data, string $className) {

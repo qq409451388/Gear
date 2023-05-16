@@ -34,8 +34,8 @@ abstract class BaseDAO implements EzBean
      * @return AbstractDO
      * @throws ReflectionException
      */
-    protected function findOne($sql, $params){
-        $sql = "select * from {$this->table} {$sql} limit 1";
+    public function findOne($sql, $params){
+        $sql = "select * from `{$this->table}` {$sql} limit 1";
         $res = DB::get($this->database)->queryOne($sql, $params);
         if (empty($res)) {
             return null;
@@ -46,7 +46,7 @@ abstract class BaseDAO implements EzBean
 
     /**
      * @param $id
-     * @return BaseDO
+     * @return AbstractDO
      * @throws ReflectionException
      */
     public function findById($id) {
