@@ -9,6 +9,7 @@ class IdGeneratorAspect extends Aspect implements BuildAspect
          */
         $anno = $this->getValue();
         $version = $anno->idGroup;
-        BeanFinder::get()->save($anno->clazz->getName(), $anno->clazz->callStatic("getInstance", $version));
+        // todo
+        //BeanFinder::get()->save($anno->clazz->getName(), $anno->clazz->callStatic("getInstance", $version));
     }
 }

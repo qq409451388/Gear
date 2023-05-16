@@ -9,33 +9,61 @@ abstract class BaseDAO implements EzBean
     protected $table;
     protected $database;
 
+    /**
+     * @var bool 是否存在分表策略
+     */
+    private $hasSplit;
+    private $splitCnt;
+    private $splitColumn;
+    private $splitModel;
+
     public function __construct() {
         $this->entityClazz = $this->bindEntity();
+        $this->hasSplit = false;
         DBC::assertTrue($this->entityClazz->isSubClassOf(AbstractDO::class),
             "[DAO] create Fail!",0, GearShutDownException::class);
+
         /**
          * @var AnnoItem $annoItem
          */
         $annoItem = AnnoationRule::searchCertainlyRelationshipAnnoation($this->entityClazz->getName(), EntityBind::class);
-        /**
-         * @var EntityBind $anno
-         */
-        $anno = $annoItem->getValue();
+        if ($annoItem instanceof AnnoItem) {
+            /**
+             * @var EntityBind $anno
+             */
+            $anno = $annoItem->getValue();
 
-        $this->table = $anno->getTable();
-        $this->database = $anno->getDb();
+            $this->table = $anno->getTable();
+            $this->database = $anno->getDb();
+        } else {
+            /**
+             * @var AnnoItem $annoItem
+             */
+            $annoItem = AnnoationRule::searchCertainlyRelationshipAnnoation($this->entityClazz->getName(), EntityBindSplit::class);
+            DBC::assertTrue($annoItem instanceof AnnoItem, "[DAO] create Fail!", 0, GearShutDownException::class);
+            /**
+             * @var EntityBindSplit $anno
+             */
+            $anno = $annoItem->getValue();
+            $this->table = $anno->getTable();
+            $this->database = $anno->getDb();
+            $this->splitCnt = $anno->getSplit();
+            $this->splitColumn = $anno->getSplitColumn();
+            $this->splitModel = $anno->getSplitModel();
+            $this->hasSplit = true;
+        }
     }
 
     abstract protected function bindEntity():Clazz;
 
     /**
-     * @param $sql
+     * @param $whereSql
      * @param $params
      * @return AbstractDO
      * @throws ReflectionException
      */
-    public function findOne($sql, $params){
-        $sql = "select * from `{$this->table}` {$sql} limit 1";
+    public function findOne($whereSql, $params){
+        $sql = "select * from `{$this->getTable($params[$this->splitColumn]??null)}` {$whereSql} limit 1";
         $res = DB::get($this->database)->queryOne($sql, $params);
         if (empty($res)) {
             return null;
@@ -57,12 +85,101 @@ abstract class BaseDAO implements EzBean
         if(null != $localCache && $data = $localCache->get($this->entityClazz->getName().$id)){
             return unserialize($data);
         }
-        $data = $this->findOne("where id = :id", [":id" => $id]);
+        $params = [":id" => $id];
+        if ($this->hasSplit) {
+            DBC::assertEquals("id", $this->splitColumn,
+                "[DAO] this table has split strategy and split column is not 'id'.", 0, GearRunTimeException::class);
+            $params["id"] = $id;
+        }
+        $data = $this->findOne("where id = :id", $params);
         if(empty($data)){
             return null;
         }
         null != $localCache && $localCache->set($this->entityClazz->getName().$id, serialize($data));
         return $data;
+    }
+
+    private function findList4Split($whereSql, $params) {
+        // 来源是 findByIds
+        if ("id" == $this->splitColumn && isset($params[':ids'])) {
+            $tableList = [];
+            foreach ($params[':ids'] as $id) {
+                $tmpTableName = $this->getTable($id);
+                if (!isset($tableList[$tmpTableName])) {
+                    $tableList[$tmpTableName] = [];
+                }
+                $tableList[$tmpTableName][] = $id;
+            }
+            $sql = [];
+            foreach ($tableList as $tableName => $ids) {
+                $sql[] = "select * from $tableName where id in (:ids)";
+            }
+            $sql = implode(SqlPatternChunk::EOL, $sql);
+            $res = DB::get($this->database)->query($sql, [], SqlOptions::new()->isChunk(true));
+            $className = $this->entityClazz->getName();
+            foreach ($res as &$item) {
+                $item = EzBeanUtils::createObject($item, $className);
+            }
+            return $res;
+        }
+        return [];
+    }
+
+    /**
+     * @param $whereSql
+     * @param $params
+     * @return array<AbstractDO>
+     * @throws ReflectionException
+     */
+    public function findList($whereSql, $params) {
+        if ($this->hasSplit) {
+            return $this->findList4Split($whereSql, $params);
+        }
+        $sql = "select * from `{$this->getTable()}` {$whereSql}";
+        $res = DB::get($this->database)->query($sql, $params);
+        if (empty($res)) {
+            return [];
+        }
+        $className = $this->entityClazz->getName();
+        foreach ($res as &$item) {
+            $item = EzBeanUtils::createObject($item, $className);
+        }
+        return $res;
+    }
+
+    /**
+     * @param $ids
+     * @return array<AbstractDO>
+     * @throws ReflectionException
+     */
+    public function findByIds($ids) {
+        /**
+         * @var EzLocalCache $localCache
+         */
+        $localCache = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
+        $res = [];
+        $idsNoCache = [];
+        foreach ($ids as $id) {
+            if(null != $localCache && $data = $localCache->get($this->entityClazz->getName().$id)){
+                $res[] = unserialize($data);
+            } else {
+                $idsNoCache[] = $id;
+            }
+        }
+
+        $resNoCache = [];
+        if (!empty($idsNoCache)) {
+            $resNoCache = $this->findList("where id in (:ids)", [":ids" => $idsNoCache]);
+        }
+        /**
+         * @var AbstractDO $item
+         */
+        foreach ($resNoCache as $item) {
+            null != $localCache && $localCache->set($this->entityClazz->getName().$item->id, serialize($item));
+        }
+        $res = array_merge($res, $resNoCache);
+        array_multisort($res, array_column($res, "id"), SORT_ASC);
+        return $res;
     }
 
     public function save(BaseDO $domain) {
@@ -79,7 +196,8 @@ abstract class BaseDAO implements EzBean
         $date = EzDate::now();
         $domain->createTime = $date;
         $domain->updateTime = $date;
-        return DB::get($this->database)->save($this->table, $domain->toArray());
+        $splitColumn = $this->splitColumn;
+        return DB::get($this->database)->save($this->getTable($domain->$splitColumn ?? null), $domain->toArray());
     }
 
     public function update(BaseDO $domain) {
@@ -89,12 +207,24 @@ abstract class BaseDAO implements EzBean
         $domain->updateTime = EzDate::now();
         $ver = $domain->ver;
         $domain->ver++;
-        $updateRes = DB::get($this->database)->update($this->table, $domain->toArray(), "id", "ver = $ver");
+        $splitColumn = $this->splitColumn;
+        $updateRes = DB::get($this->database)->update($this->getTable($domain->$splitColumn ?? null), $domain->toArray(), "id", "ver = $ver");
         /**
          * @var EzLocalCache $localCache
          */
         $localCache = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
         $localCache->del($this->entityClazz->getName().$domain->id);
         return $updateRes;
+    }
+
+    private function getTable($splitValue = null) {
+        if ($this->hasSplit) {
+            DBC::assertNonNull($splitValue, "[DAO] getTableFail! this table has split strategy, but no splitvalue input!");
+            if ("mod" == $this->splitModel) {
+                return sprintf($this->table, $splitValue%$this->splitCnt);
+            }
+            DBC::assertTrue(true, "[DAO] getTableFail! this table has split strategy, but no splitmodel input!");
+        }
+        return $this->table;
     }
 }

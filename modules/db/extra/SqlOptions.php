@@ -15,7 +15,10 @@ class SqlOptions
      */
     private $isUnion = false;
 
-    public static function new(){
+    /**
+     * @return SqlOptions
+     */
+    public static function new():SqlOptions{
         return new SqlOptions();
     }
 
