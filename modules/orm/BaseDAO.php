@@ -2,6 +2,8 @@
 
 abstract class BaseDAO implements EzBean
 {
+    private $ezDbDAO;
+
     /**
      * @var Clazz $entityClazz
      */
@@ -23,6 +25,9 @@ abstract class BaseDAO implements EzBean
         DBC::assertTrue($this->entityClazz->isSubClassOf(AbstractDO::class),
             "[DAO] create Fail!",0, GearShutDownException::class);
 
+        if (StockCheckRecordDAO::class == get_class($this)) {
+            var_dump($this);
+        }
         /**
          * @var AnnoItem $annoItem
          */
@@ -52,6 +57,7 @@ abstract class BaseDAO implements EzBean
             $this->splitModel = $anno->getSplitModel();
             $this->hasSplit = true;
         }
+        $this->ezDbDAO = new EzDbDAO($this->database);
     }
 
     abstract protected function bindEntity():Clazz;
@@ -64,12 +70,7 @@ abstract class BaseDAO implements EzBean
      */
     public function findOne($whereSql, $params){
         $sql = "select * from `{$this->getTable($params[$this->splitColumn]??null)}` {$whereSql} limit 1";
-        $res = DB::get($this->database)->queryOne($sql, $params);
-        if (empty($res)) {
-            return null;
-        }
-        $className = $this->entityClazz->getName();
-        return EzBeanUtils::createObject($res, $className);
+        return $this->ezDbDAO->findOne($this->entityClazz, $sql, $params);
     }
 
     /**
@@ -99,22 +100,29 @@ abstract class BaseDAO implements EzBean
         return $data;
     }
 
+    private function getSql4Split($whereSql, $params, $column) {
+        $tableList = [];
+        foreach ($params[$column] as $id) {
+            $tmpTableName = $this->getTable($id);
+            if (!isset($tableList[$tmpTableName])) {
+                $tableList[$tmpTableName] = [];
+            }
+            $tableList[$tmpTableName][] = $id;
+        }
+        $sql = [];
+        foreach ($tableList as $tableName => $ids) {
+            $tmpParams = $params;
+            $tmpParams[$column] = $ids;
+            $sql[] = DB::get()->getSql("select * from $tableName $whereSql", $tmpParams);
+        }
+        $sql = implode(SqlPatternChunk::EOL, $sql);
+        return $sql;
+    }
+
     private function findList4Split($whereSql, $params) {
         // 来源是 findByIds
         if ("id" == $this->splitColumn && isset($params[':ids'])) {
-            $tableList = [];
-            foreach ($params[':ids'] as $id) {
-                $tmpTableName = $this->getTable($id);
-                if (!isset($tableList[$tmpTableName])) {
-                    $tableList[$tmpTableName] = [];
-                }
-                $tableList[$tmpTableName][] = $id;
-            }
-            $sql = [];
-            foreach ($tableList as $tableName => $ids) {
-                $sql[] = "select * from $tableName where id in (:ids)";
-            }
-            $sql = implode(SqlPatternChunk::EOL, $sql);
+            $sql = $this->getSql4Split($whereSql, $params, ":ids");
             $res = DB::get($this->database)->query($sql, [], SqlOptions::new()->isChunk(true));
             $className = $this->entityClazz->getName();
             foreach ($res as &$item) {
@@ -134,17 +142,10 @@ abstract class BaseDAO implements EzBean
     public function findList($whereSql, $params) {
         if ($this->hasSplit) {
             return $this->findList4Split($whereSql, $params);
+        } else {
+            $sql = "select * from `{$this->getTable()}` {$whereSql}";
+            return $this->ezDbDAO->findList($this->entityClazz, $sql, $params);
         }
-        $sql = "select * from `{$this->getTable()}` {$whereSql}";
-        $res = DB::get($this->database)->query($sql, $params);
-        if (empty($res)) {
-            return [];
-        }
-        $className = $this->entityClazz->getName();
-        foreach ($res as &$item) {
-            $item = EzBeanUtils::createObject($item, $className);
-        }
-        return $res;
     }
 
     /**
