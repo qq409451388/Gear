@@ -21,5 +21,9 @@
   ],
   "api": [
     "modules/api"
+  ],
+  "ezchart": [
+    "modules/ezchart",
+    "modules/ezdrawer"
   ]
 }

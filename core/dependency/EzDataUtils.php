@@ -25,6 +25,10 @@ class EzDataUtils
         return is_array($obj);
     }
 
+    public static function isString($obj) {
+        return is_string($obj);
+    }
+
     public static function toString($obj)
     {
         if (is_string($obj) || is_numeric($obj)) {
@@ -85,6 +89,23 @@ class EzDataUtils
             );
         }
         return true;
+    }
+
+    public static function isAllNotNull(...$obj) {
+        foreach ($obj as $o) {
+            if (is_null($o)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static function isFalse($obj) {
+        if (!is_bool($obj)) {
+            Logger::warn("[EzDataUtils] method isFalse expect params is a boolean! but send:{}", self::toString($obj));
+            return false;
+        }
+        return !$obj;
     }
 
     private static $dataTypeMap = [
