@@ -34,4 +34,9 @@ class RequestMultiBody implements EzDataObject
         $obj = $this->data[$field]??null;
         return $obj instanceof RequestFileBody ? $obj : null;
     }
+
+    public function getRequestBody($field) {
+        $obj = $this->data[$field]??null;
+        return $obj instanceof RequestBody ? $obj : null;
+    }
 }

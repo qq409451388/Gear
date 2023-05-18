@@ -43,30 +43,39 @@ abstract class BaseEzHttp extends AbstractTcpServer
     }
 
     protected function getResponse(IRequest $request):IResponse{
-        $path = $request->getPath();
-        if(empty($path) || "/" == $path){
-            $content = "<h1>It Works! ENV:".ENV::get()."</h1>";
-            return (new Response(HttpStatus::OK(), $content));
-        }
-        if(($httpStatus = $request->check()) instanceof HttpStatus){
-            return (new Response($httpStatus));
-        }
-        $judged = $this->judgePath($path);
-        if(!$judged){
-            if(empty($this->_root)){
-                return (new Response(HttpStatus::NOT_FOUND()));
+        try {
+            $path = $request->getPath();
+            if(empty($path) || "/" == $path){
+                $content = "<h1>It Works! ENV:".ENV::get()."</h1>";
+                return (new Response(HttpStatus::OK(), $content));
             }
-            $fullPath = Env::staticPath().DIRECTORY_SEPARATOR.$path;
-            if(empty($path) || !is_file($fullPath)) {
-                return (new Response(HttpStatus::NOT_FOUND()));
+            if(($httpStatus = $request->check()) instanceof HttpStatus){
+                return (new Response($httpStatus));
             }
-            if(!isset($this->staticCache[$path])) {
-                $this->staticCache[$path] = file_get_contents($fullPath);
+            $judged = $this->judgePath($path);
+            if(!$judged){
+                if(empty($this->_root)){
+                    return (new Response(HttpStatus::NOT_FOUND()));
+                }
+                $fullPath = Env::staticPath().DIRECTORY_SEPARATOR.$path;
+                if(empty($path) || !is_file($fullPath)) {
+                    return (new Response(HttpStatus::NOT_FOUND()));
+                }
+                if(!isset($this->staticCache[$path])) {
+                    $this->staticCache[$path] = file_get_contents($fullPath);
+                }
+                return new Response(HttpStatus::OK(), $this->staticCache[$path], $this->getMime($path));
+            }else{
+                return $this->getDynamicResponse($request);
             }
-            return new Response(HttpStatus::OK(), $this->staticCache[$path], $this->getMime($path));
-        }else{
-            return $this->getDynamicResponse($request);
+        } catch (Exception $exception) {
+            Logger::error("[Http] getResponse Exception! Code:{}, Error:{}", $exception->getCode(), $exception->getMessage());
+            return new Response(HttpStatus::INTERNAL_SERVER_ERROR());
+        } catch (Error $error) {
+            Logger::error("[Http] getResponse Fail! Code:{}, Error:{}", $error->getCode(), $error->getMessage());
+            return new Response(HttpStatus::INTERNAL_SERVER_ERROR());
         }
+
     }
 
     /**
