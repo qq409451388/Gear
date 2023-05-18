@@ -41,7 +41,7 @@ class EsLogQuery
     }
 
     public function certainlyEmpty(){
-        return !EzDataUtils::argsCheck($this->queryString);
+        return !EzObjectUtils::argsCheck($this->queryString);
     }
 
     public function getTimeOut(){

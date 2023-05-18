@@ -34,6 +34,6 @@ class EsSearchQueryBody extends BaseDTO
     }
 
     public function toString() {
-        return EzDataUtils::toString(array_filter($this->toArray()));
+        return EzObjectUtils::toString(array_filter($this->toArray()));
     }
 }

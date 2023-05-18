@@ -115,7 +115,7 @@ class WebSocketInterpreter implements Interpreter
             HttpStatus::NOT_FOUND()->getCode(),
             HttpStatus::NOT_FOUND()->getStatus()
         );
-        $response->response = EzDataUtils::toString($error);
+        $response->response = EzObjectUtils::toString($error);
         return $response;
     }
 
@@ -125,7 +125,7 @@ class WebSocketInterpreter implements Interpreter
             HttpStatus::INTERNAL_SERVER_ERROR()->getCode(),
             $errorMessage??HttpStatus::INTERNAL_SERVER_ERROR()->getStatus()
         );
-        $response->response = EzDataUtils::toString($error);
+        $response->response = EzObjectUtils::toString($error);
         return $response;
     }
 

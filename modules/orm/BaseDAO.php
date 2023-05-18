@@ -180,7 +180,7 @@ abstract class BaseDAO implements EzBean
         return $res;
     }
 
-    public function save(BaseDO $domain) {
+    public function save(AbstractDO $domain) {
         $refClass = new EzReflectionClass($domain);
         $annoItme = $refClass->getAnnoation(Clazz::get(IdGenerator::class));
         if ($annoItme instanceof AnnoItem) {
@@ -190,23 +190,29 @@ abstract class BaseDAO implements EzBean
             $idClient = BeanFinder::get()->pull($annoItme->value);
             $domain->id = $idClient->nextId();
         }
-        $domain->ver = 1;
-        $date = EzDate::now();
-        $domain->createTime = $date;
-        $domain->updateTime = $date;
+        if ($domain instanceof BaseDO) {
+            $domain->ver = 1;
+            $date = EzDate::now();
+            $domain->createTime = $date;
+            $domain->updateTime = $date;
+        }
         $splitColumn = $this->splitColumn;
         return DB::get($this->database)->save($this->getTable($domain->$splitColumn ?? null), $domain->toArray());
     }
 
-    public function update(BaseDO $domain) {
+    public function update(AbstractDO $domain) {
         if (is_null($domain->id)) {
             return false;
         }
-        $domain->updateTime = EzDate::now();
-        $ver = $domain->ver;
-        $domain->ver++;
         $splitColumn = $this->splitColumn;
-        $updateRes = DB::get($this->database)->update($this->getTable($domain->$splitColumn ?? null), $domain->toArray(), "id", "ver = $ver");
+        if ($domain instanceof BaseDO) {
+            $ver = $domain->ver;
+            $domain->ver++;
+            $domain->updateTime = EzDate::now();
+            $updateRes = DB::get($this->database)->update($this->getTable($domain->$splitColumn ?? null), $domain->toArray(), "id", "ver = $ver");
+        } else {
+            $updateRes = DB::get($this->database)->update($this->getTable($domain->$splitColumn ?? null), $domain->toArray(), "id");
+        }
         /**
          * @var EzLocalCache $localCache
          */

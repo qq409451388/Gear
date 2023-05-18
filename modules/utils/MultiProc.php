@@ -64,7 +64,7 @@ class MultiProc
             $argFormat = "'$arg'";
         }elseif(is_bool($arg)){
             $argFormat = $arg ? 'true' : 'false';
-        }elseif (EzDataUtils::isArray($arg)){
+        }elseif (EzObjectUtils::isArray($arg)){
             foreach($arg as &$a){
                 $a = self::format($a);
             }

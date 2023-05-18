@@ -5,7 +5,9 @@
  */
 class Request implements IRequest,EzDataObject
 {
-    //content-type
+    /**
+     * @var HttpContentType $contentType
+     */
     private $contentType;
 
     //content-length
@@ -70,10 +72,10 @@ class Request implements IRequest,EzDataObject
     }
 
     /**
-     * @return RequestBody|null
+     * @return RequestNormalBody|null
      */
     public function getNormalRequestBody() {
-        return $this->body instanceof RequestBody ? $this->body : null;
+        return $this->body instanceof RequestNormalBody ? $this->body : null;
     }
 
     /**
@@ -126,7 +128,7 @@ class Request implements IRequest,EzDataObject
     public function check() {
         if(!is_null($this->contentLen) && !is_null($this->contentLenActual)
             && $this->contentLen != $this->contentLenActual){
-            return HttpContentType::H_MULTIPART_FORMDATA == $this->contentType->contentType ?
+            return HttpMimeType::MIME_MULTI_FORM == $this->contentType->contentType ?
                 HttpStatus::CONTINUE() : HttpStatus::EXPECTATION_FAIL();
         }
         return true;
@@ -210,6 +212,6 @@ class Request implements IRequest,EzDataObject
     }
 
     public function toString () {
-        return EzDataUtils::toString(get_object_vars($this));
+        return EzObjectUtils::toString(get_object_vars($this));
     }
 }

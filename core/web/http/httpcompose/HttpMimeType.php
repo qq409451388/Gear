@@ -63,6 +63,10 @@ class HttpMimeType
     public const MIME_ZIP = "application/zip";
     public const MIME_STREAM = "application/stream";
 
+    public const MIME_JSON = "application/json";
+    public const MIME_MULTI_FORM = "multipart/form-data";
+    public const MIME_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+
     public const MIME_TYPE_LIST = [
         self::EXT_AVI => self::MIME_AVI,
         self::EXT_MPEG => self::MIME_MPEG,

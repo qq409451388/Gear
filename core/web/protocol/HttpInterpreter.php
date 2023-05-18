@@ -112,18 +112,16 @@ class HttpInterpreter implements Interpreter
         $contentType = @$requestSource->contentType->contentType??null;
         $requestBody = $requestSource->bodyContent;
         switch ($contentType){
-            case HttpContentType::H_X_WWW_FORM_URLENCODE:
+            case HttpMimeType::MIME_WWW_FORM_URLENCODED:
                 parse_str($requestBody, $requestBodyArr);
-                $requestBodyObj = new RequestBody();
-                $requestBodyObj->contentType = $contentType;
-                $requestBodyObj->content = $requestBodyArr;
+                $requestBodyObj = new RequestNormalBody();
+                $requestBodyObj->addAllStruct($requestBodyArr);
                 break;
-            case HttpContentType::H_JSON:
-                $requestBodyObj = new RequestBody();
-                $requestBodyObj->contentType = $contentType;
-                $requestBodyObj->content = EzCollectionUtils::decodeJson($requestBody);
+            case HttpMimeType::MIME_JSON:
+                $requestBodyObj = new RequestJsonBody();
+                $requestBodyObj->content = $requestBody;
                 break;
-            case HttpContentType::H_MULTIPART_FORMDATA:
+            case HttpMimeType::MIME_MULTI_FORM:
                 /**
                  * @var $requestBodyArr array<string, RequestBody>
                  */

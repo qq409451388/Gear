@@ -7,7 +7,7 @@ abstract class BaseDTO implements EzDataObject, EzIgnoreUnknow
     }
 
     public function toString() {
-        return EzDataUtils::toString($this->toArray());
+        return EzObjectUtils::toString($this->toArray());
     }
 
     //非public字段不参与转换

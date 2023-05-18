@@ -35,6 +35,6 @@ class EzRpcResponse implements EzDataObject
     }
 
     public function toString () {
-        return EzDataUtils::toString(get_object_vars($this));
+        return EzObjectUtils::toString(get_object_vars($this));
     }
 }

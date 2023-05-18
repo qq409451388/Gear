@@ -84,7 +84,7 @@ class EzDrawer
             if (isset(EzDrawerColorEnum::RGB_COLORS[$name])) {
                 $colorArr = EzDrawerColorEnum::RGB_COLORS[$name];
                 $this->colorResource[$name] = $this->getColorRGB($colorArr[0], $colorArr[1], $colorArr[2]);
-            } elseif (EzDataUtils::isAllNotNull($r, $g, $b)) {
+            } elseif (EzObjectUtils::isAllNotNull($r, $g, $b)) {
                 $this->colorResource[$name] = $this->getColorRGB($r, $g, $b);
             }
         }
@@ -131,9 +131,9 @@ class EzDrawer
     }
 
     public function writeText(EzDrawerText $drawerText) {
-        if (EzDataUtils::isArray($drawerText->color)) {
+        if (EzObjectUtils::isArray($drawerText->color)) {
             $drawerText->color = $this->getColorRGB(...$drawerText->color);
-        } elseif (EzDataUtils::isString($drawerText->color)) {
+        } elseif (EzObjectUtils::isString($drawerText->color)) {
             $drawerText->color = $this->getColor($drawerText->color);
         }
         imagettftext($this->resource,

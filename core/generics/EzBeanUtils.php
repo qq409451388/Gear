@@ -100,7 +100,7 @@ class EzBeanUtils implements EzHelper
                 case "MAP":
                     $list = [];
                     foreach ($dItem as $k => $item) {
-                        if (EzDataUtils::isScalar($item)) {
+                        if (EzObjectUtils::isScalar($item)) {
                             $list[$k] = $item;
                         } else {
                             $list[$k] = self::createObject($item, $propertyType);
@@ -164,16 +164,16 @@ class EzBeanUtils implements EzHelper
         if (empty($propertyTypeMatched)) {
             return [null, null];
         }
-        if (EzDataUtils::isScalarType($propertyTypeMatched)) {
+        if (EzObjectUtils::isScalarType($propertyTypeMatched)) {
             //todo type 处理
-            /*DBC::assertTrue(EzDataUtils::dataTypeNameEquals(gettype($data), $propertyTypeMatched),
+            /*DBC::assertTrue(EzObjectUtils::dataTypeNameEquals(gettype($data), $propertyTypeMatched),
                 "[EzObject] Match data Fail! Type Must Be An $propertyTypeMatched, But ".gettype($data),
                 0, GearIllegalArgumentException::class);*/
             return [null, null];
         }
         // 1. Array
         if ("array" == $propertyTypeMatched) {
-            DBC::assertTrue(EzDataUtils::isArray($data), "[EzObject] Match data Fail! Type Must Be An Array, But ".gettype($data),
+            DBC::assertTrue(EzObjectUtils::isArray($data), "[EzObject] Match data Fail! Type Must Be An Array, But ".gettype($data),
                 0, GearIllegalArgumentException::class);
             return ["ARRAY", "array"];
         }
@@ -182,7 +182,7 @@ class EzBeanUtils implements EzHelper
         $propertyType = $matched['propertyType']??"";
         $propertyType2 = $matched['propertyType2']??"";
         if (!empty($propertyType2)) {
-            DBC::assertTrue(EzDataUtils::isMap($data, $propertyType, $propertyType2), "[EzObject] Match data Fail! Type Must Be a Map, But ".gettype($data),
+            DBC::assertTrue(EzObjectUtils::isMap($data, $propertyType, $propertyType2), "[EzObject] Match data Fail! Type Must Be a Map, But ".gettype($data),
                 0, GearIllegalArgumentException::class);
             return ["MAP", $propertyType];
         }
@@ -190,7 +190,7 @@ class EzBeanUtils implements EzHelper
         preg_match("/array<\s*(?<propertyType>\w+)\s*>/", $propertyTypeMatched, $matched);
         $propertyType = $matched['propertyType'] ?? "";
         if (!empty($propertyType)) {
-            DBC::assertTrue(EzDataUtils::isList($data), "[EzObject] Match data Fail! Type Must Be a Map, But ".gettype($data),
+            DBC::assertTrue(EzObjectUtils::isList($data), "[EzObject] Match data Fail! Type Must Be a Map, But ".gettype($data),
                 0, GearIllegalArgumentException::class);
             return ["LIST", $propertyType];
         }

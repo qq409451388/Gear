@@ -15,7 +15,7 @@ class AnnoationRule implements EzHelper
         $valueType = $annoName->callStatic("constStruct");
         $at = $annoName->callStatic("constTarget");
         $refTarget = self::getRefTarget($reflection);
-        if (EzDataUtils::isArray($at)) {
+        if (EzObjectUtils::isArray($at)) {
             DBC::assertTrue(in_array($refTarget, $at), "[AnnoationRule] Unsupport positon!");
         } else {
             DBC::assertEquals($at, $refTarget, "[AnnoationRule] Unsupport positon!");
@@ -186,7 +186,7 @@ class AnnoationRule implements EzHelper
                 continue;
             }
             $content = "{".$matched['content']."}";
-            if (!EzDataUtils::isJson($content)) {
+            if (!EzObjectUtils::isJson($content)) {
                 Logger::warn("[Gear] Invalid Content AnnoInfo:{}, Content:{}", $annoName, $content);
                 continue;
             }

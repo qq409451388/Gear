@@ -15,7 +15,7 @@ class EzArray implements ArrayAccess
             DBC::assertList($args, "[EzArray Exception] Init EzArray Must Be Type Of ArrayList!");
             $this->initArray($args);
         } else {
-            DBC::throwEx("[EzArray Exception] Unsupport datatype for __construct with ".EzDataUtils::toString($args));
+            DBC::throwEx("[EzArray Exception] Unsupport datatype for __construct with ".EzObjectUtils::toString($args));
         }
     }
 

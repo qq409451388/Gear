@@ -73,7 +73,7 @@ class EzDoublyLinkedList
              * @var $next EzNode|EzNullNode
              */
             $next = $this->next();
-            $str[] = EzDataUtils::toString($next->getData());
+            $str[] = EzObjectUtils::toString($next->getData());
         }
         return empty($str) ? null : "[ROOT]->".PHP_EOL.implode("->".PHP_EOL, $str);
     }
