@@ -16,11 +16,10 @@ class HttpInterpreter implements Interpreter
         $header .= "Date: ".gmdate('D, d M Y H:i:s T')."\r\n";
         $header .= "Content-Type: {$response->getContentType()}\r\n";
         $header .= "Content-Length: ".strlen($response->getContent());
-        if ($response->getHeader()->getCode() != 200) {
+        if ($response->getHeader()->getCode() != 200 || !empty($response->getContent())) {
             $header .= "\r\n\r\n";
         }
         if (!empty($response->getContent())) {
-            $header .= "\r\n\r\n";
             $header .= $response->getContent();
         }
         return $header;

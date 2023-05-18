@@ -3,10 +3,9 @@
 class RequestJsonBody implements EzDataObject
 {
     /**
-     * @link HttpContentType
      * @var string $contentType
      */
-    public $contentType = HttpContentType::H_JSON;
+    public $contentType = HttpMimeType::MIME_JSON;
 
     /**
      * @var string $content requestData

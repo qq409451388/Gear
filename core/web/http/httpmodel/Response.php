@@ -46,11 +46,11 @@ class Response implements IResponse,EzDataObject
         }
         if ($this->content instanceof EzRpcResponse) {
             $this->content = $this->content->toJson();
-            return HttpContentType::H_JSON;
+            return HttpMimeType::MIME_JSON;
         } elseif (null !== json_decode($this->content, true)) {
-            return HttpContentType::H_JSON;
+            return HttpMimeType::MIME_JSON;
         } else {
-            return HttpContentType::H_HTML;
+            return HttpMimeType::MIME_JSON;
         }
     }
 
