@@ -118,10 +118,10 @@ abstract class BaseDAO implements EzBean
         return $sql;
     }
 
-    private function findList4Split($whereSql, $params) {
+    private function findList4Split($appendSql, $params) {
         // 来源是 findByIds
         if (isset($params[':'.$this->splitColumn."List"])) {
-            $sql = $this->getSql4Split($whereSql, $params, ':'.$this->splitColumn."List");
+            $sql = $this->getSql4Split($appendSql, $params, ':'.$this->splitColumn."List");
             $res = DB::get($this->database)->query($sql, [], SqlOptions::new()->isChunk(true));
             $className = $this->entityClazz->getName();
             foreach ($res as &$item) {
@@ -129,14 +129,16 @@ abstract class BaseDAO implements EzBean
             }
             return $res;
         } else {
-            $splitSql = [];
+            $appendSql = "select * from $this->table ".strtolower($appendSql);
+            preg_match('/^(\s*select\s+(?P<select>.*))\s+from\s+(?P<from>[^\s]+)?(\s+where\s+(?P<where>.*?))?(\s+group\s+by\s+(?P<groupby>[\w,\s]+?))?(?:\s+having\s+(?P<having>.*?))?(?:\s+order\s+by\s+(?P<orderby>[\w`,\s]+)?)?(?:\s+limit\s+(?P<offset>\d+\s?),(?P<limit>\s?\d+?))?\s*$/i', $appendSql, $matches);
+            $whereSql = "where {$matches['where']}";
             for ($i=0;$i<$this->splitCnt;$i++) {
                 $tmpTable = sprintf($this->table, $i);
                 $tmpParams = $params;
-                $splitSql[] = "(".DB::get($this->database)->getSql("select * from $tmpTable $whereSql", $tmpParams).")";
+                $splitSql[] = "(".DB::get($this->database)->getSql("select * from $tmpTable $whereSql ", $tmpParams).")";
             }
-            $splitSql = implode("union all", $splitSql);
-            $sql = "select * from ($splitSql) tmp $whereSql";
+            $splitSql = implode(" union all ", $splitSql);
+            $sql = "select * from ($splitSql) tmp $appendSql";
             $res = DB::get($this->database)->query($sql, $params);
             $className = $this->entityClazz->getName();
             foreach ($res as &$item) {
