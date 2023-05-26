@@ -97,12 +97,14 @@ abstract class BaseEzHttp extends AbstractTcpServer
             return $this->interpreter->getDynamicResponse($request);
         }catch (GearRunTimeException $e) {
             Logger::error($e->getMessage().$e->getFile().":".$e->getLine());
-            $premix = Env::isDev() ? "[".get_class($e)."]" : "";
-            return $this->interpreter->getNetErrorResponse($request, $premix.$e->getMessage());
+            $premix = Env::isProd() ? "" : "[".get_class($e)."]";
+            $msg = Env::isProd() ? "NetError" : $e->getMessage();
+            return $this->interpreter->getNetErrorResponse($request, $premix.$msg);
         }catch (Exception $e){
             Logger::error($e->getMessage());
-            $premix = Env::isDev() ? "[".get_class($e)."]" : "";
-            return $this->interpreter->getNetErrorResponse($request, $premix.$e->getMessage());
+            $premix = Env::isProd() ? "" : "[".get_class($e)."]";
+            $msg = Env::isProd() ? "NetError" : $e->getMessage();
+            return $this->interpreter->getNetErrorResponse($request, $premix.$msg);
         }
     }
 
