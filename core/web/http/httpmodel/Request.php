@@ -214,4 +214,12 @@ class Request implements IRequest,EzDataObject
     public function toString () {
         return EzObjectUtils::toString(get_object_vars($this));
     }
+
+    /**
+     * @return mixed
+     */
+    public function getContentLenActual()
+    {
+        return $this->contentLenActual;
+    }
 }

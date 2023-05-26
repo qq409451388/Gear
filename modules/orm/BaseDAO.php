@@ -118,16 +118,24 @@ abstract class BaseDAO implements EzBean
         return $sql;
     }
 
+    private function findList4SplitCertainly($appendSql, $params, $column) {
+        $sql = $this->getSql4Split($appendSql, $params, $column);
+        $res = DB::get($this->database)->query($sql, [], SqlOptions::new()->isChunk(true));
+        $className = $this->entityClazz->getName();
+        foreach ($res as &$item) {
+            $item = EzBeanUtils::createObject($item, $className);
+        }
+        return $res;
+    }
+
     private function findList4Split($appendSql, $params) {
         // 来源是 findByIds
-        if (isset($params[':'.$this->splitColumn."List"])) {
-            $sql = $this->getSql4Split($appendSql, $params, ':'.$this->splitColumn."List");
-            $res = DB::get($this->database)->query($sql, [], SqlOptions::new()->isChunk(true));
-            $className = $this->entityClazz->getName();
-            foreach ($res as &$item) {
-                $item = EzBeanUtils::createObject($item, $className);
-            }
-            return $res;
+        if (isset($params[':'.$this->splitColumn])) {
+            return $this->findList4SplitCertainly($appendSql, $params, ":$this->splitColumn");
+        } elseif(isset($params[":".$this->splitColumn."List"])){
+            return $this->findList4SplitCertainly($appendSql, $params, ":{$this->splitColumn}List");
+        } elseif(isset($params[':'.$this->splitColumn."s"])) {
+            return $this->findList4SplitCertainly($appendSql, $params, ":{$this->splitColumn}s");
         } else {
             $appendSql = "select * from $this->table ".strtolower($appendSql);
             preg_match('/^(\s*select\s+(?P<select>.*))\s+from\s+(?P<from>[^\s]+)?(\s+where\s+(?P<where>.*?))?(\s+group\s+by\s+(?P<groupby>[\w,\s]+?))?(?:\s+having\s+(?P<having>.*?))?(?:\s+order\s+by\s+(?P<orderby>[\w`,\s]+)?)?(?:\s+limit\s+(?P<offset>\d+\s?),(?P<limit>\s?\d+?))?\s*$/i', $appendSql, $matches);

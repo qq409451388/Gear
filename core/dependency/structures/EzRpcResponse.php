@@ -25,13 +25,19 @@ class EzRpcResponse implements EzDataObject
 
     public function toJson():string{
         if (is_array($this->data) || is_object($this->data)) {
-            foreach ($this->data as $k => &$v) {
-                if ($v instanceof EzSerializeDataObject) {
-                    $v = Clazz::get($v)->getSerializer()->serialize($v);
-                }
-            }
+            $this->format($this->data);
         }
         return EzString::encodeJson($this)??self::EMPTY_RESPONSE;
+    }
+
+    private function format(&$data) {
+        foreach ($data as $k => &$v) {
+            if ($v instanceof AbstractDO) {
+                $this->format($v);
+            } elseif ($v instanceof EzSerializeDataObject) {
+                $v = Clazz::get($v)->getSerializer()->serialize($v);
+            }
+        }
     }
 
     public function toString () {

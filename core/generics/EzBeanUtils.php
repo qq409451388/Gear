@@ -59,6 +59,10 @@ class EzBeanUtils implements EzHelper
         if (is_null($data)) {
             return null;
         }
+        if (!is_object($data) && !is_array($data) && !EzObjectUtils::isJson($data)
+            && !is_subclass_of($className, EzSerializeDataObject::class)) {
+            return null;
+        }
         DBC::assertTrue(class_exists($className), "[EzObject] ClassName $className is not found!", 0, GearIllegalArgumentException::class);
         if (is_subclass_of($className, BaseDTO::class)) {
             return $className::create($data);

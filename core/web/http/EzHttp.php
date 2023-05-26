@@ -9,14 +9,27 @@ class EzHttp extends BaseEzHttp
         $this->socket = new EzTcpServer($this->ip, $this->port, $this->interpreter->getSchema());
         $this->socket->setRequestHandler(function (EzConnection $connection, $request = null):IRequest {
             $buf = $connection->getBuffer();
+            /**
+             * @var Request $request
+             */
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);
+                if ($request->getContentLen() > Config::get("application.HTTP_SERVER_REQUEST_LIMIT")) {
+                    $request->setIsInit(true);
+                    return $request;
+                }
             } else {
                 $this->appendRequest($request, $buf);
             }
             return $request;
         });
         $this->socket->setResponseHandler(function (IRequest $request):IResponse {
+            /**
+             * @var Request $request
+             */
+            if ($request->getContentLenActual() != $request->getContentLen()) {
+                return new Response(HttpStatus::EXPECTATION_FAIL(), "body is too large!");
+            }
             return $this->getResponse($request);
         });
         $this->socket->setKeepAlive();
