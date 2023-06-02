@@ -6,6 +6,23 @@ class DataBaseUtils
     const NAMED_LOW_CAMELCASE = 3;
     const NAMED_UNDERSCORE = 4;
 
+    private static $hash = [
+        "varchar" => "string",
+        "tinyint" => "integer",
+        "smallint" => "integer",
+        "mediumint" => "integer",
+        "int" => "integer",
+        "bigint" => "integer",
+        "float" => "float",
+        "decimal" => "string",
+        "datetime" => "string",
+        "mediumtext" => "string",
+        "text" => "string",
+        "timestamp" => "string",
+        "date" => "string",
+        "char" => "string",
+    ];
+
     public static function detectName($name) {
         if (false !== strstr($name, "_")) {
             return self::NAMED_UNDERSCORE;
@@ -173,6 +190,64 @@ class DataBaseUtils
 
             $str .= $column.":".$hash[$item['DATA_TYPE']]." ".$item['COLUMN_COMMENT'].PHP_EOL;
         }
+        return $str;
+    }
+
+    public static function generateClassFileForGear($database) {
+        self::generateDomainClassFileForGear($database);
+    }
+
+    public static function generateDomainClassFileForGear($database) {
+        if (!is_dir(USER_PATH.DIRECTORY_SEPARATOR."/domain/$database")) {
+            mkdir(USER_PATH.DIRECTORY_SEPARATOR."/domain/$database", 0777, true);
+        }
+        if (!is_dir(USER_PATH.DIRECTORY_SEPARATOR."/dao/$database")) {
+            mkdir(USER_PATH.DIRECTORY_SEPARATOR."/dao/$database", 0777, true);
+        }
+        $tableNameList = DB::get($database)->queryColumn("show tables;", [], "Tables_in_".$database);
+        foreach ($tableNameList as $tableName) {
+            $information = DB::get($database)
+                ->query(
+                    "select * from information_schema.`COLUMNS` where TABLE_SCHEMA = '$database' and TABLE_NAME = '$tableName'"
+                );
+            $targetClassName = self::convertName($tableName, self::NAMED_CAMELCASE);
+            file_put_contents(USER_PATH.DIRECTORY_SEPARATOR."/domain/$database/{$targetClassName}DO.php",
+                self::gearDomainStr($database, $tableName, $information, $targetClassName."DO"));
+            file_put_contents(USER_PATH.DIRECTORY_SEPARATOR."/dao/$database/{$targetClassName}DAO.php",
+                self::gearDaoStr($targetClassName));
+        }
+    }
+
+    private static function gearDomainStr($database, $tableName, $information, $targetClassName) {
+        $str = "<?php".PHP_EOL.PHP_EOL."/**".PHP_EOL;
+        $str .= " * @EntityBind(table=>$tableName, db=>$database)".PHP_EOL;
+        $str .= " * @IdGenerator(idClient=>EzIdClient, idGroup=>$targetClassName)".PHP_EOL;
+        $str .= " */".PHP_EOL;
+        $str .= "class $targetClassName extends AbstractDO {".PHP_EOL;
+        foreach ($information as $item) {
+            $column = self::convertName($item['COLUMN_NAME'], self::NAMED_LOW_CAMELCASE);
+
+            $str .= "    /**".PHP_EOL;
+            if (!empty($item['COLUMN_COMMENT'])) {
+                $str .= "     * ".$item['COLUMN_COMMENT'].PHP_EOL;
+            }
+            $str .= "     * @ColumnAlias(\"{$item['COLUMN_NAME']}\")".PHP_EOL;
+            $str .= "     * @var ".self::$hash[$item['DATA_TYPE']]." $".$column.PHP_EOL;
+            $str .= "     */".PHP_EOL;
+            $str .= "    public $".$column.";".PHP_EOL.PHP_EOL;
+        }
+        $str .= "}";
+        return $str;
+    }
+
+    private static function gearDaoStr($targetClassName) {
+        $str = "<?php".PHP_EOL.PHP_EOL;
+        $str .= "class {$targetClassName}DAO extends BaseDAO".PHP_EOL;
+        $str .= "{".PHP_EOL;
+        $str .= "    protected function bindEntity(): Clazz {".PHP_EOL;
+        $str .= "        return Clazz::get(${targetClassName}DO::class);".PHP_EOL;
+        $str .= "    }".PHP_EOL;
+        $str .= "}";
         return $str;
     }
 }

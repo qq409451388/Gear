@@ -1,0 +1,29 @@
+{
+  "orm": [
+    "modules/db",
+    "modules/orm"
+  ],
+  "utils": [
+    "modules/utils"
+  ],
+  "db": [
+    "modules/db"
+  ],
+  "ezcache": [
+    "modules/ezcache"
+  ],
+  "datastream": [
+    "modules/datastream",
+    "modules/datasplit"
+  ],
+  "idclient": [
+    "modules/idclient"
+  ],
+  "api": [
+    "modules/api"
+  ],
+  "ezchart": [
+    "modules/ezchart",
+    "modules/ezdrawer"
+  ]
+}
