@@ -66,10 +66,12 @@ class EzCurlBodyFormData extends EzCurlBody
         foreach ($dataList as $k => $v) {
             if ($v instanceof EzCurlBodyFile) {
                 $v->analyse();
-                $body .= $this->boundary . "\r\n" . 'Content-Disposition: form-data; name="' . $k . '"; filename="' . $v->getFileName() . '"';
+                $fileContent = file_get_contents($v->getFilePath());
+                $fileLength = strlen($fileContent);
+                $body .= $this->boundary . "\r\n" . 'Content-Disposition: form-data; name="' . $k . '"; filename="' . $v->getFileName() . '"; filelength='.$fileLength;
                 $body .= "\r\n";
                 $body .= $v->getContentType() . "\r\n\r\n";
-                $body .= file_get_contents($v->getFilePath()) . "\r\n";
+                $body .= $fileContent . "\r\n";
             } else {
                 if (is_numeric($v) || is_string($v)) {
                     $body .= $this->boundary . "\r\n" . 'Content-Disposition: form-data; name="' . $k . '"';
@@ -78,6 +80,7 @@ class EzCurlBodyFormData extends EzCurlBody
             }
         }
         $body .= $this->boundary . "--\r\n";
+
         return $body;
     }
 }

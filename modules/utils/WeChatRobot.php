@@ -7,6 +7,8 @@ class WeChatRobot
     private $key;
 
     private const WECHAT_ROBOT_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/send";
+    private const WECHAT_ROBOT_UPLOAD_URL = "https://qyapi.weixin.qq.com/cgi-bin/webhook/upload_media?key=%s&type=file";
+    private const WECHAT_ROBOT_UPLOAD_MAX_SIZE = 20971520;
 
     public static function get($type = ""){
         if(null == self::$ins){
@@ -72,5 +74,35 @@ class WeChatRobot
 
     public function sendMarkDown($text){
         return $this->send(['content' => EzString::convertToUnicode($text)], "markdown");
+    }
+
+    public function sendFile($filePath) {
+        $mediaId = $this->upload($filePath);
+        DBC::assertNotEmpty($mediaId, "上传文件失败！");
+        return $this->send(["media_id"=>$mediaId], "file");
+    }
+
+    private function upload($filePath) {
+        DBC::assertNotEmpty($filePath, "传入的文件路径为空！");
+        DBC::assertTrue(is_file($filePath), "传入的文件路径有误！".$filePath);
+        DBC::assertLessThan(self::WECHAT_ROBOT_UPLOAD_MAX_SIZE, filesize($filePath), "传入文件必须小于20m!");
+        $cache = new EzFileCache();
+        $key = __METHOD__.$filePath;
+        $mediaId = $cache->get($key);
+        if (!empty($mediaId)) {
+            return $mediaId;
+        }
+        $url = sprintf(self::WECHAT_ROBOT_UPLOAD_URL, $this->key);
+        $curl = new EzCurl();
+        $curl->setUrl($url);
+        $body = ["media" => new CURLFile($filePath)];
+        $res = $curl->post($body, EzCurl::POSTTYPE_FILE);
+        $res = EzCollectionUtils::decodeJson($res);
+        if (empty($res) || 0 != $res['errcode']) {
+            return "";
+        }
+        $mediaId = $res["media_id"];
+        $cache->setEX($key, $mediaId, 86400);
+        return $mediaId;
     }
 }

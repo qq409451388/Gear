@@ -102,6 +102,22 @@ class DBC
     }
 
     /**
+     * 断言实际数值小于等于预期
+     * @param int $expect
+     * @param int $actual
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
+    public static function assertLessThan(int $expect, int $actual, $msg, $code = 0, $clazz = GearRunTimeException::class) {
+        if($expect < $actual){
+            self::throwEx($msg, $code, $clazz);
+        }
+    }
+
+    /**
      * @param $obj
      * @param $msg
      * @param $code
