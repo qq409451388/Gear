@@ -27,6 +27,7 @@ class SysUtils
 
     public static function scanDir($path, $deep = 1, $filterHidden = true)
     {
+        $path = rtrim($path, DIRECTORY_SEPARATOR);
         $result = [];
         if ($deep == 0) {
             return $result;
@@ -36,12 +37,12 @@ class SysUtils
             return $result;
         }
         foreach ($objs as $obj) {
-            $tmpPath = $path . "/" . $obj;
+            $tmpPath = $path . DIRECTORY_SEPARATOR . $obj;
             if (is_dir($tmpPath)) {
                 if ("." == $obj || ".." == $obj) {
                     continue;
                 }
-                if ($filterHidden && self::judgeHiddenDir($obj)) {
+                if ($filterHidden && self::judgeHiddenDir($tmpPath)) {
                     continue;
                 }
                 $result[] = $tmpPath;
