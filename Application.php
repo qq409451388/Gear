@@ -9,7 +9,7 @@ class Application
     private function envConstants($constants = null) {
         $this->envCheck("PROJECT_PATH");
         if (!defined("GEAR_PATH")) {
-            define("GEAR_PATH", PROJECT_PATH."/gear");
+            define("GEAR_PATH", PROJECT_PATH."/Gear");
         }
         if (!defined("CORE_PATH")) {
             define("CORE_PATH", GEAR_PATH."/core");
