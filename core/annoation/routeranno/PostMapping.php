@@ -1,5 +1,5 @@
 <?php
-class PostMapping extends Anno implements AnnoationCombination {
+class PostMapping extends RequestMapping implements AnnoationCombination {
 
     public function getPath() {
         return $this->value;

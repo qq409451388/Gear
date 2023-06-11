@@ -18,4 +18,10 @@ class AnnoValueTypeEnum
      * @description 形如 @Anno(a=>1, b=>2)
      */
     public const TYPE_RELATION = "RELATION";
+
+    /**
+     * 列表注解
+     * @description 形如 @Anno name 名字
+     */
+    public const TYPE_LIST = "LIST";
 }

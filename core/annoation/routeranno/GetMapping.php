@@ -1,5 +1,5 @@
 <?php
-class GetMapping extends Anno implements AnnoationCombination {
+class GetMapping extends RequestMapping implements AnnoationCombination {
     /**
      * @var array 路由参数匹配正则
      */
