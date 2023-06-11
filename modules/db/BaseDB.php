@@ -19,7 +19,6 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $vals = trim($vals, ",");
         $vals = "(".$vals.")";
         $sql = "insert into ".$table." (".$keys.") values ".$vals;
-        var_dump($sql);
         return $this->query($sql, [], SqlOptions::new());
     }
 

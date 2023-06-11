@@ -118,7 +118,6 @@ class AnnoationRule implements EzHelper
         }
         $s2 = "/(?<value>[a-zA-Z]+)/";
         preg_match_all($s2, $matched['content'], $matchedes2, 2);
-        var_dump($matchedes2);die;
         if (empty($matchedes2)) {
             return null;
         }
@@ -274,7 +273,6 @@ class AnnoationRule implements EzHelper
         $s = "/\s?@(?<annoName>[a-zA-Z]+)\s(?<content>[\w(.*)\s]+)/";
         $document = EzString::convertToUnicode($document);
         preg_match($s, $document, $matchedes);
-        var_dump($matchedes);
         $s2 = "/(?<value>[a-zA-Z]+)?/";
         foreach ($matchedes as $matched) {
             if (empty($matched['annoName'])) {
