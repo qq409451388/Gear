@@ -213,7 +213,9 @@ class Gear implements IDispatcher
      */
     private function startAnno($annoList){
         foreach($annoList as $aspect){
-            DBC::assertTrue($aspect->check(), "[Gear] Init Anno Check Fail! AnnoInfo:".$aspect->getAnnoName());
+            if (!$aspect->check()) {
+                continue;
+            }
             if(AnnoPolicyEnum::POLICY_BUILD == $aspect->getPolicy()){
                 /**
                  * @var $aspect Aspect|BuildAspect

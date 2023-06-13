@@ -14,7 +14,7 @@ class RespInterpreter implements Interpreter
     }
 
     public function getSchema(): string {
-        return "resp";
+        return NetWork::SCHEMA_RESP;
     }
 
     public function encode(IResponse $response):string

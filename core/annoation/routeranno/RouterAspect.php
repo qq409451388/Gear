@@ -14,6 +14,9 @@ class RouterAspect extends Aspect implements BuildAspect
         if (!$this->getAtClass()->isSubclassOf(BaseController::class)) {
             return false;
         }
+        if (NetWork::SCHEMA_WEBSOCKET === Config::get("schema")) {
+            return false;
+        }
         /**
          * 存在一个有效就往下走
          */

@@ -36,7 +36,6 @@ class EzWebSocketServer extends AbstractTcpServer
                 return $request;
             }
         );
-
         $this->socket->setResponseHandler(
         /**
          * @var WebSocketRequest $request

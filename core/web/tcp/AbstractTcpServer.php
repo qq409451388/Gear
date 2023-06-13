@@ -19,6 +19,7 @@ abstract class AbstractTcpServer
         $this->port = $port;
         Config::set(['ip'=>$ip, 'port'=>$port]);
         $this->setInterpreterInstance();
+        Config::setOne('schema', $this->interpreter->getSchema());
         $this->setTcpServerInstance();
         $this->setPropertyCustom();
     }

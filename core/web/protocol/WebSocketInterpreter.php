@@ -4,7 +4,7 @@ class WebSocketInterpreter implements Interpreter
 {
 
     public function getSchema(): string {
-        return "ws";
+        return NetWork::SCHEMA_WEBSOCKET;
     }
 
     /**
@@ -77,7 +77,6 @@ class WebSocketInterpreter implements Interpreter
         DBC::assertNotEmpty($jsonObj,
             "[WebSocketInterpreter] Request Data Decoded is Fail!", 0, GearIllegalArgumentException::class);
         $request->setPath($request->sourceData['method']);
-        var_dump($request);
         if (EzWebSocketMethodEnum::METHOD_CONTRACT == $request->getPath()) {
             $data = EzWebSocketRequestContract::create($jsonObj);
         } else if (EzWebSocketMethodEnum::METHOD_CALL == $request->getPath()) {

@@ -35,9 +35,10 @@ class Env
     }
 
     public static function getDomain(){
+        $schema = Config::get("schema");
         $host = self::getIp();
         $port = Config::get('port');
-        return 'http://'.$host.':'.$port.'/';
+        return $schema.'://'.$host.':'.$port.'/';
     }
 
     public static function getIp(){

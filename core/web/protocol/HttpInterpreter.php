@@ -3,7 +3,7 @@
 class HttpInterpreter implements Interpreter
 {
     public function getSchema():string {
-        return "http";
+        return NetWork::HTTP;
     }
 
     /**
