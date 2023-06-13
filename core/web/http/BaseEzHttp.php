@@ -25,7 +25,7 @@ abstract class BaseEzHttp extends AbstractTcpServer
     }
 
     protected function setPropertyCustom() {
-        $this->dispatcher = $this->setDispatcher(Gear::class);
+        $this->setDispatcher(Gear::class);
         $this->_root = "./";
     }
 

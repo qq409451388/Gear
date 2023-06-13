@@ -1,6 +1,11 @@
 <?php
 class EzHttp extends BaseEzHttp
 {
+    protected function setPropertyCustom() {
+        $this->setDispatcher(GearLite::class);
+        $this->_root = "./";
+    }
+
     public static function create(string $ip, int $port, $dispatcher = GearLite::class) {
         (new EzHttp($ip, $port))->setDispatcher($dispatcher)->start();
     }
