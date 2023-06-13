@@ -16,7 +16,9 @@ abstract class AbstractDO implements EzDataObject, EzIgnoreUnknow, EzComponent
             if (isset($annoList[$k])) {
                 $annoItem = $annoList[$k];
                 $array[$annoItem->value] = $item;
-                unset($array[$k]);
+                if ($k !== $annoItem->value) {
+                    unset($array[$k]);
+                }
             }
         }
         return $array;
