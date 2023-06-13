@@ -2,7 +2,7 @@
 class RouterAspect extends Aspect implements BuildAspect
 {
     private function getHttpMethodLimit() {
-        if ($this->getValue() instanceof RequestMapping) {
+        if (RequestMapping::class === get_class($this->getValue())) {
             return null;
         }
         $httpMethod = str_replace("Mapping", "", $this->getAnnoName());
@@ -38,6 +38,7 @@ class RouterAspect extends Aspect implements BuildAspect
     public function adhere(): void
     {
         foreach ($this->getDependList() as $dependSon) {
+            var_dump($dependSon->getValue());
             $cPath = trim($this->getValue()->getPath(), "/");
             $aPath = trim($dependSon->getValue()->getPath(), "/");
             $path =  $cPath."/".$aPath;
