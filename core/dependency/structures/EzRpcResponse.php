@@ -20,6 +20,12 @@ class EzRpcResponse implements EzDataObject
     }
 
     public static function error($code, $msg = ""){
+        if (Env::isProd()) {
+            return self::error(ErrorCode::SYSTEM_ERROR);
+        }
+        if (empty($msg) && !empty(ErrorCode::$codeMap[$code])) {
+            return (new self(null, $code, ErrorCode::$codeMap[$code]));
+        }
         return (new self(null, $code, $msg));
     }
 
