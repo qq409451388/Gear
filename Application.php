@@ -16,7 +16,10 @@ class Application
         }
         if (!empty($constants)) {
             foreach ($constants as $k => $v) {
-                define($k, PROJECT_PATH.DIRECTORY_SEPARATOR.$v);
+                if (false === strpos($v, DIRECTORY_SEPARATOR)) {
+                    $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
+                }
+                define($k, $v);
             }
         }
         $this->envCheck2("USER_PATH");
