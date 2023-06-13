@@ -38,7 +38,6 @@ class RouterAspect extends Aspect implements BuildAspect
     public function adhere(): void
     {
         foreach ($this->getDependList() as $dependSon) {
-            var_dump($dependSon->getValue());
             $cPath = trim($this->getValue()->getPath(), "/");
             $aPath = trim($dependSon->getValue()->getPath(), "/");
             $path =  $cPath."/".$aPath;
