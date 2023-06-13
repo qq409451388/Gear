@@ -4,7 +4,7 @@ class WebSocketInterpreter implements Interpreter
 {
 
     public function getSchema(): string {
-        return NetWork::SCHEMA_WEBSOCKET;
+        return SchemaConst::WEBSOCKET;
     }
 
     /**

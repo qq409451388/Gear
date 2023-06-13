@@ -12,9 +12,10 @@ class RouterAspect extends Aspect implements BuildAspect
     public function check(): bool
     {
         if (!$this->getAtClass()->isSubclassOf(BaseController::class)) {
+            Logger::error("The Router Annoation Must Use At Object instance of BaseController!");
             return false;
         }
-        if (NetWork::SCHEMA_WEBSOCKET === Config::get("schema")) {
+        if (!SchemaConst::isHttpOrSecurity()) {
             return false;
         }
         /**
