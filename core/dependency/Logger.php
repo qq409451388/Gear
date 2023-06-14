@@ -8,7 +8,7 @@ class Logger
     const TYPE_DATA = 'data';
 
     public static function console(String $msg){
-        echo $msg.PHP_EOL;
+        echo "[".date("Y-m-d H:i:s")."]".$msg.PHP_EOL;
     }
 
     public static function info($template, ...$args)

@@ -149,7 +149,8 @@ class EzObjectUtils
 
     public static function isScalarType($dataType)
     {
-        return in_array(self::$dataTypeMap[$dataType] ?? "", self::$scalarTypeList);
+        return in_array($dataType, self::$scalarTypeList)
+            || in_array(self::$dataTypeMap[$dataType] ?? "", self::$scalarTypeList);
     }
 
     public static function dataTypeNameEquals($actual, $expect)
@@ -168,5 +169,24 @@ class EzObjectUtils
         $actualTrans = self::$dataTypeMap[$actual] ?? null;
         $expectTrans = self::$dataTypeMap[$expect] ?? null;
         return $actualTrans === $expectTrans;
+    }
+
+    /**
+     * 标量转换真实类型
+     * @param $data
+     * @param string $dataType
+     * @return mixed
+     */
+    public static function convertScalarToTrueType($data, string $dataType) {
+        if (in_array($dataType, ["int", "integer", "Integer"])) {
+            return intval($data);
+        }
+        if (in_array($dataType, ["float", "Float"])) {
+            return floatval($data);
+        }
+        if (in_array($dataType, ["double", "Double"])) {
+            return doubleval($data);
+        }
+        return strval($data);
     }
 }
