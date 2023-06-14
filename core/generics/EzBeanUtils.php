@@ -198,12 +198,10 @@ class EzBeanUtils implements EzHelper
         if (!empty($propertyType2)) {
             $newData = [];
             foreach ($data as $datak => $datav) {
-                var_dump(EzObjectUtils::convertScalarToTrueType($datak, $propertyType));
                 $newData[EzObjectUtils::convertScalarToTrueType($datak, $propertyType)] =
                 EzObjectUtils::convertScalarToTrueType($datav, $propertyType2);
             }
             $data = $newData;
-            var_dump($newData, $propertyType, $propertyType2);
             DBC::assertTrue(EzObjectUtils::isMap($data, $propertyType, $propertyType2), "[EzObject] Match data Fail! Type Must Be a Map, But ".gettype($data),
                 0, GearIllegalArgumentException::class);
             return ["MAP", [$propertyType, $propertyType2]];

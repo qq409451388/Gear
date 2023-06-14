@@ -127,7 +127,6 @@ class GearMessageProtocol
     }
 
     public function buildRequest($content):IRequest{
-        var_dump($content);
         return new GmRequest();
     }
 
