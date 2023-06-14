@@ -150,6 +150,33 @@ class DataShader
         }
     }
 
+    public function fields(...$fields) {
+        $fielder = new DataField();
+        $fielder->setFields($fields);
+        $this->commandList[] = $fielder;
+        return $this;
+    }
+
+    public function map($mapRelation) {
+        $mapper = new DataMapper();
+        $mapper->setMapRelation($mapRelation);
+        $this->commandList[] = $mapper;
+        return $this;
+    }
+
+    public function map2(...$mapRelation) {
+        DBC::assertTrue(0 === count($mapRelation)%2, "[DataSharder] 传入参数数量不对，必须为两个一组");
+        $mapRelationNew = [];
+        $cnt = count($mapRelation) / 2;
+        for ($i=0;$i<$cnt;$i++) {
+            $mapRelationNew[$mapRelation[0]] = $mapRelation[1];
+        }
+        $mapper = new DataMapper();
+        $mapper->setMapRelation($mapRelationNew);
+        $this->commandList[] = $mapper;
+        return $this;
+    }
+
     /**
      * 子对象排序
      * @description 操作流
