@@ -119,6 +119,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             } else {
                 if (in_array($column, $jsonKeys)) {
                     $value = EzString::encodeJson($value);
+                    $value = str_replace("\"", "\\\"", $value);
                 } else {
                     $value = htmlentities($value);
                 }
