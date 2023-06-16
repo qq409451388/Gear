@@ -265,4 +265,14 @@ abstract class BaseDAO implements EzBean
         }
         return $this->table;
     }
+
+    public function count($whereSql, $params):int {
+        if ($this->hasSplit) {
+            Logger::warn("未实现此方法");
+            return 0;
+        } else {
+            $sql = "select count(1) as cnt from `{$this->getTable()}` {$whereSql}";
+            return DB::get($this->database)->queryValue($sql, $params, "cnt");
+        }
+    }
 }

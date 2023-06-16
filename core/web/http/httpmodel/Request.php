@@ -222,4 +222,8 @@ class Request implements IRequest,EzDataObject
     {
         return $this->contentLenActual;
     }
+
+    public function toArray(): array {
+        return $this->query;
+    }
 }

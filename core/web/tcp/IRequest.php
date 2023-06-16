@@ -26,4 +26,6 @@ interface IRequest
      * @return bool
      */
     public function isEmpty():bool;
+
+    public function toArray():array;
 }
