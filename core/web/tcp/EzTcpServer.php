@@ -18,6 +18,8 @@ class EzTcpServer extends BaseTcpServer
 
     public function init() {
         $this->master = socket_create(AF_INET, SOCK_STREAM, 0);
+        //复用地址
+        socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
         @socket_bind($this->master, $this->ip, $this->port);
         $this->detection();
         @socket_listen($this->master, 511);
@@ -25,8 +27,6 @@ class EzTcpServer extends BaseTcpServer
         //设置 SO_LINGER 套接字选项
         $linger = array('l_onoff' => 1, 'l_linger' => 0);
         socket_set_option($this->master, SOL_SOCKET, SO_LINGER, $linger);
-        //复用地址
-        socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
         //接收超时
         socket_set_option($this->master,SOL_SOCKET,SO_RCVTIMEO,["sec"=>3, "usec"=>0]);
         //发送超时
