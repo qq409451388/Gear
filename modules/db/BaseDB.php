@@ -102,19 +102,26 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $timeStampKeys = array_column(array_filter($dbInfo, function($dbInfoItem){
             return $dbInfoItem['Type'] == 'timestamp' ? $dbInfoItem : null;
         }), "Field");
+        $jsonKeys = array_column(array_filter($dbInfo, function($dbInfoItem){
+            return $dbInfoItem['Type'] == 'json' ? $dbInfoItem : null;
+        }), "Field");
         foreach($info as $column => &$value){
             if (is_null($value)) {
                 continue;
             }
+            DBC::assertTrue(in_array($column, $jsonKeys) && is_array($value),
+                "[DB Exception] Column $column's DataType is json, And The value must be an array");
             if(in_array($column, $timeStampKeys) && empty($value)){
                 $value = "1970-00-00 00:00:00";
             }
             if ($value instanceof EzDate) {
                 $value = $value->datetimeString();
-            } elseif (is_array($value)) {
-                $value = EzString::encodeJson($value);
             } else {
-                $value = htmlentities($value);
+                if (in_array($column, $jsonKeys)) {
+                    $value = EzString::encodeJson($value);
+                } else {
+                    $value = htmlentities($value);
+                }
             }
         }
     }

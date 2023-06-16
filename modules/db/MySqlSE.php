@@ -20,7 +20,7 @@ class MySqlSE extends BaseDB implements IDbSe
         {
             DBC::throwEx('[Mysql Exception]'.$this->mysqli->connect_error, $this->mysqli->connect_errno);
         }
-        $this->mysqli->set_charset('utf-8');
+        $this->mysqli->set_charset('utf8');
         $this->trace = new Trace();
         $this->database = $database;
         return $this;
