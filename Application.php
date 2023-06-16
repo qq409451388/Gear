@@ -6,6 +6,10 @@
  */
 class Application
 {
+    const OS_UNIX = "UNIX";
+    const OS_WINDOWS = "WINDOWS";
+    const OS_MAC = "MACOS";
+
     private function envConstants($constants = null) {
         $this->envCheck("PROJECT_PATH");
         if (!defined("GEAR_PATH")) {
@@ -16,9 +20,16 @@ class Application
         }
         if (!empty($constants)) {
             foreach ($constants as $k => $v) {
-                if (false === strpos($v, DIRECTORY_SEPARATOR)) {
-                    $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
+                if (self::isWin()) {
+                    if (false === strpos($v, "/")) {
+                        $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
+                    }
+                } else {
+                    if (false === strpos($v, DIRECTORY_SEPARATOR)) {
+                        $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
+                    }
                 }
+
                 define($k, $v);
             }
         }
@@ -102,6 +113,50 @@ class Application
             }
         }
         return $hash;
+    }
+
+    /**
+     * 获取系统家族名称
+     * @return string
+     */
+    public static function getSimlpeOs() {
+        if (defined("PHP_OS_FAMILY")) {
+            switch (PHP_OS_FAMILY) {
+                case "Windows":
+                    return self::OS_WINDOWS;
+                case "BSD":
+                case "Linux":
+                case "Solaris":
+                case "Darwin":
+                    return self::OS_UNIX;
+                case "Unknown":
+                default:
+                    return "";
+
+            }
+        } else if (defined("PHP_OS")) {
+            switch (PHP_OS) {
+                case "Linux":
+                case "Darwin":
+                    return self::OS_UNIX;
+                case "WINNT":
+                case "WIN32":
+                case "Windows":
+                    return self::OS_WINDOWS;
+                default:
+                    return "";
+            }
+        } else {
+            return "";
+        }
+    }
+
+    public static function isWin() {
+        return self::OS_WINDOWS === self::getSimlpeOs();
+    }
+
+    public static function isUnix() {
+        return self::OS_UNIX === self::getSimlpeOs();
     }
 
     protected function register($hash) {

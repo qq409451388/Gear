@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * 对象相关工具类
+ */
 class EzObjectUtils
 {
     public static function hashCode($obj)
@@ -177,7 +180,7 @@ class EzObjectUtils
      * @param string $dataType
      * @return mixed
      */
-    public static function convertScalarToTrueType($data, string $dataType) {
+    public static function convertScalarToTrueType($data, string $dataType = null) {
         if (in_array($dataType, ["int", "integer", "Integer"])) {
             return intval($data);
         }
