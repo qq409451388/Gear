@@ -63,6 +63,10 @@ abstract class BaseEzHttp extends AbstractTcpServer
                 }
                 if(!isset($this->staticCache[$path])) {
                     $this->staticCache[$path] = file_get_contents($fullPath);
+
+                    if (count($this->staticCache) > 100) {
+                        $this->staticCache = array_slice($this->staticCache, 0, 50);
+                    }
                 }
                 return new Response(HttpStatus::OK(), $this->staticCache[$path], $this->getMime($path));
             }else{
