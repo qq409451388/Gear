@@ -171,9 +171,7 @@ class DataShader
                 $dataItem->runModifier($modifier);
             } else {
                 $customFunction = $modifier->getCustomFunction();
-                var_dump($dataItem);
                 $dataItem = $customFunction($dataItem);
-                var_dump($dataItem);
             }
         }
     }
