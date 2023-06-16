@@ -9,12 +9,12 @@ class DataMapper extends DataModifier
 
     public function getCustomFunction(): Closure {
         $mapRelation = $this->mapRelation;
-        return function (&$item) use($mapRelation) {
+        return function ($item) use($mapRelation) {
             $nItem = [];
             foreach ($mapRelation as $field => $newField) {
                 $nItem[$newField] = $item[$field]??null;
             }
-            $item = $nItem;
+            return $nItem;
         };
     }
 }

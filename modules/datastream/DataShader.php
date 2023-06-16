@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 对象润色器
+ * 对象处理器
  * @author guohan
  * @date 2022-11-01
  * @version 1.0
@@ -171,7 +171,9 @@ class DataShader
                 $dataItem->runModifier($modifier);
             } else {
                 $customFunction = $modifier->getCustomFunction();
-                $customFunction($dataItem);
+                var_dump($dataItem);
+                $dataItem = $customFunction($dataItem);
+                var_dump($dataItem);
             }
         }
     }

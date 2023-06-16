@@ -9,12 +9,12 @@ class DataField extends DataModifier
 
     public function getCustomFunction(): Closure {
         $showFields = $this->showFields;
-        return function (&$item) use($showFields) {
+        return function ($item) use($showFields) {
             $nItem = [];
             foreach ($showFields as $field) {
                 $nItem[$field] = $item[$field]??null;
             }
-            $item = $nItem;
+            return $nItem;
         };
     }
 }
