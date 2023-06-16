@@ -111,8 +111,11 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             }
             if ($value instanceof EzDate) {
                 $value = $value->datetimeString();
+            } elseif (is_array($value)) {
+                $value = EzString::encodeJson($value);
+            } else {
+                $value = htmlentities($value);
             }
-            $value = htmlentities($value);
         }
     }
 
