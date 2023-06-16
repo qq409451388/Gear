@@ -41,6 +41,7 @@ abstract class BaseTcpServer
         $this->ip = $ip;
         $this->port = $port;
         $this->schema = $schema;
+        Config::set(["ip" => $ip, "port" => $port, "schema" => $schema]);
     }
 
     /**

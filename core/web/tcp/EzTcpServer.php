@@ -17,6 +17,8 @@ class EzTcpServer extends BaseTcpServer
     }
 
     public function init() {
+        DBC::assertNonNull($this->requestHandler, "[EzTcpServer] Must setRequestHandler! But Null.");
+        DBC::assertNonNull($this->responseHandler, "[EzTcpServer] Must setResponseHandler! But Null.");
         $this->master = socket_create(AF_INET, SOCK_STREAM, 0);
         //复用地址
         socket_set_option($this->master, SOL_SOCKET, SO_REUSEADDR, 1);
