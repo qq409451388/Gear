@@ -109,8 +109,8 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             if (is_null($value)) {
                 continue;
             }
-            DBC::assertTrue(in_array($column, $jsonKeys) && is_array($value),
-                "[DB Exception] Column $column's DataType is json, And The value must be an array");
+            DBC::assertTrue(!in_array($column, $jsonKeys) || is_array($value),
+                "[DB Exception] Column $column DataType is json And The value must be an array");
             if(in_array($column, $timeStampKeys) && empty($value)){
                 $value = "1970-00-00 00:00:00";
             }
