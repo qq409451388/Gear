@@ -72,6 +72,32 @@ class DataShader
         return $this;
     }
 
+    /**
+     * 子对象过滤
+     * @param $key string|int 匹配的key
+     * @param $expectValue mixed 期望的值
+     * @return DataShader
+     */
+    public function where($key, $expectValue) {
+        $filter = new DataWhereFilter();
+        $filter->setWhere($key, $expectValue);
+        $this->commandList[] = $filter;
+        return $this;
+    }
+
+    /**
+     * 子对象过滤
+     * @param $key string|int 匹配的key
+     * @param $expectValue array 期望的值
+     * @return DataShader
+     */
+    public function whereIn($key,array $expectValue) {
+        $filter = new DataWhereFilter();
+        $filter->setWhereIn($key, $expectValue);
+        $this->commandList[] = $filter;
+        return $this;
+    }
+
     private function runFilter(DataFilter $filter){
         foreach($this->data as $dataItem){
             if($dataItem instanceof DataShader){
