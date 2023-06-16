@@ -159,6 +159,10 @@ class Application
         return self::OS_UNIX === self::getSimlpeOs();
     }
 
+    public static function isMac() {
+        return self::OS_MAC === self::getSimlpeOs();
+    }
+
     protected function register($hash) {
         spl_autoload_register(function ($className) use($hash){
             $filePath = $hash[$className] ?? "";
