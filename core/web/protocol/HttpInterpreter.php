@@ -39,7 +39,7 @@ class HttpInterpreter implements Interpreter
         $request->setContentLenActual($httpRequestInfos->contentLengthActual);
         $request->setContentType($httpRequestInfos->contentType);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
-        $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
+        $request->setIsInit($httpRequestInfos->contentLength == $httpRequestInfos->contentLengthActual);
         $request->setCustomHeaders($httpRequestInfos->getCustomHeaders());
         if ($request->isInit()) {
             $requestBody = $this->buildHttpRequestBody($httpRequestInfos);
@@ -82,7 +82,7 @@ class HttpInterpreter implements Interpreter
                     $value->boundary = trim(str_replace("boundary=", "", $contentType[1]??""));
                 }
                 if (property_exists($requestSource, $key)) {
-                    $requestSource->$key = $value;
+                    $requestSource->$key = is_numeric($value) ? EzObjectUtils::convertScalarToTrueType($value, "int") : $value;
                 } else {
                     $requestSource->setCustomHeader($key, $value);
                 }
