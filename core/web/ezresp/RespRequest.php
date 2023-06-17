@@ -41,4 +41,9 @@ class RespRequest implements IRequest
     {
         return true;
     }
+
+    public function toArray(): array
+    {
+        return get_object_vars($this);
+    }
 }
