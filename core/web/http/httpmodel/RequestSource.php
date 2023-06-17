@@ -25,7 +25,21 @@ class RequestSource implements EzDataObject
 
     public $bodyContent;
 
+    private $customHeaders;
+
     public function toString () {
         return EzObjectUtils::toString(get_object_vars($this));
+    }
+
+    public function setCustomHeader(string $k, string $v) {
+        if (isset($this->customHeaders[$k])) {
+            $this->customHeaders[$k] .= $v;
+        } else {
+            $this->customHeaders[$k] = $v;
+        }
+    }
+
+    public function getCustomHeaders() {
+        return $this->customHeaders;
     }
 }

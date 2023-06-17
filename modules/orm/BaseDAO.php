@@ -275,4 +275,27 @@ abstract class BaseDAO implements EzBean
             return DB::get($this->database)->queryValue($sql, $params, "cnt");
         }
     }
+
+    /**
+     * @param $sql
+     * @param $params
+     * @return array<AbstractDO>
+     * @throws ReflectionException
+     */
+    public function findListRaw($sql, $params) {
+        if ($this->hasSplit) {
+            Logger::warn("未实现此方法");
+            return [];
+        } else {
+            $res = DB::get($this->database)->query($sql, $params);
+            if (empty($res)) {
+                return [];
+            }
+            $className = $this->entityClazz->getName();
+            foreach ($res as &$item) {
+                $item = EzBeanUtils::createObject($item, $className);
+            }
+            return $res;
+        }
+    }
 }

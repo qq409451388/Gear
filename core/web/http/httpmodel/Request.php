@@ -35,6 +35,12 @@ class Request implements IRequest,EzDataObject
      */
     private $dispatcher;
 
+    /**
+     * 自定义的headers
+     * @var array<string, string>
+     */
+    private $customHeaders;
+
     public function setQuery($key, $value){
         $this->query[$key] = $value;
     }
@@ -225,5 +231,13 @@ class Request implements IRequest,EzDataObject
 
     public function toArray(): array {
         return $this->query;
+    }
+
+    public function setCustomHeaders($customHeaders) {
+        $this->customHeaders = $customHeaders;
+    }
+
+    public function getCustomHeader($key) {
+        return $this->customHeaders[$key]??null;
     }
 }

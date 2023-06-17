@@ -40,6 +40,7 @@ class HttpInterpreter implements Interpreter
         $request->setContentType($httpRequestInfos->contentType);
         $request->setRequestMethod(HttpMethod::get($httpRequestInfos->requestMethod));
         $request->setIsInit($httpRequestInfos->contentLength === $httpRequestInfos->contentLengthActual);
+        $request->setCustomHeaders($httpRequestInfos->getCustomHeaders());
         if ($request->isInit()) {
             $requestBody = $this->buildHttpRequestBody($httpRequestInfos);
             $this->buildRequestArgs($requestBody, $args, $request);
@@ -80,7 +81,11 @@ class HttpInterpreter implements Interpreter
                     $value->contentType = trim($contentType[0]);
                     $value->boundary = trim(str_replace("boundary=", "", $contentType[1]??""));
                 }
-                $requestSource->$key = is_numeric($value) ? (int) $value : $value;
+                if (property_exists($requestSource, $key)) {
+                    $requestSource->$key = $value;
+                } else {
+                    $requestSource->setCustomHeader($key, $value);
+                }
             }
 
         }
