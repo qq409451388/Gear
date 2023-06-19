@@ -26,4 +26,8 @@ class RequestNormalBody implements EzDataObject
     public function getStruct($k) {
         return $this->data[$k]??null;
     }
+
+    public function getAll() {
+        return $this->data;
+    }
 }

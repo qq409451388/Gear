@@ -28,7 +28,7 @@ class AnnoationRule implements EzHelper
             case AnnoValueTypeEnum::TYPE_RELATION:
                 return self::searchCertainlyRelationshipAnnoationFromDoc($reflection->getDocComment(), $refTarget, $annoName->getName());
             case AnnoValueTypeEnum::TYPE_LIST:
-                return self::searchCertainlyListAnnoationFromDoc($reflection->getDocComment(), $refTarget, $annoName);
+                return self::searchCertainlyListAnnoationFromDoc($reflection->getDocComment(), $refTarget, $annoName->getName());
             default:
                 Logger::warn("[AnnoationRule] Unsupport STRUCT for Anno:{}", $annoName->getName());
                 return null;
@@ -111,7 +111,7 @@ class AnnoationRule implements EzHelper
          * @example: @XXX(a=>1, b=>2)
          */
         //$s = "/\s?@(?<annoName>[a-zA-Z]+)\s?\((?<content>[\w\s=>\"\',]+)\)/";
-        $s = "/\s?@$annoName\s?\((?<content>[\w\s\"\',\%]+)\)/";
+        $s = "/\s?@$annoName\s(?<content>[\w\s]+)/";
         preg_match($s, $document, $matched);
         if (empty($matched)) {
             return null;
@@ -121,7 +121,7 @@ class AnnoationRule implements EzHelper
         if (empty($matchedes2)) {
             return null;
         }
-        $arr = array_combine(array_column($matchedes2, "key"), array_column($matchedes2, "value"));
+        $arr = array_column($matchedes2, "value");
         return AnnoItem::createComplex($annoName, $arr, $at);
     }
 

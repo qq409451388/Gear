@@ -73,10 +73,18 @@ abstract class BaseEzHttp extends AbstractTcpServer
                 return $this->getDynamicResponse($request);
             }
         } catch (Exception $exception) {
-            Logger::error("[Http] getResponse Exception! Code:{}, Error:{}", $exception->getCode(), $exception->getMessage());
+            $message = $exception->getMessage();
+            if (!Env::isProd()) {
+                $message .= $exception->getTraceAsString();
+            }
+            Logger::error("[Http] getResponse Exception! Code:{}, Error:{}", $exception->getCode(), $message);
             return new Response(HttpStatus::INTERNAL_SERVER_ERROR());
         } catch (Error $error) {
-            Logger::error("[Http] getResponse Fail! Code:{}, Error:{}", $error->getCode(), $error->getMessage());
+            $message = $error->getMessage();
+            if (!Env::isProd()) {
+                $message .= $error->getTraceAsString();
+            }
+            Logger::error("[Http] getResponse Fail! Code:{}, Error:{}", $error->getCode(), $message);
             return new Response(HttpStatus::INTERNAL_SERVER_ERROR());
         }
 
@@ -103,11 +111,17 @@ abstract class BaseEzHttp extends AbstractTcpServer
             Logger::error($e->getMessage().$e->getFile().":".$e->getLine());
             $premix = Env::isProd() ? "" : "[".get_class($e)."]";
             $msg = Env::isProd() ? "NetError" : $e->getMessage();
+            if (!Env::isProd()) {
+                $msg .= $e->getTraceAsString();
+            }
             return $this->interpreter->getNetErrorResponse($request, $premix.$msg);
         }catch (Exception $e){
             Logger::error($e->getMessage());
             $premix = Env::isProd() ? "" : "[".get_class($e)."]";
             $msg = Env::isProd() ? "NetError" : $e->getMessage();
+            if (!Env::isProd()) {
+                $msg .= $e->getTraceAsString();
+            }
             return $this->interpreter->getNetErrorResponse($request, $premix.$msg);
         }
     }

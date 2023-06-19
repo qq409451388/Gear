@@ -19,6 +19,9 @@ class Request implements IRequest,EzDataObject
     private $path;
 
     private $query = [];
+    /**
+     * @var RequestJsonBody|RequestMultiBody|RequestNormalBody|RequestBody
+     */
     private $body;
     //request build succ
     private $isInit = false;
@@ -59,22 +62,38 @@ class Request implements IRequest,EzDataObject
 
     /**
      * 获取请求体
-     * @param $key
-     * @return RequestBody
+     * @return array<string, string|int|float>
      */
-    public function getStructBody($key){
-        if (is_null($this->body)) {
-            return null;
+    public function getStructBodyData(){
+        $body = $this->getBody();
+        if ($body instanceof RequestJsonBody) {
+            return $body->getData();
+        } else if ($body instanceof RequestNormalBody) {
+            return $body->getAll();
+        } else if ($body instanceof RequestMultiBody) {
+            return $body->getTextMap();
+        } else {
+            return [];
         }
-        DBC::assertTrue(is_array($this->body), "[Request] Body is not a struct data, may be you need call getBody!");
-        return $this->body[$key]??new RequestNullBody();
     }
 
     /**
-     * @return RequestMultiBody|RequestBody
+     * 获取请求体
+     * @var RequestJsonBody $body when {@link HttpMimeType::MIME_JSON}
+     * @var RequestNormalBody $body when {@link HttpMimeType::MIME_WWW_FORM_URLENCODED}
+     * @var RequestMultiBody $body when {@link HttpMimeType::MIME_MULTI_FORM}
+     * @var RequestBody $body when else Content-type
+     * @return RequestBody|RequestJsonBody|RequestMultiBody|RequestNormalBody
      */
     public function getBody() {
         return $this->body;
+    }
+
+    /**
+     * @return RequestJsonBody|null
+     */
+    public function getJsonRequestBody() {
+        return $this->body instanceof RequestJsonBody ? $this->body : null;
     }
 
     /**

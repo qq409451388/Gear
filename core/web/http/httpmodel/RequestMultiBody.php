@@ -12,6 +12,20 @@ class RequestMultiBody implements EzDataObject
     }
 
     /**
+     * 返回请求体中的所有text对象
+     * @return array<string, string>
+     */
+    public function getTextMap() {
+        $map = [];
+        foreach ($this->data as $k => $obj) {
+            if ($obj instanceof RequestBody) {
+                $map[$k] = $obj->content;
+            }
+        }
+        return $map;
+    }
+
+    /**
      * 返回请求体中的所有文件对象
      * @return array<string, RequestFileBody>
      */

@@ -147,6 +147,9 @@ class EzObjectUtils
 
     public static function isScalar($data)
     {
+        if (is_null($data)) {
+            return true;
+        }
         return is_scalar($data);
     }
 
