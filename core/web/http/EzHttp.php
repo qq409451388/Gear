@@ -28,7 +28,7 @@ class EzHttp extends BaseEzHttp
             }
             return $request;
         });
-        $this->socket->setResponseHandler(function (IRequest $request):IResponse {
+        $this->socket->setResponseHandler(function (EzConnection $connection, IRequest $request):IResponse {
             /**
              * @var Request $request
              */

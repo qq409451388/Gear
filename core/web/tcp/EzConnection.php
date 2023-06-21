@@ -16,6 +16,11 @@ class EzConnection
     private $buf;
 
     /**
+     * @var EzTcpServerConnection $server
+     */
+    private $serverConnection;
+
+    /**
      * @return string
      */
     public function getBuffer()
@@ -62,4 +67,21 @@ class EzConnection
     {
         $this->serverSocket = $serverSocket;
     }
+
+    /**
+     * @return EzTcpServerConnection
+     */
+    public function getServer()
+    {
+        return $this->serverConnection;
+    }
+
+    /**
+     * @param EzTcpServerConnection $server
+     */
+    public function setServerConnection($server): void
+    {
+        $this->serverConnection = $server;
+    }
+
 }

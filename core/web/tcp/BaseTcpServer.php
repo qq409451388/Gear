@@ -6,24 +6,14 @@ abstract class BaseTcpServer
     protected $schema;
     protected $keepAlive = false;
     /**
-     * @var socket|null 主进程
+     * @var EzTcpServerConnection $serverConnection
      */
-    protected $master = null;
-    /**
-     * @var int 最大连接数
-     */
-    protected $maxConnectNum = 200;
+    protected $serverConnection;
 
     /**
      * @var int 连接超时时间（单位：s）
      */
     protected $timeOut = 3;
-
-    /**
-     * userKey => userSocket
-     * @var array socket连接池
-     */
-    protected $connectPool = [];
 
     /**
      * socket read长度
@@ -35,7 +25,7 @@ abstract class BaseTcpServer
      */
     const MASTER = "EZTCP_MASTER";
 
-    private $isInit = false;
+    protected $isInit = false;
 
     public function __construct(string $ip, $port, string $schema = "") {
         $this->ip = $ip;
@@ -81,7 +71,8 @@ abstract class BaseTcpServer
         if(time() % 10000 != 0){
             return;
         }
-        foreach ($this->connectPool as $alias => $connection) {
+        $connectionPool = $this->serverConnection->getConnectPool();
+        foreach ($connectionPool as $alias => $connection) {
             if (self::MASTER == $alias) {
                 continue;
             }
@@ -117,10 +108,11 @@ abstract class BaseTcpServer
 
     /**
      * 将IRequest接口实例对象转换为IResponse接口实例对象
+     * @param EzConnection $connection
      * @param IRequest $request
      * @return IResponse
      */
-    protected abstract function buildResponse(IRequest $request):IResponse;
+    protected abstract function buildResponse(EzConnection $connection, IRequest $request):IResponse;
 
     /**
      * 关闭Server

@@ -42,4 +42,8 @@ class TcpMessage implements IRequest, IResponse
     {
         return json_encode($this->data);
     }
+
+    public function toArray(): array {
+        return $this->data;
+    }
 }

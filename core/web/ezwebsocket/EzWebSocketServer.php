@@ -40,7 +40,7 @@ class EzWebSocketServer extends AbstractTcpServer
         /**
          * @var WebSocketRequest $request
          */
-        function(IRequest $request):IResponse {
+        function(EzConnection $connection, IRequest $request):IResponse {
             $webSocketResposne = new WebSocketResponse();
             $webSocketResposne->method = $request->getPath();
             try {

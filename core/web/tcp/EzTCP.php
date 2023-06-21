@@ -23,6 +23,10 @@ class EzTCP extends BaseTcpClient
         return $result;
     }
 
+    public function read() {
+
+    }
+
     protected function destory(){
         if(null != $this->conn){
             socket_close($this->conn);

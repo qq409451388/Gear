@@ -13,7 +13,7 @@ class EzResp extends AbstractTcpServer
             return $this->interpreter->decode($connection->getBuffer());
         });
 
-        $this->socket->setResponseHandler(function(RespRequest $request) {
+        $this->socket->setResponseHandler(function(EzConnection $connection, RespRequest $request) {
             return $this->interpreter->getDynamicResponse($request);
         });
 
