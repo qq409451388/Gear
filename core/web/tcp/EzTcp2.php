@@ -69,9 +69,16 @@ class EzTcp2 extends BaseTcpClient
                     $feof = true;
                 }
 
-                $this->readCallback["STDIN"]($read);
+                $this->listenStdin($read);
             }
         }
+    }
+
+    private function listenStdin($read) {
+        if (!isset($this->readCallback['STDIN'])) {
+            return;
+        }
+        $this->readCallback["STDIN"]($read);
     }
 
     protected function destory(){
