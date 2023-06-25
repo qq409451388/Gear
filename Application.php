@@ -49,6 +49,7 @@ class Application
         }
     }
 
+    // todo 类加载 区分场景，http、tcp等
     protected function loadUserDefined() {
         if (!defined("USER_PATH")) {
             return;

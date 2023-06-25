@@ -22,6 +22,8 @@ class Env
      */
     private static $RUN_MODE = null;
 
+    public const LOCAL_HOST = "127.0.0.1";
+
     public static function isDev(){
         return self::getEnv() == self::DEV;
     }
@@ -60,6 +62,8 @@ class Env
             if (preg_match('/inet\s+([0-9\.]+)/', $ifconfigInfo, $matches)) {
                 $ipAddress = $matches[1];
             }
+        } else if (self::isMac()) {
+            return self::LOCAL_HOST;
         } else if (self::isWin()) {
             exec("ipconfig", $output);
             foreach ($output as $line) {
@@ -96,8 +100,9 @@ class Env
                 case "BSD":
                 case "Linux":
                 case "Solaris":
-                case "Darwin":
                     return self::OS_UNIX;
+                case "Darwin":
+                    return self::OS_MAC;
                 case "Unknown":
                 default:
                     return "";
@@ -106,8 +111,9 @@ class Env
         } else if (defined("PHP_OS")) {
             switch (PHP_OS) {
                 case "Linux":
-                case "Darwin":
                     return self::OS_UNIX;
+                case "Darwin":
+                    return self::OS_MAC;
                 case "WINNT":
                 case "WIN32":
                 case "Windows":
@@ -128,6 +134,10 @@ class Env
         return self::OS_UNIX === self::getSimlpeOs();
     }
 
+    public static function isMac() {
+        return self::OS_MAC === self::getSimlpeOs();
+    }
+
     /**
      * 获取系统根目录
      * @return string
@@ -135,6 +145,7 @@ class Env
     public static function getRootPath() {
         switch (self::getSimlpeOs()) {
             case self::OS_UNIX:
+            case self::OS_MAC:
                 return "/";
             case self::OS_WINDOWS:
                 return "C:\\";

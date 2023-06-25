@@ -49,17 +49,24 @@ class Gear implements IDispatcher
         }
     }
 
+    /**
+     * 自动注册继承自BaseController的公共函数的路由
+     * 路径规则：类名/方法名
+     * @deprecated
+     * @return void
+     * @throws ReflectionException
+     */
     protected function initRouter() {
         /**
          * @var DynamicProxy $obj
          */
         foreach(BeanFinder::get()->getAll(DynamicProxy::class) as $objName => $obj) {
             $reflection = $obj->getReflectionClass();
+            if(!$reflection->isSubclassOf(BaseController::class)){
+                continue;
+            }
             $reflectionMethods = $reflection->getMethods();
             foreach($reflectionMethods as $reflectionMethod) {
-                if(!$reflection->isSubclassOf(BaseController::class)){
-                    continue;
-                }
                 if(!$reflectionMethod->isPublic()
                     || BaseController::class === $reflectionMethod->getDeclaringClass()->getName()){
                     continue;
@@ -287,7 +294,11 @@ class Gear implements IDispatcher
             /**
              * isDeep传false， 交由注解逻辑:startAnno()统一注入
              */
-            BeanFinder::get()->save($class, EzBeanUtils::createBean($class, false));
+            $bean = EzBeanUtils::createBean($class, false);
+            if (is_null($bean)) {
+                return;
+            }
+            BeanFinder::get()->save($class, $bean);
             Logger::console("[Gear]Create Bean {$class}");
         } catch (Exception $e) {
             DBC::throwEx("[Gear]Create Bean Exception {$e->getMessage()}", 0, GearShutDownException::class);

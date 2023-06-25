@@ -83,5 +83,4 @@ class EzConnection
     {
         $this->serverConnection = $server;
     }
-
 }

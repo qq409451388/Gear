@@ -26,13 +26,16 @@ class EzBeanUtils implements EzHelper
             0, GearIllegalArgumentException::class);
         DBC::assertTrue(is_subclass_of($className, EzBean::class), "[EzObject] Class Must implements EzBean, But {$className}!",
             0, GearIllegalArgumentException::class);
+        $refClass = new EzReflectionClass($className);
+        if ($refClass->isAbstract()) {
+            return null;
+        }
         $class = BeanFinder::get()->pull($className);
         if ($class instanceof DynamicProxy && $class->isInit()) {
             return $class;
         }
         $class = new $className;
         if ($isDeep) {
-            $refClass = new EzReflectionClass($class);
             $properties = $refClass->getProperties();
             foreach ($properties as $property) {
                 $propertyDoc = $property->getDocComment();
