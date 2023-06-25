@@ -38,6 +38,9 @@ class EzTcp2 extends BaseTcpClient
         $this->readCallback['STDIN'] = function($read) {
             if(in_array(STDIN, $read)) {
                 $input = fgets(STDIN);
+                if (empty(trim($input))) {
+                    return;
+                }
                 fwrite($this->conn, $input);
             }
         };

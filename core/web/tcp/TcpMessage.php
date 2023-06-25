@@ -46,4 +46,20 @@ class TcpMessage implements IRequest, IResponse
     public function toArray(): array {
         return $this->data;
     }
+
+    public static function OK() {
+        $s = new self();
+        $s->data = [
+            "code" => 0,
+        ];
+        return $s;
+    }
+
+    public static function ERROR() {
+        $s = new self();
+        $s->data = [
+            "code" => 999,
+        ];
+        return $s;
+    }
 }

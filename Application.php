@@ -128,8 +128,9 @@ class Application
                 case "BSD":
                 case "Linux":
                 case "Solaris":
-                case "Darwin":
                     return self::OS_UNIX;
+                case "Darwin":
+                    return self::OS_MAC;
                 case "Unknown":
                 default:
                     return "";
@@ -138,8 +139,9 @@ class Application
         } else if (defined("PHP_OS")) {
             switch (PHP_OS) {
                 case "Linux":
-                case "Darwin":
                     return self::OS_UNIX;
+                case "Darwin":
+                    return self::OS_MAC;
                 case "WINNT":
                 case "WIN32":
                 case "Windows":
