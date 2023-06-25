@@ -51,14 +51,16 @@ class TcpMessage implements IRequest, IResponse
         $s = new self();
         $s->data = [
             "code" => 0,
+            "msg" => "OK"
         ];
         return $s;
     }
 
-    public static function ERROR() {
+    public static function ERROR($msg = "") {
         $s = new self();
         $s->data = [
             "code" => 999,
+            "msg" => $msg
         ];
         return $s;
     }
