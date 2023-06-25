@@ -202,11 +202,25 @@ class EzRedis extends EzCache
         return $this->exec("SET", $key, $value);
     }
 
+    /**
+     * Only set the key if it doesn't already exist.
+     * @param string $key
+     * @param string $value
+     * @param int $expire
+     * @return bool
+     */
     public function setNX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool {
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "NX", "EX", $expire);
     }
 
+    /**
+     * Only set the key if it already exists.
+     * @param string $key
+     * @param string $value
+     * @param int $expire
+     * @return bool
+     */
     public function setXX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool{
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "XX", "EX", $expire);

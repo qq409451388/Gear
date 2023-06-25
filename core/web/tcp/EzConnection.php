@@ -44,6 +44,11 @@ class EzConnection
         return $this->clientSocket;
     }
 
+    public function getClientIp() {
+        socket_getpeername($this->clientSocket, $ip, $port);
+        return $ip;
+    }
+
     /**
      * @param mixed $socket
      */
