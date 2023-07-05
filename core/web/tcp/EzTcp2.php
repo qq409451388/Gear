@@ -33,13 +33,17 @@ class EzTcp2 extends BaseTcpClient
      * 读入console输入的数据
      * @return void
      */
-    public function addStdin() {
+    public function addStdin(Closure $inputHandler = null) {
         $this->read['STDIN'] = STDIN;
-        $this->readCallback['STDIN'] = function($read) {
+        $this->readCallback['STDIN'] = function($read) use ($inputHandler) {
             if(in_array(STDIN, $read)) {
                 $input = fgets(STDIN);
-                if (empty(trim($input))) {
+                $input = trim($input);
+                if (empty($input)) {
                     return;
+                }
+                if (!is_null($inputHandler)) {
+                    $input = $inputHandler($input);
                 }
                 fwrite($this->conn, $input);
             }

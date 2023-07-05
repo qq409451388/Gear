@@ -226,7 +226,7 @@ class EzRedis extends EzCache
         return $this->exec("SET", $key, $value, "XX", "EX", $expire);
     }
 
-    public function setEX(string $key, string $value, int $expire = self::EXPIRE_WEEK):bool{
+    public function setEX(string $key, $expire, string $value):bool{
         $expire = empty($expire) ? self::EXPIRE_WEEK : $expire;
         return $this->exec("SET", $key, $value, "EX", $expire);
     }

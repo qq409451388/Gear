@@ -95,6 +95,7 @@ class WeChatRobot
         $url = sprintf(self::WECHAT_ROBOT_UPLOAD_URL, $this->key);
         $curl = new EzCurl();
         $curl->setUrl($url);
+        $curl->setTimeOut(60);
         $body = ["media" => new CURLFile($filePath)];
         $res = $curl->post($body, EzCurl::POSTTYPE_FILE);
         $res = EzCollectionUtils::decodeJson($res);
@@ -102,7 +103,7 @@ class WeChatRobot
             return "";
         }
         $mediaId = $res["media_id"];
-        $cache->setEX($key, $mediaId, 86400);
+        $cache->setEX($key, 86400, $mediaId);
         return $mediaId;
     }
 }

@@ -16,7 +16,7 @@ interface IEzCacheString
      * @param int $expire
      * @return bool
      */
-    public function setEX(string $k, string $v, int $expire = 7200):bool;
+    public function setEX(string $k, int $expire, string $v):bool;
 
     /**
      * 支持过期时间的set，key不存在才创建

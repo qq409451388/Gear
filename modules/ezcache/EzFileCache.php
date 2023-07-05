@@ -43,7 +43,7 @@ class EzFileCache extends EzLocalCache
     }
 
     private function initWorker() {
-        if (Env::isUnix()) {
+        if (Env::isUnix() || Env::isMac()) {
             $this->initWorkerForUnix();
         } else if (Env::isWin()) {
             $this->initWorkerForWindows();
@@ -73,21 +73,23 @@ class EzFileCache extends EzLocalCache
         return !in_array($method, self::RO_COMMAND_LIST);
     }
 
-    public function writeAof() {
+    public function writeAof(Exception $e) {
         if (!empty($this->commandList)) {
             foreach ($this->commandList as $command) {
                 Logger::save($command, __CLASS__);
             }
         }
+        throw $e;
     }
 
-    public function writeRdb() {
+    public function writeRdb(Exception $e) {
         $msg = "";
         foreach ($this->_concurrentHashMap as $k => $obj) {
             $msg .= $k.PHP_EOL;
             $msg .= serialize($obj).PHP_EOL;
         }
         Logger::reSave($msg, __CLASS__);
+        throw $e;
     }
 
     public function set(string $k, string $v):bool {

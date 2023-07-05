@@ -155,8 +155,9 @@ class EzLocalCache extends EzCache
         return true;
     }
 
-    public function setEX(string $k, string $v, int $expire = 7200):bool
+    public function setEX(string $k, $expire, string $v):bool
     {
+        $expire = intval($expire);
         $this->_concurrentHashMap[$k] = EzLocalCacheObject::create($v, $expire);
         return true;
     }
@@ -166,7 +167,7 @@ class EzLocalCache extends EzCache
         if($this->exists($k)){
             return false;
         }
-        return $this->setEX($k, $v, $expire);
+        return $this->setEX($k, $expire, $v);
     }
 
     public function setXX(string $k, string $v, int $expire = 7200): bool
@@ -174,7 +175,7 @@ class EzLocalCache extends EzCache
         if(!$this->exists($k)){
             return false;
         }
-        return $this->setEX($k, $v, $expire);
+        return $this->setEX($k, $expire, $v);
     }
 
     public function get(string $k): string
