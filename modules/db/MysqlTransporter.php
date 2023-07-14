@@ -4,8 +4,6 @@ class MysqlTransporter
     private $sourceConn;
     private $targetConn;
 
-    private $databasesWhiteList = ["cuishou"];
-
     public function setSource($ip, $user, $pwd, $port){
         $this->sourceConn = mysqli_init();
         $this->sourceConn->connect($ip, $user, $pwd, null, $port);

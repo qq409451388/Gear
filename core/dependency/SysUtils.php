@@ -64,7 +64,7 @@ class SysUtils
             $filename = basename($dir);
             return substr($filename, 0, 1) === '.' || strpos($filename, '.\\') === 0;
         } else {
-            if (Env::isUnix()) {
+            if (Env::isUnix() || Env::isMac()) {
                 $dir = dirname($dir);
                 return substr($dir, 0, 1) === '.' || false !== strpos($dir, '/.');
             } else {
