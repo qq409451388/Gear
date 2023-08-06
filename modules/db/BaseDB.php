@@ -11,7 +11,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             if (is_null($v)) {
                 $vals .= "null";
             } else {
-                $vals .= is_numeric($v) ? $v : '"'.$v.'"';
+                $vals .= is_integer($v) ? $v : '"'.$v.'"';
             }
             $vals .= ",";
         }
@@ -19,6 +19,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $vals = trim($vals, ",");
         $vals = "(".$vals.")";
         $sql = "insert into ".$table." (".$keys.") values ".$vals;
+        Logger::save($sql.";".PHP_EOL, $table);
         return $this->query($sql, [], SqlOptions::new());
     }
 
@@ -36,7 +37,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         foreach($infos as $info){
             $vals .= "(";
             foreach($info as $k => $v){
-                $vals .= is_numeric($v) ? $v : '"'.$v.'"';
+                $vals .= is_integer($v) ? $v : '"'.$v.'"';
                 $vals .= ",";
             }
             $vals = trim($vals, ",");
@@ -45,6 +46,8 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $vals = trim($vals, ",");
 
         $sql = "insert into ".$table." (".$keys.") values ".$vals;
+
+        Logger::save($sql.";".PHP_EOL, $table);
         return $this->query($sql, [], SqlOptions::new());
     }
 
@@ -65,6 +68,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             $singleString .= " and ".$appendSignleString;
         }
         $sql = "update $table set ".$setString." where ".$singleString;
+        Logger::save($sql.";".PHP_EOL, $table);
         return $this->query($sql, []);
     }
 
@@ -99,6 +103,9 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $diffColumns = array_diff($mustExistsColumns, $columns);
         DBC::assertEmpty($diffColumns, "[DB Exception] Must Set Columns ".implode(",", $diffColumns));
 
+        $dbInfoHash = array_column($dbInfo, null, "Field");
+        $this->checkFields($info, $dbInfoHash);
+
         $timeStampKeys = array_column(array_filter($dbInfo, function($dbInfoItem){
             return $dbInfoItem['Type'] == 'timestamp' ? $dbInfoItem : null;
         }), "Field");
@@ -116,6 +123,9 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             }
             if ($value instanceof EzDate) {
                 $value = $value->datetimeString();
+            } else if ($value instanceof SqlJsonDataItem) {
+                $value = $value->getJson();
+                $value = str_replace("\"", "\\\"", $value);
             } else {
                 if (in_array($column, $jsonKeys)) {
                     $value = EzString::encodeJson($value);
@@ -132,6 +142,43 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         //todo 检查每一个info的key都是一样的
         foreach($infos as &$info){
             $this->preCheck4Write($db, $info, $dbInfo);
+        }
+    }
+
+    private function checkFields($itemData, $fieldInfos) {
+        foreach ($itemData as $k => $v) {
+            $fieldInfo = $fieldInfos[$k];
+            if ("NO" === $fieldInfo['Null']) {
+                DBC::assertNonNull($v, "[DB Exception] Column $k Can Not Be Null");
+            }
+            if ("YES" === $fieldInfo['Null'] && is_null($v)) {
+                continue;
+            }
+
+            preg_match("/(?<type>[\/a-zA-Z0-9]+)\(?(?<length>\d+)?\)?/", strtolower($fieldInfo['Type']), $matches);
+            $type = $matches['type'];
+            $length = $matches['length'] ?? 0;
+            switch ($type) {
+                case "char":
+                case "varchar":
+                    DBC::assertLessThan($length, strlen($v), "[DB Exception] Column $k Length Must Less Than $length but sent ".EzObjectUtils::toString($v));
+                    break;
+                case "text":
+                    $valueActualLen = $v instanceof SqlJsonDataItem ? $v->getJsonLength() : strlen($v);
+                    DBC::assertLessThan(65535, $valueActualLen, "[DB Exception] Column $k Length Must Less Than 65535 but sent ".EzObjectUtils::toString($v));
+                    break;
+                case "int":
+                case "tinyint":
+                case "bigint":
+                    DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
+                    DBC::assertLessThan($length, strlen(strval($v)), "[DB Exception] Column $k Length Must Less Than $length but sent ".EzObjectUtils::toString($v));
+                    break;
+                case "datetime":
+                    DBC::assertTrue(EzDateUtils::isValid($v), "[DB Exception] Column $k Must Be A Valid Datetime");
+                    break;
+                default:
+                    Logger::warn("[DB Exception] Column $k Type {$fieldInfo['Type']} Not Check, sendType $type");
+            }
         }
     }
 }

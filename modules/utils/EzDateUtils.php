@@ -43,4 +43,8 @@ class EzDateUtils
         }
         return $resultStr;
     }
+
+    public static function isValid($data) {
+        return false !== strtotime($data);
+    }
 }

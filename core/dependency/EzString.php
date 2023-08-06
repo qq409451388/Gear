@@ -150,7 +150,7 @@ class EzString
         return trim($string, "��\t\n\r ");
     }
 
-    public static function convertEncoding($arr, $toEncoding, $fromEncoding='', $convertKey=false)
+    public static function convertEncoding($arr, $toEncoding, $fromEncoding='AUTO', $convertKey=false)
     {
         if (empty($arr) || $toEncoding == $fromEncoding)
         {
@@ -444,5 +444,51 @@ class EzString
         } else {
             return strval($object);
         }
+    }
+
+    public static function equalsIgnoreCase($a, $b) {
+        if (!is_string($a) || !is_string($b)) {
+            return false;
+        }
+        return strtolower($a) == strtolower($b);
+    }
+
+    /**
+     * if $haystack contains $needle then return true else return false
+     * @example containIgnoreCase("a", "abc") return true
+     * @param $needle
+     * @param $haystack
+     * @return bool
+     */
+    public static function containIgnoreCase($needle, $haystack) {
+        if (!is_string($haystack) || !is_string($needle)) {
+            return false;
+        }
+        return false !== strstr($haystack, $needle);
+    }
+
+    public static function seemlike($a, $b, $level = false) {
+        if (!is_string($a) || !is_string($b)) {
+            return $level ? -1 : false;
+        }
+        $a = strtolower($a);
+        $b = strtolower($b);
+
+        $check1 = EzString::removeSpace($a) === EzString::removeSpace($b);
+        if ($check1) {
+            return $level ? 1 : true;
+        }
+
+        $aArr = explode(" ", $a);
+        $bArr = explode(" ", $b);
+        $check2 = !empty(array_intersect($aArr, $bArr));
+        return $level ? ($check2 ? 2 : -1) : $check2;
+    }
+
+    public static function removeSpace($str) {
+        if (is_null($str)) {
+            return "";
+        }
+        return str_replace(" ", "", $str);
     }
 }

@@ -73,23 +73,21 @@ class EzFileCache extends EzLocalCache
         return !in_array($method, self::RO_COMMAND_LIST);
     }
 
-    public function writeAof(Exception $e) {
+    public function writeAof() {
         if (!empty($this->commandList)) {
             foreach ($this->commandList as $command) {
                 Logger::save($command, __CLASS__);
             }
         }
-        throw $e;
     }
 
-    public function writeRdb(Exception $e) {
+    public function writeRdb() {
         $msg = "";
         foreach ($this->_concurrentHashMap as $k => $obj) {
             $msg .= $k.PHP_EOL;
             $msg .= serialize($obj).PHP_EOL;
         }
         Logger::reSave($msg, __CLASS__);
-        throw $e;
     }
 
     public function set(string $k, string $v):bool {
