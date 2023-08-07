@@ -58,7 +58,7 @@ class Application
     }
 
     // todo 类加载 区分场景，http、tcp等
-    protected function loadUserDefined() {
+    protected function loadWebServerContainer() {
         if (!defined("USER_PATH")) {
             return;
         }
@@ -190,7 +190,6 @@ class Application
         $app->loadCore();
         $app->initConfig();
         $app->loadModulePackages();
-        $app->loadUserDefined();
         Env::setRunModeScript();
         return $app;
     }
@@ -202,7 +201,7 @@ class Application
         $app->loadCore();
         $app->initConfig();
         $app->loadModulePackages();
-        $app->loadUserDefined();
+        $app->loadWebServerContainer();
         Env::setRunModeConsole();
         return $app;
     }

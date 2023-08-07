@@ -13,32 +13,40 @@ class Logger
 
     public static function info($template, ...$args)
     {
-        $template = '[Info]'.$template;
+        $template = '[INFO]'.$template;
         $res = self::matchTemplate($template, $args);
-        if(Env::isDev()){
+        if(Env::isScript() || Env::isDev()){
             self::console($res);
         }
-        self::write($res, self::TYPE_RECORD);
+        if (Env::isConsole()) {
+            self::write($res, self::TYPE_RECORD);
+        }
     }
 
     public static function warn($template, ...$args)
     {
-        $template = '[Warn]'.$template;
+        $template = '[WARN]'.$template;
         $res = self::matchTemplate($template, $args);
-        if(Env::isDev()){
+        if (Env::isScript() || Env::isDev()) {
             self::console($res);
         }
-        self::write($res, self::TYPE_RECORD);
+        if (Env::isConsole()) {
+            self::write($res, self::TYPE_RECORD);
+            self::write($res, self::TYPE_RECORD, date('Y-m-d')."_warn");
+        }
     }
 
     public static function error($template, ...$args)
     {
-        $template = '[Error]'.$template;
+        $template = '[ERROR]'.$template;
         $res = self::matchTemplate($template, $args);
-        if(Env::isDev()){
+        if (Env::isScript() || Env::isDev()) {
             self::console($res);
         }
-        self::write($res, self::TYPE_RECORD);
+        if (Env::isConsole()) {
+            self::write($res, self::TYPE_RECORD);
+            self::write($res, self::TYPE_RECORD, date('Y-m-d')."_error");
+        }
     }
 
     public static function save($msg, $name)
@@ -81,14 +89,13 @@ class Logger
         return file_get_contents(self::generateFilePath($type, $fileName));
     }
 
-    private static function write($msg, $type, $fileName = '')
+    private static function write($msg, $type, $fileName = '', $ext = ".log")
     {
         $dirPath = self::LOG_PATH.$type.DIRECTORY_SEPARATOR;
         if(!is_dir($dirPath))
         {
             mkdir($dirPath, 0777, true);
         }
-        $ext = '.log';
         if(empty($fileName))
         {
             $fileName = date('Y-m-d');
