@@ -11,6 +11,14 @@ class Application
     const OS_MAC = "MACOS";
 
     private function envConstants($constants = null) {
+        if (!empty($constants)) {
+            foreach ($constants as $k => $v) {
+                define($k, $v);
+            }
+        }
+    }
+
+    private function envPaths($paths = null) {
         $this->envCheck("PROJECT_PATH");
         if (!defined("GEAR_PATH")) {
             define("GEAR_PATH", PROJECT_PATH."/Gear");
@@ -18,8 +26,8 @@ class Application
         if (!defined("CORE_PATH")) {
             define("CORE_PATH", GEAR_PATH."/core");
         }
-        if (!empty($constants)) {
-            foreach ($constants as $k => $v) {
+        if (!empty($paths)) {
+            foreach ($paths as $k => $v) {
                 if (self::isWin()) {
                     if (false === strpos($v, "/")) {
                         $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
@@ -175,8 +183,9 @@ class Application
         });
     }
 
-    public static function runScript($constants = null) {
+    public static function runScript($paths = null, $constants = null) {
         $app = new self();
+        $app->envPaths($paths);
         $app->envConstants($constants);
         $app->loadCore();
         $app->initConfig();
@@ -186,8 +195,9 @@ class Application
         return $app;
     }
 
-    public static function runWebServer($constants = null) {
+    public static function runWebServer($paths = null, $constants = null) {
         $app = new self();
+        $app->envPaths($paths);
         $app->envConstants($constants);
         $app->loadCore();
         $app->initConfig();
