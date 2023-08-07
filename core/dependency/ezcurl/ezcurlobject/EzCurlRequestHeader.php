@@ -45,7 +45,7 @@ class EzCurlRequestHeader extends EzCurlHeader
         return $s;
     }
 
-    private function contentLengthToString() {
+    protected function contentLengthToString() {
         return "Content-Length: " . $this->contentLength;
     }
 

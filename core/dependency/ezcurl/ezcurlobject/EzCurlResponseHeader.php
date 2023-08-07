@@ -22,7 +22,27 @@ class EzCurlResponseHeader extends EzCurlHeader
         return $s;
     }
 
+    protected function dateToString() {
+        return "Date: " . $this->date . PHP_EOL;
+    }
+
+    protected function httpStatusToString() {
+        return "HTTP/1.1 " . $this->httpStatus . PHP_EOL;
+    }
+
+    protected function serverToString() {
+        return "Server: " . $this->server . PHP_EOL;
+    }
+
     public function buildSource(): array {
         // TODO: Implement buildSource() method.
+    }
+
+    protected function keepLiveToString() {
+        return "Connection: " . $this->keepLive . PHP_EOL;
+    }
+
+    protected function httpVersionToString() {
+        return "HTTP/".$this->httpVersion.PHP_EOL;
     }
 }

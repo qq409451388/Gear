@@ -41,7 +41,6 @@ class Application
                 define($k, $v);
             }
         }
-        $this->envCheck2("USER_PATH");
         $this->envCheck2("CONFIG_PATH");
     }
 
@@ -198,6 +197,7 @@ class Application
         $app = new self();
         $app->envPaths($paths);
         $app->envConstants($constants);
+        $app->envCheck2("USER_PATH");
         $app->loadCore();
         $app->initConfig();
         $app->loadModulePackages();
