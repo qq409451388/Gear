@@ -28,7 +28,7 @@ class EzCurlRequestHeader extends EzCurlHeader
         if (empty($this->customHeader)) {
             return "";
         }
-        return implode(PHP_EOL, $this->customHeader) . PHP_EOL;
+        return implode(PHP_EOL, $this->customHeader);
     }
 
     public function toString(): string {
@@ -37,7 +37,7 @@ class EzCurlRequestHeader extends EzCurlHeader
         foreach ($vars as $varName => $var) {
             $varToStringMethodName = $varName . "ToString";
             if (method_exists($this, $varToStringMethodName)) {
-                $s .= $this->$varToStringMethodName();
+                $s .= $this->$varToStringMethodName().PHP_EOL;
             } else {
                 Logger::warn(__CLASS__ . " Unset Method {} for property {}!", $varToStringMethodName, $varName);
             }

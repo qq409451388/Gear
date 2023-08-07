@@ -38,7 +38,7 @@ abstract class EzCurlHeader
         if (empty($this->cookie)) {
             return "";
         }
-        return "Cookie: " . wordwrap(implode("; ", $this->cookie), 100) . PHP_EOL;
+        return "Cookie: " . wordwrap(implode("; ", $this->cookie), 100);
     }
 
     protected function contentLengthToString() {

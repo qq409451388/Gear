@@ -461,7 +461,7 @@ class EzCurl2
         $msg = 'EzCurl [' . $response->requestMethod . '] ' . $this->url . PHP_EOL;
         if (!empty($this->requestHeader)) {
             $msg .= '[RequestHeader] ' . PHP_EOL;
-            $msg .= print_r(is_null($this->requestHeader) ? "" : $this->requestHeader->toString(), true);
+            $msg .= print_r(is_null($this->requestHeader) ? "" : $this->requestHeader->toString(), true).PHP_EOL;
         }
         if (!empty($this->body)) {
             $msg .= PHP_EOL;

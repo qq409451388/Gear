@@ -14,7 +14,7 @@ class EzCurlResponseHeader extends EzCurlHeader
         foreach ($vars as $varName => $var) {
             $varToStringMethodName = $varName . "ToString";
             if (method_exists($this, $varToStringMethodName)) {
-                $s .= $this->$varToStringMethodName();
+                $s .= $this->$varToStringMethodName().PHP_EOL;
             } else {
                 Logger::warn(__CLASS__ . " Unset Method {} for property {}!", $varToStringMethodName, $varName);
             }
@@ -23,15 +23,15 @@ class EzCurlResponseHeader extends EzCurlHeader
     }
 
     protected function dateToString() {
-        return "Date: " . $this->date . PHP_EOL;
+        return "Date: " . $this->date;
     }
 
     protected function httpStatusToString() {
-        return "HTTP/1.1 " . $this->httpStatus . PHP_EOL;
+        return "HTTP/1.1 " . $this->httpStatus;
     }
 
     protected function serverToString() {
-        return "Server: " . $this->server . PHP_EOL;
+        return "Server: " . $this->server;
     }
 
     public function buildSource(): array {
@@ -39,10 +39,10 @@ class EzCurlResponseHeader extends EzCurlHeader
     }
 
     protected function keepLiveToString() {
-        return "Connection: " . $this->keepLive . PHP_EOL;
+        return "Connection: " . $this->keepLive;
     }
 
     protected function httpVersionToString() {
-        return "HTTP/".$this->httpVersion.PHP_EOL;
+        return "HTTP/".$this->httpVersion;
     }
 }
