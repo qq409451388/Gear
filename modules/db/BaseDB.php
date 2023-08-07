@@ -176,6 +176,11 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
                 case "datetime":
                     DBC::assertTrue(EzDateUtils::isValid($v), "[DB Exception] Column $k Must Be A Valid Datetime");
                     break;
+                case "date":
+                    DBC::assertTrue(EzDateUtils::isValid($v), "[DB Exception] Column $k Must Be A Valid Date");
+                    break;
+                case "decimal":
+                    break;
                 default:
                     Logger::warn("[DB Exception] Column $k Type {$fieldInfo['Type']} Not Check, sendType $type");
             }

@@ -1,7 +1,7 @@
 <?php
 class SqlOptions
 {
-    private $useCache = true;
+    private $useCache = false;
 
     /**
      * @var bool chunk and merge result,when use SqlPatternChunk map in where

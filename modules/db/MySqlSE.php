@@ -30,6 +30,14 @@ class MySqlSE extends BaseDB implements IDbSe
         if(null == $sqlOptions){
             $sqlOptions = SqlOptions::new();
         }
+        $cache = CacheFactory::getInstance(CacheFactory::TYPE_MEM);
+        $key = $this->database . ":" . $sqlTemplate . ":" . json_encode($binds). ":".EzObjectUtils::toString($sqlOptions);
+        if ($sqlOptions->getUseCache()) {
+            $value = $cache->get($key);
+            if (!empty($value)) {
+                return EzCollectionUtils::decodeJson($value);
+            }
+        }
         $this->trace->start();
         $this->buildSql($sqlTemplate, $binds, $sqlOptions);
         if(null != ($chunkResult = $this->chunkResult($binds, $sqlOptions))){
@@ -47,7 +55,11 @@ class MySqlSE extends BaseDB implements IDbSe
         {
             return $query;
         }
-        return $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+        $result = $query ? $query->fetch_all(MYSQLI_ASSOC) : [];
+        if ($sqlOptions->getUseCache()) {
+            $cache->set($key, EzString::encodeJson($result));
+        }
+        return $result;
     }
 
     public function startTransaction()
