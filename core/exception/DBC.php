@@ -118,6 +118,22 @@ class DBC
     }
 
     /**
+     * 断言实际数值小于等于预期
+     * @param int $expect
+     * @param int $actual
+     * @param $msg
+     * @param $code
+     * @param $clazz
+     * @return void
+     * @throws Exception
+     */
+    public static function assertMoreThan(int $expect, int $actual, $msg, $code = 0, $clazz = GearRunTimeException::class) {
+        if($expect > $actual){
+            self::throwEx($msg, $code, $clazz);
+        }
+    }
+
+    /**
      * @param $obj
      * @param $msg
      * @param $code
@@ -187,5 +203,22 @@ class DBC
      */
     public static function assertNotList($obj, $msg, $code = 0, $clazz = GearRunTimeException::class) {
         self::assertFalse(EzObjectUtils::isList($obj), $msg, $code, $clazz);
+    }
+
+    public static function assertInRange(string $expect, int $actual, $msg, $code = 0, $clazz = GearRunTimeException::class) {
+        $bounds = explode(',', trim($expect, '[]()'));
+        if ($expect[0] == '[') {
+            self::assertFalse($actual < $bounds[0], $msg, $code, $clazz);
+        } else {
+            self::assertFalse($actual <= $bounds[0], $msg, $code, $clazz);
+        }
+        if ($expect[strlen($expect)-1] == ']') {
+            self::assertFalse($actual > $bounds[1], $msg, $code, $clazz);
+            if ($actual > $bounds[1]) {
+                return false;
+            }
+        } else {
+            self::assertFalse($actual >= $bounds[1], $msg, $code, $clazz);
+        }
     }
 }

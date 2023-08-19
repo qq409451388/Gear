@@ -37,8 +37,6 @@ class EzEncoder{
     /**
      * 片base64解码
      * @param string $base64_image_content 图片文件流
-     * @param bool $save_img    是否保存图片
-     * @param string $path 文件保存路径
      * @return string
      */
     public static function imgBase64Decode($base64_image_content)
@@ -66,8 +64,9 @@ class EzEncoder{
 
     /**
      * @main 签名
-     * @param $content * @return string * User: sync * Date: 2020/6/12
-     * Time: 3:20 下午
+     * @param $content
+     * @param $privateKey
+     * @return string
      */
     public static function getRsaSign($content, $privateKey)
     {
