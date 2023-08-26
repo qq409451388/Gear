@@ -31,7 +31,7 @@ class EzBeanUtils implements EzHelper
             return null;
         }
         $class = BeanFinder::get()->pull($className);
-        if ($class instanceof DynamicProxy && $class->isInit()) {
+        if ($class instanceof DynamicProxy && $class->__CALL__isInit()) {
             return $class;
         }
         $class = new $className;
@@ -46,7 +46,7 @@ class EzBeanUtils implements EzHelper
                 $property->forceSetValue($class, self::createBean($annoItem->value, $isDeep));
             }
         }
-        $dp = DynamicProxy::get($class, $isDeep);
+        $dp = DynamicProxy::__CALL__get($class, $isDeep);
         if ($isDeep) {
             BeanFinder::get()->save($className, $dp);
         }

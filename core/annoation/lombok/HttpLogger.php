@@ -1,5 +1,5 @@
 <?php
-class HttpLogger extends Anno
+class HttpLogger extends Anno implements ILogger
 {
     /**
      * 指定注解可以放置的位置（默认: 所有）@see AnnoElementType
@@ -25,5 +25,38 @@ class HttpLogger extends Anno
     public static function constAspect()
     {
         return LombokLogAspect::class;
+    }
+
+    public function logBefore(RunTimeProcessPoint $rpp)
+    {
+        /**
+         * @var Request $request
+         */
+        $request = current($rpp->getArgs());
+        Logger::info("Request [{}] [HTTP Method:{}] {}, with args:{}", $rpp->getClassName(), $request->getRequestMethod(),
+            $request->getPath(),
+            EzObjectUtils::toString($request->getQuery()));
+    }
+
+    public function logAfter(RunTimeProcessPoint $rpp)
+    {
+        /**
+         * @var Request $request
+         */
+        $request = current($rpp->getArgs());
+        Logger::info("Request [{}] [HTTP Method:{}] {}, with args:{}, return value:{}",
+            $rpp->getClassName(), $request->getRequestMethod(), $request->getPath(),
+            EzObjectUtils::toString($request->getQuery()), EzObjectUtils::toString($rpp->getReturnValue()));
+    }
+
+    public function logException(RunTimeProcessPoint $rpp)
+    {
+        /**
+         * @var Request $request
+         */
+        $request = current($rpp->getArgs());
+        Logger::error("Request [{}] [HTTP Method:{}] {}, with args:{}, return value:{}",
+            $rpp->getClassName(), $request->getRequestMethod(), $request->getPath(),
+            EzObjectUtils::toString($request->getQuery()), EzObjectUtils::toString($rpp->getReturnValue()));
     }
 }

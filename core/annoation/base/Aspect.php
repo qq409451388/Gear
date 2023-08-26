@@ -1,8 +1,6 @@
 <?php
 abstract class Aspect
 {
-    //标识注解可以保留到什么时候{启动时、运行时}
-    private $policy;
     private $annoName;
 
     /**
@@ -46,22 +44,6 @@ abstract class Aspect
      * @var array<Aspect>
      */
     private $dependList;
-
-    /**
-     * @return mixed
-     */
-    public function getPolicy()
-    {
-        return $this->policy;
-    }
-
-    /**
-     * @param mixed $policy
-     */
-    public function setPolicy($policy): void
-    {
-        $this->policy = $policy;
-    }
 
     /**
      * @return mixed
@@ -219,36 +201,36 @@ abstract class Aspect
     {
         $object = BeanFinder::get()->pull($this->getAtClass()->getName());
         if(!$object instanceof DynamicProxy){
-            $dynamic = DynamicProxy::get($object);
+            $dynamic = DynamicProxy::__CALL__get($object);
         }else{
             $dynamic = $object;
         }
         if(!is_null($this->getAtMethod())){
-            $dynamic->registeBefore($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp) {
+            $dynamic->__CALL__registeBefore($this->getAtMethod()->getName(), $this->annoName, function(RunTimeProcessPoint $rpp) {
                 /**
                  * @var $this RunTimeAspect
                  */
                 $this->before($rpp);
-            });
-            $dynamic->registeAfter($this->getAtMethod()->getName(), function(RunTimeProcessPoint $rpp){
+            }, $this->value->getOrder());
+            $dynamic->__CALL__registeAfter($this->getAtMethod()->getName(), $this->annoName, function(RunTimeProcessPoint $rpp){
                 /**
                  * @var $this RunTimeAspect
                  */
                 $this->after($rpp);
-            });
+            }, $this->value->getOrder());
         }else{
-            $dynamic->registeBeforeAll(function(RunTimeProcessPoint $rpp) {
+            $dynamic->__CALL__registeBeforeAll($this->annoName, function(RunTimeProcessPoint $rpp) {
                 /**
                  * @var $this RunTimeAspect
                  */
                 $this->before($rpp);
-            });
-            $dynamic->registeAfterAll(function(RunTimeProcessPoint $rpp){
+            }, $this->value->getOrder());
+            $dynamic->__CALL__registeAfterAll($this->annoName, function(RunTimeProcessPoint $rpp){
                 /**
                  * @var $this RunTimeAspect
                  */
                 $this->after($rpp);
-            });
+            }, $this->value->getOrder());
         }
 
         BeanFinder::get()->replace(strtolower($this->getAtClass()->getName()), $dynamic);

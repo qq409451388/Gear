@@ -40,6 +40,13 @@ abstract class Anno
         }
     }
 
+    /**
+     * @return int 注解优先级，越大越先执行
+     */
+    public function getOrder() {
+        return 0;
+    }
+
     public function __get($name) {
         $method = "get".ucfirst($name);
         if (method_exists($this, $method)) {

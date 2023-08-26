@@ -1,6 +1,16 @@
 <?php
 class LombokLogAspect extends Aspect implements RunTimeAspect
 {
+    /**
+     * @return ILogger|null
+     */
+    public function getValue() {
+        $value = parent::getValue();
+        if ($value instanceof ILogger) {
+            return $value;
+        }
+        return null;
+    }
 
     public function check(): bool
     {
@@ -9,23 +19,11 @@ class LombokLogAspect extends Aspect implements RunTimeAspect
 
     public function before(RunTimeProcessPoint $rpp): void
     {
-        /**
-         * @var Request $request
-         */
-        $request = current($rpp->getArgs());
-        Logger::info("Request [{}] [HTTP Method:{}] {}, with args:{}", $rpp->getClassName(), $request->getRequestMethod(),
-            $request->getPath(),
-            EzObjectUtils::toString($request->getQuery()));
+        $this->getValue()->logBefore($rpp);
     }
 
     public function after(RunTimeProcessPoint $rpp): void
     {
-        /**
-         * @var Request $request
-         */
-        $request = current($rpp->getArgs());
-        Logger::info("Request [{}] [HTTP Method:{}] {}, with args:{}, return value:{}",
-            $rpp->getClassName(), $request->getRequestMethod(), $request->getPath(),
-            EzObjectUtils::toString($request->getQuery()), EzObjectUtils::toString($rpp->getReturnValue()));
+        $this->getValue()->logAfter($rpp);
     }
 }

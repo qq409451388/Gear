@@ -29,10 +29,11 @@ class UrlMapping implements IRouteMapping
      * @throws ReflectionException
      */
     public function disPatch(IRequest $request) {
-        if(!is_null($this->getHttpMethod()) && $request instanceof Request
+        // todo 临时关闭HTTP METHOD 检查
+        /*if(!is_null($this->getHttpMethod()) && $request instanceof Request
             && $this->getHttpMethod() != $request->getRequestMethod()){
             return $request->getArgumentErrorResponse("Expect HttpMethod:".$this->getHttpMethod());
-        }
+        }*/
         $rewriteRequestParams = $this->rewriteParams($request);
         return call_user_func_array($this->getCallBack(), $rewriteRequestParams);
     }

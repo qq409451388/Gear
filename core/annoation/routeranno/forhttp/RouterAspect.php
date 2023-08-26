@@ -1,5 +1,5 @@
 <?php
-class RouterAspect extends Aspect implements BuildAspect
+class RouterAspect extends Aspect implements BuildAspect, RunTimeAspect
 {
     private function getHttpMethodLimit() {
         if (RequestMapping::class === get_class($this->getValue())) {
@@ -50,5 +50,15 @@ class RouterAspect extends Aspect implements BuildAspect
                 );
             }
         }
+    }
+
+    public function before(RunTimeProcessPoint $rpp): void
+    {
+        var_dump($rpp);
+    }
+
+    public function after(RunTimeProcessPoint $rpp): void
+    {
+        // TODO: Implement after() method.
     }
 }

@@ -61,7 +61,7 @@ class Gear implements IDispatcher
          * @var DynamicProxy $obj
          */
         foreach(BeanFinder::get()->getAll(DynamicProxy::class) as $objName => $obj) {
-            $reflection = $obj->getReflectionClass();
+            $reflection = $obj->__CALL__getReflectionClass();
             if(!$reflection->isSubclassOf(BaseController::class)){
                 continue;
             }
@@ -184,7 +184,7 @@ class Gear implements IDispatcher
             /**
              * @var DynamicProxy $obj
              */
-            $reflection = $obj->getReflectionClass();
+            $reflection = $obj->__CALL__getReflectionClass();
             $twichClassAnno = [];
             $annoMethodList = [];
             $annoPropertyList = [];
@@ -223,16 +223,12 @@ class Gear implements IDispatcher
             if (!$aspect->check()) {
                 continue;
             }
-            if(AnnoPolicyEnum::POLICY_BUILD == $aspect->getPolicy()){
-                /**
-                 * @var $aspect Aspect|BuildAspect
-                 */
+            //if(AnnoPolicyEnum::POLICY_BUILD == $aspect->getPolicy()){
+            if ($aspect instanceof BuildAspect) {
                 $aspect->adhere();
             }
-            if(AnnoPolicyEnum::POLICY_RUNTIME == $aspect->getPolicy()){
-                /**
-                 * @var $aspect Aspect|RunTimeAspect
-                 */
+            //if(AnnoPolicyEnum::POLICY_RUNTIME == $aspect->getPolicy()){
+            if ($aspect instanceof RunTimeAspect) {
                 $aspect->around();
             }
         }
@@ -268,7 +264,6 @@ class Gear implements IDispatcher
          * @var $aspect Aspect
          */
         $aspect = new $aspectClass;
-        $aspect->setPolicy($policy);
         $aspect->setAnnoName($k);
         $aspect->setValue($v);
         $aspect->setIsCombination(is_subclass_of($v, AnnoationCombination::class));
