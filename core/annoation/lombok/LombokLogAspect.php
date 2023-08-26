@@ -9,11 +9,23 @@ class LombokLogAspect extends Aspect implements RunTimeAspect
 
     public function before(RunTimeProcessPoint $rpp): void
     {
-        // TODO: Implement before() method.
+        /**
+         * @var Request $request
+         */
+        $request = current($rpp->getArgs());
+        Logger::info("Request [{}] [HTTP Method:{}] {}, with args:{}", $rpp->getClassName(), $request->getRequestMethod(),
+            $request->getPath(),
+            EzObjectUtils::toString($request->getQuery()));
     }
 
     public function after(RunTimeProcessPoint $rpp): void
     {
-        Logger::info($rpp);
+        /**
+         * @var Request $request
+         */
+        $request = current($rpp->getArgs());
+        Logger::info("Request [{}] [HTTP Method:{}] {}, with args:{}, return value:{}",
+            $rpp->getClassName(), $request->getRequestMethod(), $request->getPath(),
+            EzObjectUtils::toString($request->getQuery()), EzObjectUtils::toString($rpp->getReturnValue()));
     }
 }

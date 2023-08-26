@@ -247,7 +247,12 @@ class Gear implements IDispatcher
         $v = $annoItem->getValue();
         DBC::assertNotEmpty($v->constStruct(), "[Gear] Anno $k Must Defined Const STRUCT!");
         $target = $v->constTarget();
-        DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
+        if (EzObjectUtils::isList($target)) {
+            DBC::assertTrue(in_array($annoItem->at, $target),
+                "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
+        } else {
+            DBC::assertEquals($target, $annoItem->at, "[Gear] Anno $k Must Used At ".AnnoElementType::getDesc($target)."!");
+        }
         $dependConf = $v instanceof AnnoationCombination ? $v->constDepend() : [];
         $policy = $v->constPolicy();
         DBC::assertNotEmpty($policy, "[Gear] Anno $k Must Defined Const POLICY!");

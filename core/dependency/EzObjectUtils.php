@@ -69,6 +69,9 @@ class EzObjectUtils
 
     public static function isList($array)
     {
+        if (!self::isArray($array)) {
+            return false;
+        }
         $i = 0;
         foreach ($array as $k => $v) {
             if ($k !== $i++) {

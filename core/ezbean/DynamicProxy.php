@@ -65,10 +65,16 @@ class DynamicProxy
     }
 
     private function hasBefore($funcName){
+        if (!empty($this->callBefore['*'])) {
+            return true;
+        }
         return array_key_exists($funcName, $this->callBefore);
     }
 
     private function hasAfter($funcName){
+        if (!empty($this->callAfter['*'])) {
+            return true;
+        }
         return array_key_exists($funcName, $this->callAfter);
     }
 
@@ -89,9 +95,9 @@ class DynamicProxy
     }
 
     private function callBefore(RunTimeProcessPoint $rpp){
-        $calls = $this->callBefore[$rpp->getFunctionName()];
+        $calls = $this->callBefore[$rpp->getFunctionName()]??[];
         if(isset($this->callBefore['*'])){
-            $calls[] += $this->callBefore["*"];
+            $calls += $this->callBefore["*"];
         }
         foreach($calls as $call){
             $call($rpp);
@@ -99,9 +105,9 @@ class DynamicProxy
     }
 
     private function callAfter(RunTimeProcessPoint $rpp){
-        $calls = $this->callAfter[$rpp->getFunctionName()];
+        $calls = $this->callAfter[$rpp->getFunctionName()]??[];
         if(isset($this->callAfter['*'])){
-            $calls[] = $this->callAfter["*"];
+            $calls = $this->callAfter["*"];
         }
         foreach ($calls as $call){
             $call($rpp);

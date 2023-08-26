@@ -15,6 +15,11 @@ class AnnoElementType
     ];
 
     public static function getDesc($expected){
+        if (EzObjectUtils::isList($expected)) {
+            return implode(",", array_map(function ($item) {
+                return self::getDesc($item);
+            }, $expected));
+        }
         return self::$descMap[$expected];
     }
 }
