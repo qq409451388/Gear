@@ -130,6 +130,6 @@ class DynamicProxy
 
     // todo order
     private function __CALL__reOrder($runtimeItemList) {
-        var_dump($runtimeItemList);
+        //var_dump($runtimeItemList);
     }
 }

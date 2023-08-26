@@ -54,6 +54,10 @@ class RouterAspect extends Aspect implements BuildAspect, RunTimeAspect
 
     public function before(RunTimeProcessPoint $rpp): void
     {
+        /*// 如有必要，可以限制仅在POST时才使用RequestBody
+        if (HttpMethod::POST !== $this->getHttpMethod()) {
+            return null;
+        }*/
         var_dump($rpp);
     }
 
