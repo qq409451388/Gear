@@ -46,7 +46,6 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $vals = trim($vals, ",");
 
         $sql = "insert into ".$table." (".$keys.") values ".$vals;
-
         Logger::save($sql.";".PHP_EOL, $table);
         return $this->query($sql, [], SqlOptions::new());
     }
@@ -158,7 +157,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
             preg_match("/(?<type>[\/a-zA-Z0-9]+)\(?(?<length>\d+)?\)?(\s+)?(?<unsigned>unsigned)?/", strtolower($fieldInfo['Type']), $matches);
             $type = $matches['type'];
             $length = $matches['length'] ?? 0;
-            $unsigned = $matches['unsigned'] == 'unsigned';
+            $unsigned = $matches['unsigned']??"" == 'unsigned';
             switch ($type) {
                 case "char":
                 case "varchar":
@@ -189,9 +188,9 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
                 case "bigint":
                     DBC::assertNumeric($v, "[DB Exception] Column $k Must Be Numeric");
                     if ($unsigned) {
-                        DBC::assertInRange("[0,18446744073709551615)", $v, "[DB Exception] The value of Column $k Must in range 0~255 but sent ".EzObjectUtils::toString($v));
+                        DBC::assertInRange("[0,18446744073709551615)", $v, "[DB Exception] The value of Column $k Must in range 0~18446744073709551615 but sent ".EzObjectUtils::toString($v));
                     } else {
-                        DBC::assertInRange("[-9223372036854775808,9223372036854775807)", $v, "[DB Exception] The value of Column $k Must in range -128~127 but sent ".EzObjectUtils::toString($v));
+                        DBC::assertInRange("[-9223372036854775808,9223372036854775808)", $v, "[DB Exception] The value of Column $k Must in range -9223372036854775808~9223372036854775808 but sent ".EzObjectUtils::toString($v));
                     }
                     break;
                 case "datetime":

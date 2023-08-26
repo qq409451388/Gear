@@ -61,7 +61,6 @@ class EzDataTransfer
             if(empty($data)){
                 break;
             }
-            var_dump($data);
             $this->save($data);
             $saveCnt += count($data);
             Logger::console("save ".$this->targetDatabase."->".$this->table." ".$saveCnt."/".$total);
@@ -84,9 +83,12 @@ class EzDataTransfer
         if(empty($tables)){
             $tables = DB::get($this->sourceDatabase, $this->sourceEnv)->queryColumn("show tables", [], "Tables_in_{$this->sourceDatabase}");
         }
-        foreach ($tables as $table) {
+        foreach ($tables as $k => $table) {
             $this->setTable($table);
-            $this->initTable($table);
+            $initRes = $this->initTable($table);
+            if (!$initRes) {
+                unset($tables[$k]);
+            }
         }
         //init lots data of table
         foreach($tables as $table){
@@ -104,7 +106,11 @@ class EzDataTransfer
         $tablesExists = DB::get($this->targetDatabase, $this->targetEnv)->queryColumn("show tables", [], "Tables_in_{$this->targetDatabase}");
         if (!in_array($table, $tablesExists)) {
             $tableCmd = DB::get($this->sourceDatabase, $this->sourceEnv)->queryValue("show create table $table", [], "Create Table");
+            if (empty($tableCmd)) {
+                return false;
+            }
             DB::get($this->targetDatabase, $this->targetEnv)->query($tableCmd);
         }
+        return true;
     }
 }
