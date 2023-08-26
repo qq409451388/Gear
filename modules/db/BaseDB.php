@@ -98,6 +98,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         $columns = array_column($dbInfo, "Field");
         $this->preCheckUnknowKeys4Write($columns, $info);
         $this->prepare($dbInfo, $info);
+        var_dump($info);
         $this->checkFields($dbInfo, $info);
     }
 
@@ -125,7 +126,7 @@ abstract class BaseDB extends BaseDBSimple implements IDbSe
         DBC::assertEmpty($diffColumns, "[DB Exception] Must Set Columns ".implode(",", $diffColumns));
     }
 
-    private function prepare($dbInfo, $info) {
+    private function prepare($dbInfo, &$info) {
         $timeStampKeys = array_column(array_filter($dbInfo, function($dbInfoItem){
             return $dbInfoItem['Type'] == 'timestamp' ? $dbInfoItem : null;
         }), "Field");
