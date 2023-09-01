@@ -44,6 +44,7 @@ class DB{
             DBC::throwEx("[DB] Null Env");
         }
         $se = self::$ins->map[$database.$env] ?? null;
+
         if(!$se instanceof IDbSe || $se->isExpired())
         {
             if($se instanceof IDbSe && $se->isExpired()){
@@ -59,6 +60,9 @@ class DB{
     {
         $dbConfig = self::getDbConfig($database, $env);
         $dbType = $dbConfig['dbType'] ?? '';
+        /**
+         * @var IDbSe $se
+         */
         $se = null;
         switch($dbType){
             case self::DB_MONGOPS:
@@ -70,8 +74,7 @@ class DB{
                 break;
             default:
                 DBC::throwEx("[DB]Unknow Db-Type:$dbType");
-                break;
         }
-        return $se->init($dbConfig['host'], $dbConfig['user'], $dbConfig['pwd'], $database, $dbConfig['port']??3306);
+        return $se->init($dbConfig['host'], $dbConfig['port']??3306, $dbConfig['user'], $dbConfig['pwd'], $database);
     }
 }

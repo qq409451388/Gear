@@ -1,7 +1,7 @@
 <?php
 class EzFileUtils
 {
-    public function eachProcessorLine($filePath, Closure $processor, $delimiter = "\t") {
+    public static function eachProcessorLine($filePath, Closure $processor, $delimiter = "\t") {
         DBC::assertTrue(is_file($filePath), "file not exists: $filePath");
         $fileExtName = self::fileExtName($filePath);
         if (".csv" == $fileExtName) {
