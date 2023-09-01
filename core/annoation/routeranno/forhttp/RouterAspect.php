@@ -58,7 +58,6 @@ class RouterAspect extends Aspect implements BuildAspect, RunTimeAspect
         if (HttpMethod::POST !== $this->getHttpMethod()) {
             return null;
         }*/
-        var_dump($rpp);
     }
 
     public function after(RunTimeProcessPoint $rpp): void
