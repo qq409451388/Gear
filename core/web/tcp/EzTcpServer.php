@@ -66,7 +66,7 @@ class EzTcpServer extends BaseTcpServer
         DBC::assertFalse($this->hasConnect($alias), "[EzWebSocketServer Exception] {$alias} Already Connected!");
         if (self::MASTER != $alias) {
             socket_set_nonblock($clientSocket);
-            Logger::console($clientSocket." CONNECTED!");
+            //Logger::console($clientSocket." CONNECTED!");
         }
         $this->serverConnection->clientInPool($clientSocket, $alias);
     }
