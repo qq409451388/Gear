@@ -1,11 +1,13 @@
 <?php
 class UrlMapping implements IRouteMapping
 {
+    private $path;
     private $class;
     private $function;
     private $httpMethod;
 
-    public function __construct($class, $func, $httpMethod = null){
+    public function __construct($path, $class, $func, $httpMethod = null){
+        $this->path = $path;
         $this->class = $class;
         $this->function = $func;
         $this->httpMethod = $httpMethod;
@@ -19,8 +21,14 @@ class UrlMapping implements IRouteMapping
         return $this->httpMethod;
     }
 
-    private function getCallBack() {
-        return [BeanFinder::get()->pull($this->class), $this->function];
+    private function getCallBack($request) {
+        /**
+         * @var DynamicProxy $instance
+         */
+        $instance = BeanFinder::get()->pull($this->class);
+        $instance->addContextInstance($this);
+        $instance->addContextInstance($request);
+        return [$instance, $this->function];
     }
 
     /**
@@ -29,18 +37,17 @@ class UrlMapping implements IRouteMapping
      * @throws ReflectionException
      */
     public function disPatch(IRequest $request) {
-        // todo 临时关闭HTTP METHOD 检查
-        /*if(!is_null($this->getHttpMethod()) && $request instanceof Request
-            && $this->getHttpMethod() != $request->getRequestMethod()){
-            return $request->getArgumentErrorResponse("Expect HttpMethod:".$this->getHttpMethod());
-        }*/
         $rewriteRequestParams = $this->rewriteParams($request);
-        return call_user_func_array($this->getCallBack(), $rewriteRequestParams);
+        return call_user_func_array($this->getCallBack($request), $rewriteRequestParams);
     }
 
     /**
+     * Rewrite to support multiple parameter lists.
+     * 1.query | body => [Request]
+     * 2.query => [XXDTO<? extends BaseDTO>]
+     * 3.body => [Object]
+     * 4.query => [params1, params2, params3, ...]
      * @param Request $request
-     * @return Request|array
      * @throws ReflectionException
      */
     private function rewriteParams($request) {
@@ -115,5 +122,21 @@ class UrlMapping implements IRouteMapping
         }*/
         $requestBodyItem = $refMethod->getAnnoation(Clazz::get(EzRequestBody::class));
         return is_null($requestBodyItem) ? null : $requestBodyItem->getValue();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    /**
+     * @param mixed $path
+     */
+    public function setPath($path): void
+    {
+        $this->path = $path;
     }
 }

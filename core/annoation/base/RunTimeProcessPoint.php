@@ -6,7 +6,7 @@
 class RunTimeProcessPoint
 {
     /**
-     * @var ReflectionClass
+     * @var EzReflectionClass
      */
     private $classInstance;
 
@@ -24,6 +24,11 @@ class RunTimeProcessPoint
      * @var array 参数值列表
      */
     private $args;
+
+    /**
+     * @var array 上下文实例列表
+     */
+    private $contextInstanceList;
 
     /**
      * @var mixed 函数运行返回值
@@ -126,15 +131,15 @@ class RunTimeProcessPoint
     }
 
     /**
-     * @return ReflectionClass
+     * @return EzReflectionClass
      */
-    public function getClassInstance(): ReflectionClass
+    public function getClassInstance(): EzReflectionClass
     {
         return $this->classInstance;
     }
 
     /**
-     * @param ReflectionClass $classInstance
+     * @param EzReflectionClass $classInstance
      */
     public function setClassInstance(ReflectionClass $classInstance): void
     {
@@ -155,5 +160,15 @@ class RunTimeProcessPoint
     public function setIsSkip(bool $isSkip): void
     {
         $this->isSkip = $isSkip;
+    }
+
+    public function getContextInstanceList(): array
+    {
+        return $this->contextInstanceList;
+    }
+
+    public function setContextInstanceList(array $contextInstanceList): void
+    {
+        $this->contextInstanceList = $contextInstanceList;
     }
 }

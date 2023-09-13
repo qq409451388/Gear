@@ -26,11 +26,13 @@ class DynamicProxy
      */
     private $callAfter;
 
+    private $contextInstance;
+
     public function __construct($object){
         $this->obj = $object;
         $this->init = false;
         $this->ref = new EzReflectionClass($this->obj);
-        $this->callBefore = $this->callAfter = [];
+        $this->callBefore = $this->callAfter = $this->contextInstance = [];
     }
 
     public function __CALL__isInit() {
@@ -48,24 +50,28 @@ class DynamicProxy
     }
 
     public function __call($funcName, $args){
-        if(method_exists($this, $funcName)){
-            return call_user_func_array([$this, $funcName], $args);
+        try {
+            if(method_exists($this, $funcName)){
+                return call_user_func_array([$this, $funcName], $args);
+            }
+            $rpp = new RunTimeProcessPoint(get_class($this->obj), $funcName, $args, null);
+            $rpp->setClassInstance($this->ref);
+            $rpp->setContextInstanceList($this->contextInstance);
+            if($this->__CALL__hasBefore($rpp->getFunctionName())){
+                $this->__CALL__callBefore($rpp);
+            }
+            if(!$rpp->isSkip()){
+                $return = call_user_func_array([$this->obj, $rpp->getFunctionName()], $rpp->getArgs());
+                $rpp->setReturnValue($return);
+            }
+            if($this->__CALL__hasAfter($rpp->getFunctionName())){
+                $this->__CALL__callAfter($rpp);
+            }
+            return $rpp->getReturnValue();
+        } finally {
+            $this->clearContextInstance();
         }
-        $rpp = new RunTimeProcessPoint(get_class($this->obj), $funcName, $args, null);
-        $rpp->setClassInstance($this->ref);
-        if($this->__CALL__hasBefore($rpp->getFunctionName())){
-            $this->__CALL__callBefore($rpp);
-        }
-        if($rpp->isSkip()){
-            $return = $rpp->getReturnValue();
-        }else{
-            $return = call_user_func_array([$this->obj, $rpp->getFunctionName()], $rpp->getArgs());
-        }
-        $rpp->setReturnValue($return);
-        if($this->__CALL__hasAfter($rpp->getFunctionName())){
-            $this->__CALL__callAfter($rpp);
-        }
-        return $rpp->getReturnValue();
+
     }
 
     public function __CALL__getSourceObj(){
@@ -131,5 +137,13 @@ class DynamicProxy
     // todo order
     private function __CALL__reOrder($runtimeItemList) {
         //var_dump($runtimeItemList);
+    }
+
+    public function addContextInstance($ins) {
+        $this->contextInstance[] = $ins;
+    }
+
+    private function clearContextInstance() {
+        $this->contextInstance = [];
     }
 }

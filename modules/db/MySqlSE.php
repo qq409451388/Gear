@@ -128,7 +128,7 @@ class MySqlSE extends BaseDBSimple implements IDbSe
         $vals = trim($vals, ",");
 
         $sql = "insert into ".$table." (".$keys.") values ".$vals;
-        Logger::save($sql.";".PHP_EOL, $table);
+        Logger::console($sql.";".PHP_EOL, $table);
         return $this->query($sql, [], SqlOptions::new());
     }
 

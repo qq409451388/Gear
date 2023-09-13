@@ -22,7 +22,7 @@ class EzRouter
             if (array_key_exists($path, $this->urlMap)) {
                 Logger::warn("EzRouter Has Setted Path:".$path.", From Obj:".$class."::".$func);
             }
-            $this->urlMap[$path] = new UrlMapping($class, $func, $httpMethod);
+            $this->urlMap[$path] = new UrlMapping($path, $class, $func, $httpMethod);
             Logger::console("[EzRouter] Mapping Path ".$path." To $func@$class ".Env::getDomain().$path);
         } else {
             $pathExplained = explode("/", $path);
@@ -30,7 +30,7 @@ class EzRouter
             $tmpUrlMapFuzzy = &$this->urlMapFuzzy;
             foreach ($pathExplained as $k => $pathItem) {
                 if ($k == $endIndex) {
-                    $tmpUrlMapFuzzy[$pathItem] = new UrlMapping($class, $func, $httpMethod);
+                    $tmpUrlMapFuzzy[$pathItem] = new UrlMapping($path, $class, $func, $httpMethod);
                 } else {
                     $tmpUrlMapFuzzy[$pathItem] = [];
                     $tmpUrlMapFuzzy = &$tmpUrlMapFuzzy[$pathItem];

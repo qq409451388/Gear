@@ -54,11 +54,23 @@ class RouterAspect extends Aspect implements BuildAspect, RunTimeAspect
 
     public function before(RunTimeProcessPoint $rpp): void
     {
-        /*// 如有必要，可以限制仅在POST时才使用RequestBody
-        if (HttpMethod::POST !== $this->getHttpMethod()) {
-            return null;
-        }*/
-        var_dump($rpp);
+        DBC::assertTrue($rpp->getClassInstance()->isSubclassOf(BaseController::class), "[RouterAspect] The Router Annoation Must Use At Object instance of BaseController!");
+        $contextInstanceList = $rpp->getContextInstanceList();
+        $mapping = $request = null;
+        foreach ($contextInstanceList as $contextInstance) {
+            if (is_null($mapping) && $contextInstance instanceof UrlMapping) {
+                $mapping = $contextInstance;
+            }
+            if (is_null($request) && $contextInstance instanceof Request) {
+                $request = $contextInstance;
+            }
+        }
+        DBC::assertNonNull($mapping, "[RouterAspect] UrlMapping Not Found!");
+        if ($mapping->getHttpMethod() !== $request->getRequestMethod()) {
+            $rpp->setIsSkip(true);
+            $response = new Response(HttpStatus::BAD_REQUEST(), "Http Method {$request->getRequestMethod()} Is Not Support!");
+            $rpp->setReturnValue($response);
+        }
     }
 
     public function after(RunTimeProcessPoint $rpp): void
