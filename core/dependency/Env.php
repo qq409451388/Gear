@@ -235,4 +235,17 @@ class Env
         }
     }
 
+    /**
+     * Support Unix-style paths starting with “~”
+     * @param string $path
+     * @return string
+     */
+    public static function rewritePathForUnix($path) {
+        if (Env::isUnix() && 0 === strpos($path, "~/")) {
+            $home = Env::getHome();
+            return str_replace("~/", $home."/", $path);
+        }
+        return $path;
+    }
+
 }

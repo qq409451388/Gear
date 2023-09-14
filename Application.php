@@ -10,38 +10,56 @@ class Application
     const OS_WINDOWS = "WINDOWS";
     const OS_MAC = "MACOS";
 
+    private function setPath($k, $v) {
+        // rewrite path if $v is only a folder name
+        if (self::isWin()) {
+            if (false === strpos($v, "/")) {
+                $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
+            }
+        } else {
+            if (false === strpos($v, DIRECTORY_SEPARATOR)) {
+                $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
+            }
+        }
+        $v = self::rewritePathForUnix($v);
+        if (!is_dir($v)) {
+            exit("The constants $k <$v> path is not exists!");
+        }
+        define($k, $v);
+    }
+
     private function envConstants($constants = null) {
+        $this->envCheck("PROJECT_PATH");
         if (!empty($constants)) {
             foreach ($constants as $k => $v) {
-                define($k, $v);
+                $this->setPath($k, $v);
             }
+        }
+        if (!defined("GEAR_PATH")) {
+            $this->setPath("GEAR_PATH", PROJECT_PATH."/Gear");
+        }
+        if (!defined("CORE_PATH")) {
+            $this->setPath("CORE_PATH", GEAR_PATH."/core");
+        }
+        if (!defined("USER_PATH")) {
+            $this->setPath("USER_PATH", PROJECT_PATH."/src");
+        }
+        if (!defined("CONFIG_PATH")) {
+            $this->setPath("CONFIG_PATH", self::getHome()."/config");
         }
     }
 
-    private function envPaths($paths = null) {
-        $this->envCheck("PROJECT_PATH");
-        if (!defined("GEAR_PATH")) {
-            define("GEAR_PATH", PROJECT_PATH."/Gear");
+    /**
+     * Support Unix-style paths starting with “~”
+     * @param string $path
+     * @return string
+     */
+    public static function rewritePathForUnix($path) {
+        if (self::isUnix() && 0 === strpos($path, "~/")) {
+            $home = self::getHome();
+            return str_replace("~/", $home."/", $path);
         }
-        if (!defined("CORE_PATH")) {
-            define("CORE_PATH", GEAR_PATH."/core");
-        }
-        if (!empty($paths)) {
-            foreach ($paths as $k => $v) {
-                if (self::isWin()) {
-                    if (false === strpos($v, "/")) {
-                        $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
-                    }
-                } else {
-                    if (false === strpos($v, DIRECTORY_SEPARATOR)) {
-                        $v = PROJECT_PATH.DIRECTORY_SEPARATOR.$v;
-                    }
-                }
-
-                define($k, $v);
-            }
-        }
-        $this->envCheck2("CONFIG_PATH");
+        return $path;
     }
 
     private function envCheck($envKey) {
@@ -58,9 +76,7 @@ class Application
 
     // todo 类加载 区分场景，http、tcp等
     protected function loadWebServerContainer() {
-        if (!defined("USER_PATH")) {
-            return;
-        }
+        $this->envCheck("USER_PATH");
         $hash = $this->getFilePaths(USER_PATH);
         $this->register($hash);
         Config::set(["GLOBAL_USER_CLASS"=>array_keys($hash)]);
@@ -161,6 +177,14 @@ class Application
         }
     }
 
+    protected static function getHome() {
+        if (self::isWin()) {
+            return getenv("HOMEDRIVE").getenv("HOMEPATH");
+        } else {
+            return getenv("HOME");
+        }
+    }
+
     public static function isWin() {
         return self::OS_WINDOWS === self::getSimlpeOs();
     }
@@ -182,9 +206,8 @@ class Application
         });
     }
 
-    public static function runScript($paths = null, $constants = null) {
+    public static function runScript($constants = null) {
         $app = new self();
-        $app->envPaths($paths);
         $app->envConstants($constants);
         $app->loadCore();
         $app->initConfig();
@@ -193,11 +216,9 @@ class Application
         return $app;
     }
 
-    public static function runWebServer($paths = null, $constants = null) {
+    public static function runWebServer($constants = null) {
         $app = new self();
-        $app->envPaths($paths);
         $app->envConstants($constants);
-        $app->envCheck2("USER_PATH");
         $app->loadCore();
         $app->initConfig();
         $app->loadModulePackages();

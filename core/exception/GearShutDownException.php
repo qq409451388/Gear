@@ -16,7 +16,6 @@ class GearShutDownException extends \ErrorException implements Throwable
      */
     public function __construct($message = "", $code = 0, $severity = 1, $filename = __FILE__, $line = __LINE__, Throwable $previous = NULL) {
         parent::__construct($message, $code, $severity, $filename, $line, $previous);
-        Logger::console("[".__CLASS__."] ".$this->getMessage()." ". $this->getTraceAsString());
-        exit();
+        exit("[".__CLASS__."] ".$this->getMessage()." ". $this->getTraceAsString());
     }
 }
