@@ -6,7 +6,7 @@
  */
 class Application
 {
-    const OS_UNIX = "UNIX";
+    const OS_LINUX = "UNIX";
     const OS_WINDOWS = "WINDOWS";
     const OS_MAC = "MACOS";
 
@@ -146,7 +146,7 @@ class Application
                 case "BSD":
                 case "Linux":
                 case "Solaris":
-                    return self::OS_UNIX;
+                    return self::OS_LINUX;
                 case "Darwin":
                     return self::OS_MAC;
                 case "Unknown":
@@ -184,8 +184,12 @@ class Application
         return self::OS_WINDOWS === self::getSimlpeOs();
     }
 
+    public static function isLinux() {
+        return self::OS_LINUX === self::getSimlpeOs();
+    }
+
     public static function isUnix() {
-        return self::OS_UNIX === self::getSimlpeOs();
+        return self::isLinux() || self::isMac();
     }
 
     public static function isMac() {
