@@ -12,6 +12,7 @@ class Config
     public static function init() {
         $pjs = [];
         if (defined("CONFIG_PATH")) {
+            DBC::assertTrue(is_dir(CONFIG_PATH), "[Config] The specified path for CONFIG_PATH does not exist. Please ensure that the path is correct and try again. ".CONFIG_PATH, 0, GearShutDownException::class);
             $configPath = CONFIG_PATH;
             $pjs = SysUtils::scanFile($configPath, -1, [self::EXT_JSON], true);
         }

@@ -180,7 +180,7 @@ class Env
     }
 
     public static function isConsole() {
-        DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!");
+        DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!", 0, GearShutDownException::class);
         return self::$RUN_MODE == self::RUN_MODE_CONSOLE;
     }
 
