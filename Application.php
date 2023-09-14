@@ -67,6 +67,10 @@ class Application
         }
     }
 
+    private function loadSchduleTaskModule() {
+
+    }
+
     // todo 类加载 区分场景，http、tcp等
     protected function loadWebServerContainer() {
         if (!defined("USER_PATH")) {
@@ -157,7 +161,7 @@ class Application
         } else if (defined("PHP_OS")) {
             switch (PHP_OS) {
                 case "Linux":
-                    return self::OS_UNIX;
+                    return self::OS_LINUX;
                 case "Darwin":
                     return self::OS_MAC;
                 case "WINNT":
@@ -242,6 +246,22 @@ class Application
         $app->initConfig();
         $app->loadModulePackages();
         $app->loadWebServerContainer();
+        return $app;
+    }
+
+    /**
+     * The Schedule Task Mode Startup
+     * @param $constants
+     * @return self
+     */
+    public static function runSchduleTask($constants = null) {
+        $app = new self();
+        $app->envConstants($constants);
+        $app->loadCore();
+        Env::setRunModeConsole();
+        $app->initConfig();
+        $app->loadModulePackages();
+        $app->loadSchduleTaskModule();
         return $app;
     }
 }

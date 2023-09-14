@@ -23,6 +23,6 @@
 ### 3.4 数据流处理工具 DataFilter [[点击跳转](https://github.com/qq409451388/Gear/blob/main/modules/datastream/README.md)]
 ## 4.TODO List
 ### Mapping支持Restful风格
-### 使用文档更新
-### 注解解析逻辑抽象拆分
-### 限定EzObject的支持的注解
+### 支持runSchduleTask，思路：使用子任务或者单独的进程去管理，需要进程间通信
+### 支持配置中心C、S
+### 支持注册中心C、S
