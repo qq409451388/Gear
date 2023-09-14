@@ -175,14 +175,6 @@ class Env
         return Config::get("fuzzyrouter")??true;
     }
 
-    /**
-     * 默认的配置包位置
-     * @return string
-     */
-    public static function getDefaultConfigPath() {
-        return PROJECT_PATH.DIRECTORY_SEPARATOR."config";
-    }
-
     public static function isConsole() {
         DBC::assertNonNull(self::$RUN_MODE, "[ENV] Unset RUN MODE!", 0, GearShutDownException::class);
         return self::$RUN_MODE == self::RUN_MODE_CONSOLE;
