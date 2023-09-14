@@ -46,12 +46,12 @@ class EzHttp extends BaseEzHttp
             $this->dispatcher->initWithHttp();
             $this->socket->init();
             $this->socket->start();
-        } catch (Exception $e){
-            Logger::error("[HTTP] Server restarted! Cause By {}, At {}", $e->getMessage(), $e->getTraceAsString());
-            $this->socket->start();
-        } catch (Error $t){
-            Logger::error("[HTTP] Server restarted! Cause By {}, At {}", $t->getMessage(), $t->getTraceAsString());
-            $this->socket->start();
+        } catch (Exception $e) {
+            Logger::error("[HTTP] Server Closed! Cause By {}, At{}({})",
+                $e->getMessage(), $e->getFile(), $e->getLine());
+        } catch (Error $t) {
+            Logger::error("[HTTP] Server Closed! Cause By {}, At{}({})",
+                $t->getMessage(), $t->getFile(), $t->getLine(), $t);
         }
     }
 

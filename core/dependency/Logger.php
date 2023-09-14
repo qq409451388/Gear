@@ -26,12 +26,11 @@ class Logger
     public static function warn($template, ...$args)
     {
         $template = '[WARN]'.$template;
+        self::logException($args);
         $res = self::matchTemplate($template, $args);
         if (Env::isScript() || Env::isDev()) {
             self::console($res);
-        }
-        if (Env::isConsole()) {
-            self::write($res, self::TYPE_RECORD);
+        } else {
             self::write($res, self::TYPE_RECORD, date('Y-m-d')."_warn");
         }
     }
@@ -39,13 +38,27 @@ class Logger
     public static function error($template, ...$args)
     {
         $template = '[ERROR]'.$template;
+        self::logException($args);
         $res = self::matchTemplate($template, $args);
         if (Env::isScript() || Env::isDev()) {
             self::console($res);
-        }
-        if (Env::isConsole()) {
-            self::write($res, self::TYPE_RECORD);
+        } else {
             self::write($res, self::TYPE_RECORD, date('Y-m-d')."_error");
+        }
+    }
+
+    public static function exception($template, ...$args)
+    {
+        $template = '[Exception]'.$template;
+        self::logException($args);
+        $res = self::matchTemplate($template, $args);
+        self::write($res, self::TYPE_RECORD, date('Y-m-d')."_exception");
+    }
+
+    private static function logException(&$args) {
+        if (end($args) instanceof Error || end($args) instanceof Exception) {
+            $exception = array_pop($args);
+            Logger::exception("{} \n{}", $exception->getMessage(), $exception->getTraceAsString());
         }
     }
 

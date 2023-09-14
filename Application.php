@@ -84,10 +84,6 @@ class Application
     }
 
     protected function initConfig() {
-        if (!defined("CONFIG_PATH")) {
-            echo "[".date("Y-m-d H:i:s")."][WARN] Gear framework's Config path not specified, loading default configuration".PHP_EOL;
-            $this->setPath("CONFIG_PATH", self::getHome()."/config");
-        }
         Config::init();
     }
 
@@ -206,7 +202,7 @@ class Application
     }
 
     /**
-     * Ther Script Mode Startup
+     * The Script Mode Startup
      * 1.Environment Variable Configuration
      * 2.Core Loading
      * 3.Configuration Injection
@@ -218,9 +214,9 @@ class Application
         $app = new self();
         $app->envConstants($constants);
         $app->loadCore();
+        Env::setRunModeScript();
         $app->initConfig();
         $app->loadModulePackages();
-        Env::setRunModeScript();
         return $app;
     }
 
@@ -238,10 +234,10 @@ class Application
         $app = new self();
         $app->envConstants($constants);
         $app->loadCore();
+        Env::setRunModeConsole();
         $app->initConfig();
         $app->loadModulePackages();
         $app->loadWebServerContainer();
-        Env::setRunModeConsole();
         return $app;
     }
 }

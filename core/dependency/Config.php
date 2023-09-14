@@ -15,6 +15,8 @@ class Config
             $configPath = Env::rewritePathForUnix(CONFIG_PATH);
             DBC::assertTrue(is_dir($configPath), "[Config] The specified path <".CONFIG_PATH."> for CONFIG_PATH does not exist. Please ensure that the path is correct and try again.", 0, GearShutDownException::class);
             $pjs = SysUtils::scanFile($configPath, -1, [self::EXT_JSON], true);
+        } else {
+            Logger::warn("Gear framework's Config path not specified, loading default configuration.");
         }
         $configPath2 = Env::getDefaultConfigPath();
         $pjs2 = SysUtils::scanFile($configPath2, -1, [self::EXT_JSON], true);
