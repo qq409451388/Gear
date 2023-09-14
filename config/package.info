@@ -1,0 +1,1 @@
+仅仅是config 示例，使用时需要copy依赖的配置到项目下的config路径，或指定常量CONFIG_PATH到自定义目录
