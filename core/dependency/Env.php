@@ -5,7 +5,7 @@ class Env
     public const DEV = "DEV";
     public const TEST = "TEST";
 
-    const OS_UNIX = "UNIX";
+    const OS_LINUX = "LINUX";
     const OS_WINDOWS = "WINDOWS";
     const OS_MAC = "MACOS";
 
@@ -100,7 +100,7 @@ class Env
                 case "BSD":
                 case "Linux":
                 case "Solaris":
-                    return self::OS_UNIX;
+                    return self::OS_LINUX;
                 case "Darwin":
                     return self::OS_MAC;
                 case "Unknown":
@@ -111,7 +111,7 @@ class Env
         } else if (defined("PHP_OS")) {
             switch (PHP_OS) {
                 case "Linux":
-                    return self::OS_UNIX;
+                    return self::OS_LINUX;
                 case "Darwin":
                     return self::OS_MAC;
                 case "WINNT":
@@ -131,7 +131,11 @@ class Env
     }
 
     public static function isUnix() {
-        return self::OS_UNIX === self::getSimlpeOs();
+        return self::isLinux() || self::isMac();
+    }
+
+    public static function isLinux() {
+        return self::OS_LINUX === self::getSimlpeOs();
     }
 
     public static function isMac() {
@@ -144,7 +148,7 @@ class Env
      */
     public static function getRootPath() {
         switch (self::getSimlpeOs()) {
-            case self::OS_UNIX:
+            case self::OS_LINUX:
             case self::OS_MAC:
                 return "/";
             case self::OS_WINDOWS:
@@ -200,10 +204,35 @@ class Env
     public static function eol($os) {
         $hash = [
             self::OS_WINDOWS => "\r\n",
-            self::OS_UNIX => "\n",
+            self::OS_LINUX => "\n",
             self::OS_MAC => "\r"
         ];
 
         return $hash[$os]??"";
     }
+
+    public static function getHome() {
+        $home =  self::isWin() ? getenv("HOMEDRIVE").getenv("HOMEPATH") : getenv("HOME");
+        DBC::assertNotEmpty($home, "[Env] Failed to obtain the home path.", 0, GearShutDownException::class);
+        return $home;
+    }
+
+    /**
+     * Check the path is valid or not
+     * @param string $path
+     * @param bool $absoluteOnly
+     * @return bool
+     */
+    public static function checkPath($path, $absoluteOnly = true) {
+        $firstChar = substr($path, 0, 1);
+        if ($absoluteOnly) {
+            if (self::isUnix()) {
+                return "/" === $firstChar || "~" === $firstChar;
+            } else if (self::isWin()) {
+                return preg_match("/^[a-zA-Z]:/", $path);
+            }
+            return false;
+        }
+    }
+
 }
