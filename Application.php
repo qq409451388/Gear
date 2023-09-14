@@ -36,16 +36,9 @@ class Application
             }
         }
         if (!defined("GEAR_PATH")) {
+            echo "[".date("Y-m-d H:i:s")."][WARN] Gear framework path not specified, loading default configuration".PHP_EOL;
             $this->setPath("GEAR_PATH", PROJECT_PATH."/Gear");
-        }
-        if (!defined("CORE_PATH")) {
             $this->setPath("CORE_PATH", GEAR_PATH."/core");
-        }
-        if (!defined("USER_PATH")) {
-            $this->setPath("USER_PATH", PROJECT_PATH."/src");
-        }
-        if (!defined("CONFIG_PATH")) {
-            $this->setPath("CONFIG_PATH", self::getHome()."/config");
         }
     }
 
@@ -76,7 +69,9 @@ class Application
 
     // todo 类加载 区分场景，http、tcp等
     protected function loadWebServerContainer() {
-        $this->envCheck("USER_PATH");
+        if (!defined("USER_PATH")) {
+            $this->setPath("USER_PATH", PROJECT_PATH."/src");
+        }
         $hash = $this->getFilePaths(USER_PATH);
         $this->register($hash);
         Config::set(["GLOBAL_USER_CLASS"=>array_keys($hash)]);
@@ -89,6 +84,10 @@ class Application
     }
 
     protected function initConfig() {
+        if (!defined("CONFIG_PATH")) {
+            echo "[".date("Y-m-d H:i:s")."][WARN] Gear framework's Config path not specified, loading default configuration".PHP_EOL;
+            $this->setPath("CONFIG_PATH", self::getHome()."/config");
+        }
         Config::init();
     }
 
@@ -206,6 +205,15 @@ class Application
         });
     }
 
+    /**
+     * Ther Script Mode Startup
+     * 1.Environment Variable Configuration
+     * 2.Core Loading
+     * 3.Configuration Injection
+     * 4.Dependency Package Loading
+     * @param $constants
+     * @return self
+     */
     public static function runScript($constants = null) {
         $app = new self();
         $app->envConstants($constants);
@@ -216,6 +224,16 @@ class Application
         return $app;
     }
 
+    /**
+     * The WebServer Mode Startup
+     * 1.Environment Variable Configuration
+     * 2.Core Loading
+     * 3.Configuration Injection
+     * 4.Dependency Package Loading
+     * 5.User Bean Injection & Web Container Loading
+     * @param $constants
+     * @return self
+     */
     public static function runWebServer($constants = null) {
         $app = new self();
         $app->envConstants($constants);
