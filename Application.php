@@ -36,7 +36,7 @@ class Application
             }
         }
         if (!defined("GEAR_PATH")) {
-            echo "[".date("Y-m-d H:i:s")."][WARN] Gear framework path not specified, loading default configuration".PHP_EOL;
+            echo "[".date("Y-m-d H:i:s")."][WARN]Gear framework path not specified, loading default configuration".PHP_EOL;
             $this->setPath("GEAR_PATH", PROJECT_PATH."/Gear");
             $this->setPath("CORE_PATH", GEAR_PATH."/core");
         }
@@ -251,8 +251,12 @@ class Application
 
     /**
      * The Schedule Task Mode Startup
+     * 1.Environment Variable Configuration
+     * 2.Core Loading
+     * 3.Configuration Injection
+     * 4.Dependency Package Loading
      * @param $constants
-     * @return self
+     * @return SchduleTaskApplication
      */
     public static function runSchduleTask($constants = null) {
         $app = new self();
@@ -262,6 +266,6 @@ class Application
         $app->initConfig();
         $app->loadModulePackages();
         $app->loadSchduleTaskModule();
-        return $app;
+        return new SchduleTaskApplication($app);
     }
 }

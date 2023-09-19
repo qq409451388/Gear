@@ -1,4 +1,8 @@
 <?php
+
+/**
+ * WebServer Dispatcher
+ */
 interface IDispatcher
 {
     /**
@@ -14,12 +18,6 @@ interface IDispatcher
      * @throws ReflectionException
      */
     public function initWithTcp();
-
-    /**
-     * 一次性脚本启动器
-     * @return void
-     */
-    public function initWithScript();
 
     /**
      * 判断path是否能够匹配到路由规则
