@@ -81,12 +81,16 @@ class EzObjectUtils
         return true;
     }
 
+    public static function isMap($array) {
+        return is_array($array) && !self::isList($array);
+    }
+
     /**
      * 是否是一个Map
      * @param $array
      * @return bool
      */
-    public static function isMap($array, $keyTypeExpect, $valueTypeExpect)
+    public static function isMapAdvance($array, $keyTypeExpect, $valueTypeExpect)
     {
         $isNotList = is_array($array) && !self::isList($array);
         if (!$isNotList) {
@@ -197,5 +201,15 @@ class EzObjectUtils
             return doubleval($data);
         }
         return strval($data);
+    }
+
+    public static function getFromObject($object, $key) {
+        if (is_array($object)) {
+            return $object[$key] ?? null;
+        } else if (is_object($object)) {
+            return $object->$key ?? null;
+        } else {
+            return null;
+        }
     }
 }

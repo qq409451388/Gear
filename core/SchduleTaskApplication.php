@@ -53,6 +53,7 @@ class SchduleTaskApplication
     }
 
     private function sleep() {
+        sleep(1800);
         $this->timeWheel();
         $firstTask = current($this->taskLog);
         if ($firstTask > ($currentTimeStamp = time())) {
@@ -63,7 +64,7 @@ class SchduleTaskApplication
                 $this->timestamp = $currentTimeStamp;
                 return;
             }
-            usleep(1000);
+            usleep(10000000);
         }
     }
 

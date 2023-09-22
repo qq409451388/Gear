@@ -28,24 +28,7 @@ class DataShader
      */
     private $index = null;
 
-    /**
-     * 创建一个对象着色器
-     * @description 创建流
-     * @param $data
-     * @param $index
-     * @return DataShader
-     */
-    public static function stream($data, $index = null) {
-        $dataShader = new DataShader();
-        $dataShader->data = $data;
-        if(!is_null($index)){
-            if(is_null($dataShader->index)){
-                $dataShader->index = [];
-            }
-            $dataShader->index[] = $index;
-        }
-        return $dataShader;
-    }
+
 
     /**
      * 创建一个子对象着色器
