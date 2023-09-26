@@ -18,6 +18,10 @@ abstract class DataStreamCommand
         $data = ($this->closure)($data);
     }
 
+    public function runForDataItem(&$data, $key = null) {
+        $data = ($this->closure)($data, $key);
+    }
+
     public function applyToItemOnly() {
         $this->isApplyToItem = true;
     }

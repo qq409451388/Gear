@@ -5,9 +5,9 @@
  */
 abstract class DataStreamModifier extends DataStreamCommand
 {
-    public function __construct() {
-        $this->closure = function($data) {
-            return $this->modify($data);
+    public function __construct($key = null) {
+        $this->closure = function($data, $currentKey) use($key) {
+            return EzObjectUtils::isScalar($data) ? $this->modify($data, $currentKey) : $this->modify2($data, $key, $currentKey);
         };
         $this->isApplyToItem = true;
     }
@@ -16,12 +16,12 @@ abstract class DataStreamModifier extends DataStreamCommand
      * @param string|integer $dataItem
      * @return mixed
      */
-    abstract public function modify($dataItem);
+    abstract protected function modify($dataItem, $currentKey = null);
 
     /**
      * @param array|object $dataItem
      * @param $key
      * @return mixed
      */
-    abstract public function modify2($dataItem, $key);
+    abstract protected function modify2($dataItem, $key, $currentKey = null);
 }

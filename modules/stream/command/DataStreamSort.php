@@ -5,5 +5,11 @@
  */
 class DataStreamSort extends DataStreamCommand
 {
+    private $sortRule = [];
 
+    public function __construct() {
+        $this->closure = function() {
+
+        };
+    }
 }

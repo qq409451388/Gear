@@ -59,6 +59,14 @@ class DataStream implements EzHelper
         return $newDataStream;
     }
 
+    public function map($valueMap, $key = null, $defaultValue = null) {
+        $dataStreamMap = new DataStreamValueMap($key);
+        $dataStreamMap->setValueMap($valueMap);
+        $dataStreamMap->setDefaultValue($defaultValue);
+        $this->addCommand($dataStreamMap);
+        return $this;
+    }
+
     public function chunk($length) {
         $this->addCommand(new DataStreamSplit($length));
         return $this;
@@ -81,16 +89,16 @@ class DataStream implements EzHelper
                 "[DataStream] DataStreamCommand's type Must Be DataStreamCommand, But ".gettype($streamCommand)." given!");
             if ($streamCommand->isApplyToItem()) {
                 if ($streamCommand->isMultiStream()) {
-                    foreach ($this->data as &$item) {
+                    foreach ($this->data as $key => &$item) {
                         $newStream = $this->spawn($this->index + 1);
-                        $streamCommand->run($item);
+                        $streamCommand->runForDataItem($item, $key);
                         $newStream->data = $item;
                         $item = $newStream;
                     }
                     $this->isSplited = true;
                 } else {
-                    foreach ($this->data as &$item) {
-                        $streamCommand->run($item);
+                    foreach ($this->data as $key => &$item) {
+                        $streamCommand->runForDataItem($item, $key);
                     }
                 }
             } else {
@@ -141,7 +149,7 @@ class DataStream implements EzHelper
         $this->runCommand();
         $result = [];
         foreach ($this->data as $k => $item) {
-            if ($item instanceof DataShader) {
+            if ($item instanceof DataStream) {
                 $result[$k] = $item->count();
             }
         }
