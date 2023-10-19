@@ -94,7 +94,6 @@ class Gear implements IDispatcher
     /**
      * @param EzReflectionClass $reflection
      * @param array<Aspect> $annoList
-     * @param array<EzReflectionClass> $annoPropertyList
      * @return void
      */
     private function fetchAnnoFromClass($reflection, array &$annoList, array &$twichClassAnno) {
@@ -116,7 +115,6 @@ class Gear implements IDispatcher
     /**
      * @param EzReflectionClass $reflection
      * @param array<Aspect> $annoList
-     * @param array<EzReflectionMethod> $annoPropertyList
      * @return void
      */
     private function fetchAnnoFromMethod($reflection, array &$annoList, array &$annoMethodList) {
@@ -142,7 +140,7 @@ class Gear implements IDispatcher
     /**
      * @param EzReflectionClass $reflection
      * @param array<Aspect> $annoList
-     * @param array<EzReflectionProperty> $annoPropertyList
+     * @param array<string, array<EzReflectionProperty>> $annoPropertyList
      * @return void
      */
     private function fetchAnnoFromProperty($reflection, array &$annoList, array &$annoPropertyList) {
@@ -237,6 +235,7 @@ class Gear implements IDispatcher
     /**
      * @param AnnoItem $annoItem
      * @return Aspect
+     * @throws Exception
      */
     private function buildPoorAspect(AnnoItem $annoItem){
         $k = $annoItem->annoName;
