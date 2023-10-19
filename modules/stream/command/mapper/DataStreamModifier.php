@@ -3,13 +3,14 @@
 /**
  * 子数据项修改器
  */
-abstract class DataStreamModifier extends DataStreamCommand
+abstract class DataStreamModifier extends DataStreamMap
 {
-    public function __construct($key = null) {
-        $this->closure = function($data, $currentKey) use($key) {
+    public function __construct($key = null)
+    {
+        $this->closure = function (&$data, $currentKey) use ($key) {
             return EzObjectUtils::isScalar($data) ? $this->modify($data, $currentKey) : $this->modify2($data, $key, $currentKey);
         };
-        $this->isApplyToItem = true;
+        parent::__construct();
     }
 
     /**

@@ -212,4 +212,18 @@ class EzObjectUtils
             return null;
         }
     }
+
+    public static function cleanUp($obj) {
+        if (empty($obj) || self::isScalar($obj)) {
+            return $obj;
+        }
+        foreach ($obj as $k => &$v) {
+            if (self::isString($v)) {
+                $v = str_replace(array("\r\n", "\r", "\n"), "", $v);
+            } else {
+                $v = self::cleanUp($v);
+            }
+        }
+        return $obj;
+    }
 }

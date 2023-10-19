@@ -386,6 +386,7 @@ class EzString
     }
 
     public static function encodeJson($obj){
+        $obj = EzObjectUtils::cleanUp($obj);
         return json_encode($obj, JSON_UNESCAPED_SLASHES) ?? self::EMPTY_JSON_OBJ;
     }
 

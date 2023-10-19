@@ -1,7 +1,9 @@
 <?php
 
+use filter\DataStreamFilter;
+
 /**
- * 数据流处理器
+ * 数据流处理器(只保留基础函数)
  * @author guohan
  * @date 2023-09-21
  * @version 1.0
@@ -32,13 +34,14 @@ class DataStream implements EzHelper
      * 创建一个数据流处理器
      * @param $data
      * @param $index
-     * @return DataStream
+     * @return static
      */
-    public static function create($data, $index = null) {
-        $stream = new DataStream();
+    public static function create($data, $index = null)
+    {
+        $stream = new static();
         $stream->data = $data;
-        if(!is_null($index)){
-            if(is_null($stream->index)){
+        if (!is_null($index)) {
+            if (is_null($stream->index)) {
                 $stream->index = [];
             }
             $stream->index[] = $index;
@@ -49,44 +52,61 @@ class DataStream implements EzHelper
     /**
      * 创建一个子数据流处理器
      * @param $index
-     * @return DataStream
+     * @return static
      */
-    private function spawn($index) {
+    private function spawn($index)
+    {
         $this->isSplited = true;
-        $newDataStream = new DataStream();
+        $newDataStream = new static();
         $newDataStream->index = $this->index;
         $newDataStream->index[] = $index;
         return $newDataStream;
     }
 
-    public function map($valueMap, $key = null, $defaultValue = null) {
-        $dataStreamMap = new DataStreamValueMap($key);
-        $dataStreamMap->setValueMap($valueMap);
-        $dataStreamMap->setDefaultValue($defaultValue);
+    /**
+     * 对每一个数据项通过Closure进行处理(比较通用一点)
+     * @param Closure $closure
+     * @return $this
+     */
+    public function map(Closure $closure)
+    {
+        $dataStreamMap = new DataStreamMap();
+        $dataStreamMap->setLogic($closure);
         $this->addCommand($dataStreamMap);
         return $this;
     }
 
-    public function chunk($length) {
+    public function chunk($length)
+    {
         $this->addCommand(new DataStreamSplit($length));
         return $this;
     }
 
-    public function distinct($isAdvance = false) {
+    /**
+     * 根据list对象去重
+     * @param $isAdvance
+     * @return $this
+     */
+    public function distinct($isAdvance = false)
+    {
         $this->addCommand(new DataStreamFilter($isAdvance));
         return $this;
     }
 
-    private function addCommand(DataStreamCommand $command) {
+    protected function addCommand(DataStreamCommand $command)
+    {
         $this->commandList[] = $command;
     }
 
-    private function reRank() {}
+    private function reRank()
+    {
+    }
 
-    private function runCommand() {
+    private function runCommand()
+    {
         foreach ($this->commandList as $streamCommand) {
             DBC::assertTrue($streamCommand instanceof DataStreamCommand,
-                "[DataStream] DataStreamCommand's type Must Be DataStreamCommand, But ".gettype($streamCommand)." given!");
+                "[DataStream] DataStreamCommand's type Must Be DataStreamCommand, But " . gettype($streamCommand) . " given!");
             if ($streamCommand->isApplyToItem()) {
                 if ($streamCommand->isMultiStream()) {
                     foreach ($this->data as $key => &$item) {
@@ -115,7 +135,8 @@ class DataStream implements EzHelper
         }
     }
 
-    public function collect() {
+    public function collect()
+    {
         $this->reRank();
         $this->runCommand();
         $result = [];
@@ -129,7 +150,8 @@ class DataStream implements EzHelper
         return $result;
     }
 
-    public function sum() {
+    public function sum()
+    {
         $this->reRank();
         $this->runCommand();
         $result = [];
@@ -138,13 +160,14 @@ class DataStream implements EzHelper
                 $result[$k] = $item->sum();
             } else {
                 DBC::assertTrue(is_int($item),
-                    "[DataStream] DataStreamItem's type Must Be Int, But ".gettype($item)." given!");
+                    "[DataStream] DataStreamItem's type Must Be Int, But " . gettype($item) . " given!");
             }
         }
         return array_sum($this->data);
     }
 
-    public function count() {
+    public function count()
+    {
         $this->reRank();
         $this->runCommand();
         $result = [];

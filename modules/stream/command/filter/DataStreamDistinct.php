@@ -1,11 +1,8 @@
 <?php
-
-/**
- * 数据流过滤器
- */
-class DataStreamFilter extends DataStreamCommand
+class DataStreamDistinct extends DataStreamFilter
 {
-    public function __construct($isAdvance = false) {
+    public function __construct($isAdvance = false)
+    {
         if ($isAdvance) {
             $this->closure = function ($data) {
                 $dataTmp = [];

@@ -56,7 +56,8 @@ class EzBeanUtils implements EzHelper
     /**
      * @param array|null $data
      * @param string $className
-     * @throws ReflectionException
+     * @return BaseDTO|EzIgnoreUnknow|object|null
+     * @throws Exception
      */
     public static function createObject($data, string $className) {
         if (is_null($data)) {
@@ -72,6 +73,7 @@ class EzBeanUtils implements EzHelper
         } else if (is_subclass_of($className, EzSerializeDataObject::class)) {
             $serializerClass = Clazz::get($className)->getDeserializer();
             if (is_null($serializerClass)) {
+                Logger::error("[EzObject] class {} not found! for class:{}", $serializerClass, $className);
                 return null;
             } else {
                 return $serializerClass->deserialize($data);
@@ -81,6 +83,12 @@ class EzBeanUtils implements EzHelper
         }
     }
 
+    /**
+     * @param $data
+     * @param $className
+     * @return BaseDTO|EzIgnoreUnknow|object|null
+     * @throws ReflectionException|GearIllegalArgumentException
+     */
     private static function createNormalObject($data, $className) {
         $class = new $className;
         $refClass = new EzReflectionClass($class);

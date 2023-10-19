@@ -159,22 +159,6 @@ class Request implements IRequest,EzDataObject
         return true;
     }
 
-    public function getDynamicResponse(IRouteMapping $router): IResponse {
-        $response = $router->disPatch($this);
-        if ($response instanceof IResponse) {
-            return $response;
-        } elseif ($response instanceof EzRpcResponse) {
-            $response = $response->toJson();
-        } elseif (is_array($response) || is_object($response)) {
-            $response = EzString::encodeJson($response);
-        }
-        return new Response(HttpStatus::OK(), $response);
-    }
-
-    public function getArgumentErrorResponse($content):IResponse{
-        return new Response(HttpStatus::BAD_REQUEST(), $content);
-    }
-
     /**
      * @return bool
      */
