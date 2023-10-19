@@ -40,7 +40,7 @@ class Config
         if (defined("CONFIG_PATH")) {
             $configPath = Env::rewritePathForUnix(CONFIG_PATH);
         } else {
-            Logger::warn("Gear framework's Config path not specified, loading default configuration.");
+            Logger::warn("Gear framework's Config path not specified, loading default[project_path/config] configuration.");
             $configPath = self::getDefaultConfigPath();
         }
         self::initConfigFromFile($configPath);

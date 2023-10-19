@@ -36,7 +36,7 @@ class Application
             }
         }
         if (!defined("GEAR_PATH")) {
-            echo "[".date("Y-m-d H:i:s")."][WARN]Gear framework path not specified, loading default configuration".PHP_EOL;
+            echo "[".date("Y-m-d H:i:s")."][WARN]Gear framework path not specified, loading default[project_path/Gear] configuration".PHP_EOL;
             $this->setPath("GEAR_PATH", PROJECT_PATH."/Gear");
             $this->setPath("CORE_PATH", GEAR_PATH."/core");
         }
