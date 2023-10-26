@@ -22,6 +22,10 @@ class Trace
         $this->s2 = microtime(true);
     }
 
+    /**
+     * the consume time in ms
+     * @return float
+     */
     public function finish()
     {
         $this->end();
