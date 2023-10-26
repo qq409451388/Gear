@@ -122,4 +122,9 @@ class SysUtils
         }
         return $classes;
     }
+
+    public static function generateThreadId() {
+        $id = uniqid();
+        return md5(time()).'-'.$id;
+    }
 }

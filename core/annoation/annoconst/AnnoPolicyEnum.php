@@ -2,7 +2,7 @@
 class AnnoPolicyEnum
 {
     /**
-     * 在运行时生效
+     * 被动在运行时使用，实现为Aspect类
      */
     public const POLICY_RUNTIME = "RUNTIME";
 

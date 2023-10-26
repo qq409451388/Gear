@@ -1,5 +1,5 @@
 <?php
-class TcpMessage implements IRequest, IResponse
+class TcpMessage extends NetWorkRequest implements IRequest, IResponse
 {
     public $data;
 

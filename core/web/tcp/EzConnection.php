@@ -5,6 +5,8 @@
  */
 class EzConnection
 {
+    private $connectionId;
+
     private $clientSocket;
 
     private $serverSocket;
@@ -19,6 +21,10 @@ class EzConnection
      * @var EzTcpServerConnection $server
      */
     private $serverConnection;
+
+    public function __construcct() {
+        $this->connectionId = SysUtils::generateThreadId();
+    }
 
     /**
      * @return string

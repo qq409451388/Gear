@@ -3,7 +3,7 @@
 /**
  * build for http
  */
-class Request implements IRequest,EzDataObject
+class Request extends NetWorkRequest implements IRequest,EzDataObject
 {
     /**
      * @var HttpContentType $contentType
@@ -243,4 +243,5 @@ class Request implements IRequest,EzDataObject
     public function getCustomHeader($key) {
         return $this->customHeaders[$key]??null;
     }
+
 }

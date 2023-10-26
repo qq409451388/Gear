@@ -1,6 +1,8 @@
 <?php
 interface IRequest
 {
+    public function setConnection(EzConnection $connection);
+    public function getConnection():EzConnection;
     /**
      * @return string
      */

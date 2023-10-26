@@ -19,11 +19,13 @@ class EzHttp extends BaseEzHttp
              */
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);
+                $request->setConnection($connection);
                 if ($request->getContentLen() > Config::get("application.HTTP_SERVER_REQUEST_LIMIT")) {
                     $request->setIsInit(true);
                     return $request;
                 }
             } else {
+                $request->setConnection($connection);
                 $this->appendRequest($request, $buf);
             }
             return $request;

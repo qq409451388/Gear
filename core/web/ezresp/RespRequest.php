@@ -1,5 +1,5 @@
 <?php
-class RespRequest implements IRequest
+class RespRequest extends NetWorkRequest implements IRequest
 {
     public $command;
 

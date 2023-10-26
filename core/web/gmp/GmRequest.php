@@ -1,5 +1,5 @@
 <?php
-class GmRequest implements IRequest
+class GmRequest extends NetWorkRequest implements IRequest
 {
 
     public function getPath(): string
@@ -25,5 +25,25 @@ class GmRequest implements IRequest
     public function isEmpty(): bool
     {
         // TODO: Implement isEmpty() method.
+    }
+
+    public function getRequestId(): string
+    {
+        // TODO: Implement getRequestId() method.
+    }
+
+    public function setRequestId(string $id)
+    {
+        // TODO: Implement setRequestId() method.
+    }
+
+    public function isInit(): bool
+    {
+        // TODO: Implement isInit() method.
+    }
+
+    public function toArray(): array
+    {
+        // TODO: Implement toArray() method.
     }
 }

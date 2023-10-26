@@ -1,5 +1,5 @@
 <?php
-class WebSocketRequest implements IRequest
+class WebSocketRequest extends NetWorkRequest implements IRequest
 {
     /**
      * @var string 请求消息体
@@ -71,5 +71,10 @@ class WebSocketRequest implements IRequest
      */
     public function setData(EzWebSocketRequestItem $data): void {
         $this->data = $data;
+    }
+
+    public function toArray(): array
+    {
+        // TODO: Implement toArray() method.
     }
 }
