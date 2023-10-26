@@ -10,7 +10,7 @@ class DataStreamDistinct extends DataStreamFilter
                     if (EzObjectUtils::isScalar($item)) {
                         $dataTmp[$item] = $item;
                     } else {
-                        $dataTmp[EzObjectUtils::hashCode($item)] = $item;
+                        $dataTmp[EzObjectUtils::identityCode($item)] = $item;
                     }
                 }
                 return array_values($dataTmp);

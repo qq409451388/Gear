@@ -226,4 +226,132 @@ class EzObjectUtils
         }
         return $obj;
     }
+
+    /**
+     * summary for a object
+     * @param $obj
+     * @return string
+     */
+    public static function identityCode($obj) {
+        if (is_array($obj)) {
+            return self::identityCodeForArray($obj);
+        } else if (is_object($obj)) {
+            return self::identityCodeForObject($obj);
+        } else {
+            return null;
+        }
+    }
+
+    public static function identityCodeForArray(array $obj) {
+        if (empty($obj)) {
+            return null;
+        }
+        ksort($obj);
+        foreach ($obj as $key => $o) {
+            if (is_array($o) || is_object($o)) {
+                $obj[$key] = self::identityCode($o);
+            }
+        }
+        return md5(serialize($obj));
+    }
+
+    public static function identityCodeForObject(object $obj) {
+        if (empty($obj)) {
+            return null;
+        }
+        $obj = self::ksortFromObject($obj);
+        foreach ($obj as $key => $o) {
+            if (is_array($o) || is_object($o)) {
+                $obj[$key] = self::identityCode($o);
+            }
+        }
+        return md5(serialize($obj));
+    }
+
+    /**
+     * @param object $obj
+     * @return stdClass
+     */
+    public static function ksortFromObject(object $obj) {
+        if (is_null($obj)) {
+            return null;
+        }
+        $obj = (array) $obj;
+        ksort($obj);
+        return json_decode(json_encode($obj));
+    }
+
+    /**
+     * the left is the diff of obj1 with obj2, the right is the diff of obj2 with obj1
+     * @param object|array $obj1
+     * @param object|array $obj2
+     * @return array<array<string>, array<string>>
+     * @throws Exception
+     */
+    public static function compareObjectStruct($obj1, $obj2, $style = null) {
+        $left = $right = [];
+        DBC::assertFalse(self::isScalar($obj1),
+            "[EzObjectUtils] the function expect params 1 is not scalar, but given: ".self::toString($obj1));
+        DBC::assertFalse(self::isScalar($obj2),
+            "[EzObjectUtils] the function expect params 2 is not scalar, but given: ".self::toString($obj2));
+        DBC::assertEquals(gettype($obj1), gettype($obj2),
+            "[EzObjectUtils] analyseObject expect params type is same, but given: ".gettype($obj1)." and " . gettype($obj2));
+        $keys1 = self::keys($obj1);
+        $keys2 = self::keys($obj2);
+
+        $diffLeft = array_diff($keys2, $keys1);
+        $diffRight = array_diff($keys1, $keys2);
+        $intersect = array_intersect($keys1, $keys2);
+        $left = array_merge($left, $diffLeft);
+        $right = array_merge($right, $diffRight);
+        foreach ($intersect as $intersectKey) {
+            $obj1Temp = self::getFromObject($obj1, $intersectKey);
+            $obj2Temp = self::getFromObject($obj2, $intersectKey);
+            if (self::isScalar($obj1Temp)) {
+                $obj1Temp = [];
+            }
+            if (self::isScalar($obj2Temp)) {
+                $obj2Temp = [];
+            }
+            list($leftTemp, $rightTemp) = self::compareObjectStruct($obj1Temp, $obj2Temp, $style);
+            $leftTemp = self::appendKey($intersectKey, $leftTemp, $style);
+            $rightTemp = self::appendKey($intersectKey, $rightTemp, $style);
+            $left = array_merge($left, $leftTemp);
+            $right = array_merge($right, $rightTemp);
+        }
+        return [$left, $right];
+    }
+
+    public static function keys($obj) {
+        if (is_array($obj)) {
+            return array_keys($obj);
+        } else if (is_object($obj)) {
+            return array_keys(get_object_vars($obj));
+        } else {
+            return [];
+        }
+    }
+
+    private static function appendKey($intersectKey, $temp, $style = null) {
+        if (empty($temp)) {
+            return [];
+        }
+        return array_map(function ($item) use ($intersectKey, $style) {
+            return self::appendKeyStyle($intersectKey, $item, $style);
+        }, $temp);
+    }
+
+    private static function appendKeyStyle($sourceKey, $appendKey, $style = null) {
+        $style = empty($style) ? $style : strtoupper($style);
+        switch ($style) {
+            case "JAVA":
+                return $sourceKey.".".$appendKey;
+            case "PHP":
+            case "PHP_OBJECT":
+                return $sourceKey."->".$appendKey;
+            default:
+                return $sourceKey."|".$appendKey;
+        }
+    }
+
 }
