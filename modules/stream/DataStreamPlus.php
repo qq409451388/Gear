@@ -1,7 +1,5 @@
 <?php
 
-use filter\DataStreamFilter;
-
 /**
  * 数据流处理器
  * @author guohan
