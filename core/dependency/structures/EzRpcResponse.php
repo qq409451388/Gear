@@ -15,7 +15,7 @@ class EzRpcResponse implements EzDataObject
         $this->msg = $msg;
     }
 
-    public static function OK($data, $msg = ""){
+    public static function OK($data = null, $msg = ""){
         return (new self($data,self::OK, $msg));
     }
 

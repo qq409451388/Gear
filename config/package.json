@@ -24,5 +24,8 @@
   "ezchart": [
     "modules/ezchart",
     "modules/ezdrawer"
+  ],
+  "discovery": [
+    "modules/discoveryelven"
   ]
 }

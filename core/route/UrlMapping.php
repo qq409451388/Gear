@@ -80,7 +80,8 @@ class UrlMapping implements IRouteMapping
         } else {
             $requestParams = [];
             foreach ($params as $param) {
-                if ($param->getName() === $requestBody->getParamName()) {
+                if ($request->getRequestMethod() == HttpMethod::POST && !is_null($requestBody)
+                    && $param->getName() === $requestBody->getParamName()) {
                     $requestParams[] = $this->getBodyObject($request, $requestBody, $param);
                 } else {
                     $requestParam = $request->get($param->getName(), $param->getDefaultValue());
