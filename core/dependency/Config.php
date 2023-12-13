@@ -97,19 +97,19 @@ class Config
         self::$config[$key] = $data;
     }
 
-    public static function get($key){
+    public static function get($key, $default = null) {
         if(empty($key)){
-            return null;
+            return is_null($default) ? null : $default;
         }
         $keyArr = explode(self::KEY_SPLIT, $key);
         $tmpRes = self::$config;
         foreach ($keyArr as $index => $k) {
             if (!isset($tmpRes[$k])) {
-                return null;
+                return is_null($default) ? null : $default;
             }
             $tmpRes = $tmpRes[$k];
         }
-        return $tmpRes;
+        return is_null($tmpRes) ? $default : $tmpRes;
     }
 
     public static function getRecursion($p = ""){

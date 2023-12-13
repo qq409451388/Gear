@@ -20,10 +20,9 @@ class EzHttp extends BaseEzHttp
             if (is_null($request)) {
                 $request = $this->buildRequest($buf);
                 $request->setConnection($connection);
-                if ($request->getContentLen() > Config::get("application.HTTP_SERVER_REQUEST_LIMIT")) {
-                    $request->setIsInit(true);
-                    return $request;
-                }
+                DBC::assertLessThan(Config::get("application.HTTP_SERVER_REQUEST_LIMIT", 1024 * 1024 * 2),
+                    $request->getContentLen(),
+                    "[HTTP] Request body is too large!", 0, GearShutDownException::class);
             } else {
                 $request->setConnection($connection);
                 $this->appendRequest($request, $buf);
